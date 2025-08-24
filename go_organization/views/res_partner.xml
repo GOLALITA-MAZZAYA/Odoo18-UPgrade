@@ -1,0 +1,324 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+
+    <!-- Cleaned partner form inheritance -->
+    <record id="view_partner_form_inherit_custom_fields" model="ir.ui.view">
+        <field name="name">res.partner.form.inherit.partner.enhanced</field>
+        <field name="model">res.partner</field>
+        <field name="inherit_id" ref="base.view_partner_form"/>
+        <field name="arch" type="xml">
+
+            <!-- Keep website label human-friendly -->
+            <xpath expr="//field[@name='website']" position="attributes">
+                <attribute name="string">Website Link</attribute>
+            </xpath>
+
+            <!-- Quick flags & classification near VAT -->
+            <xpath expr="//field[@name='vat']" position="before">
+                <field name="has_offers"/>
+                <field name="has_branches"/>
+                <field name="entity_type" widget="radio"/>
+                <field name="partner_category_ids" widget="many2many_tags"/>
+                <field name="employee_type" widget="radio"
+                       invisible="entity_type != 'employee'"
+                       required="entity_type == 'employee'"/>
+
+
+            </xpath>
+
+            <!-- Promote commonly used operational fields near basic info -->
+            <xpath expr="//sheet/group/group/field[@name='website']" position="after">
+                <field name="sequence"/>
+                <field name="web_view_customer"/>
+                <field name="web_view_customer_id"/>
+                <field name="barcode"/>
+                <!-- keep legacy text visible but prefer date field in other views if you added it -->
+                <field name="user_expiry"/>
+                <field name="merchant_pin_new" invisible="entity_type != 'merchant'"/>
+                <field name="partner_latitude" invisible="entity_type != 'merchant'"/>
+                <field name="partner_longitude" invisible="entity_type != 'merchant'"/>
+            </xpath>
+            <xpath expr="//sheet/notebook" position="inside">
+                <page string="Family Details" invisible="entity_type not in ('employee','family')">
+                    <group>
+                        <!-- Relation type: only when the record is a family member -->
+                        <field name="relation_type"
+                               invisible="entity_type != 'family'"/>
+                        <field name="family_head_member_id"
+                               invisible="entity_type != 'employee'"/>
+
+                        <field name="family_member_ids" nolabel="1"
+                               context="{'default_entity_type': 'family', 'default_family_head_member_id': family_head_member_id}">
+                            <list editable="bottom">
+                                <field name="name"/>
+                                <field name="relation_type"/>
+                                <field name="email"/>
+                                <field name="mobile"/>
+                            </list>
+                            <form>
+                                <sheet>
+                                    <group>
+                                        <field name="name" required="1"/>
+                                        <field name="relation_type" required="1"/>
+                                        <group>
+                                            <field name="email"/>
+                                            <field name="mobile"/>
+                                        </group>
+                                    </group>
+                                </sheet>
+                            </form>
+                        </field>
+                    </group>
+                </page>
+            </xpath>
+
+            <!-- Main content notebook -->
+            <xpath expr="//sheet/notebook" position="inside">
+
+                <!-- Merchant Settings -->
+                <page string="Merchant" invisible="entity_type != 'merchant'">
+                    <group>
+                        <group>
+                            <field name="merchant_type" widget="radio"/>
+                            <field name="merchant_rating" widget="priority"/>
+                            <field name="is_hotel_business"/>
+                            <field name="is_restaurant"/>
+                            <field name="online_store"/>
+                        </group>
+                        <group>
+                            <field name="show_in_moi"/>
+                            <field name="premium_client"/>
+                            <field name="client_type"/>
+                            <field name="organisation_linked"/>
+                        </group>
+                    </group>
+
+                    <group string="Branding">
+                        <group>
+                            <field name="small_logo" widget="image"/>
+                            <field name="merchant_banner" widget="image"/>
+                            <field name="map_banner" widget="image"/>
+                        </group>
+                        <group>
+                            <field name="ribbon_text"/>
+                            <field name="ribbon_text_ar"/>
+                            <field name="ribbon_mode" widget="radio"/>
+                            <field name="ribbon_color" widget="color"/>
+                        </group>
+                    </group>
+
+                    <group string="Descriptions" colspan="2">
+                        <notebook>
+                            <page string="English">
+                                <field name="merchant_details_en" nolabel="1"/>
+                            </page>
+                            <page string="Arabic">
+                                <field name="merchant_details_ar" nolabel="1"/>
+                            </page>
+                            <page string="MOI EN">
+                                <field name="merchant_details_moi_en" nolabel="1"/>
+                            </page>
+                            <page string="MOI AR">
+                                <field name="merchant_details_moi_ar" nolabel="1"/>
+                            </page>
+                            <page string="Masrif EN">
+                                <field name="merchant_details_masrif_en" nolabel="1"/>
+                            </page>
+                            <page string="Masrif AR">
+                                <field name="merchant_details_masrif_ar" nolabel="1"/>
+                            </page>
+                        </notebook>
+                    </group>
+                </page>
+
+                <!-- Restaurant/Delivery -->
+                <page string="Restaurant / Delivery" invisible="not is_restaurant">
+                    <group>
+                        <group>
+                            <field name="accept_delivery"/>
+                            <field name="open_from"/>
+                            <field name="open_till"/>
+                        </group>
+                        <group>
+                            <field name="order_prep_time"/>
+                            <field name="delivery_cost"/>
+                        </group>
+                    </group>
+                    <group>
+                        <group>
+                            <field name="short_description_en"/>
+                            <field name="short_description_ar"/>
+                        </group>
+                    </group>
+                </page>
+
+                <!-- Contract & Terms -->
+                <page string="Contract">
+                    <group>
+                        <group>
+                            <field name="is_premium_merchant" invisible="entity_type != 'merchant'"/>
+                            <field name="pdf_attached"/>
+                            <field name="company_registration"/>
+                            <field name="company_registration_date"/>
+                        </group>
+                        <group>
+                            <field name="contract_expiry"/>
+                            <field name="contract_attachment_ids" widget="many2many_binary"/>
+                            <field name="company_expiry_date"/>
+                        </group>
+                    </group>
+                </page>
+
+                <page string="Terms">
+                    <group>
+                        <field name="terms_conditions_en" nolabel="1"/>
+                        <field name="terms_conditions_ar" nolabel="1"/>
+                    </group>
+                </page>
+
+                <!-- Devices & Notifications (admins only) -->
+                <page string="Devices &amp; Notifications" groups="base.group_system">
+                    <group>
+                        <group>
+                            <field name="device_type"/>
+                            <field name="device_id"/>
+                            <field name="device_token"/>
+                            <field name="token_permanent"/>
+                        </group>
+                        <group>
+                            <field name="notification_group"/>
+                            <field name="merchant_mobile_visit_count"/>
+                            <field name="merchant_page_count"/>
+                            <field name="from_website"/>
+                        </group>
+                    </group>
+                    <group string="Email routing &amp; CC">
+                        <group>
+                            <field name="email_to_send"/>
+                            <field name="email_to_cc"/>
+                            <field name="cc_emails_management"/>
+                        </group>
+                    </group>
+                </page>
+
+                <!-- WhatsApp (kept near communication, auto-hides fields when disabled) -->
+                <page string="WhatsApp" invisible="entity_type not in ('merchant','organisation','employee')">
+                    <group>
+                        <group>
+                            <field name="enable_whatsapp"/>
+                        </group>
+                        <group>
+                            <field name="whatsapp_title" invisible="not enable_whatsapp"/>
+                            <field name="whatsapp_number" invisible="not enable_whatsapp"/>
+                            <field name="whatsapp_prefill_message" invisible="not enable_whatsapp"/>
+                        </group>
+                    </group>
+                </page>
+                <page string="Organisation Staff" invisible="entity_type != 'organisation'">
+                    <group>
+                        <group string="VIP">
+                            <field name="vip_count" readonly="1"/>
+                            <field name="vip_employee_limit"/>
+                        </group>
+                        <group string="Standard">
+                            <field name="standard_count" readonly="1"/>
+                            <field name="standard_employee_limit"/>
+                        </group>
+                    </group>
+                    <group>
+                        <group string="Totals">
+                            <field name="total_registered_employee" readonly="1"/>
+                            <field name="total_allowed_employee"/>
+                        </group>
+                    </group>
+                </page>
+
+                <!-- Arabic / MOI Data -->
+                <page string="Arabic / MOI Data" invisible="entity_type != 'merchant'">
+                    <group>
+                        <group>
+                            <field name="arabic_name"/>
+                            <field name="moi_last_name"/>
+                            <field name="not_in_list"/>
+                        </group>
+                        <group>
+                            <field name="ar_contact_number"/>
+                            <field name="ar_email"/>
+                            <field name="ar_country"/>
+                        </group>
+                    </group>
+                    <group>
+                        <group>
+                            <field name="ar_street"/>
+                            <field name="ar_city"/>
+                        </group>
+                        <group>
+                            <field name="ar_time_from"/>
+                            <field name="ar_time_to"/>
+                        </group>
+                    </group>
+                </page>
+
+                <!-- Branches & Enquiries -->
+                <page string="Branches &amp; Enquiries" invisible="entity_type != 'merchant'">
+                    <group>
+                        <field name="branch_ids"/>
+                    </group>
+                    <group>
+                        <field name="not_linked_ids"/>
+                    </group>
+                    <group string="Hotel Enquiries" invisible="not is_hotel_business">
+                        <field name="merchant_enquiry_ids" mode="list" nolabel="1">
+                            <list editable="bottom">
+                                <field name="name"/>
+                                <field name="phone"/>
+                                <field name="email"/>
+                                <field name="country_id"/>
+                                <field name="city"/>
+                                <field name="departure_date"/>
+                                <field name="return_date"/>
+                                <field name="hotel_name"/>
+                                <field name="no_adult"/>
+                                <field name="no_children"/>
+                                <field name="note"/>
+                                <field name="state"/>
+                            </list>
+                        </field>
+                    </group>
+                </page>
+
+            </xpath>
+        </field>
+    </record>
+
+    <!-- Convenience actions -->
+    <record id="action_partner_organisations" model="ir.actions.act_window">
+        <field name="name">Organisations</field>
+        <field name="res_model">res.partner</field>
+        <field name="view_mode">kanban,list,form</field>
+        <field name="domain">[('entity_type','=','organisation')]</field>
+        <field name="context">{'default_entity_type': 'organisation'}</field>
+    </record>
+
+    <record id="action_partner_merchants" model="ir.actions.act_window">
+        <field name="name">Merchants</field>
+        <field name="res_model">res.partner</field>
+        <field name="view_mode">kanban,list,form</field>
+        <field name="domain">[('entity_type','=','merchant')]</field>
+        <field name="context">{'default_entity_type': 'merchant'}</field>
+    </record>
+    <record id="action_go_merchant_website" model="ir.actions.act_window">
+        <field name="name">Merchant From Website</field>
+        <field name="type">ir.actions.act_window</field>
+        <field name="res_model">res.partner</field>
+        <field name="view_mode">kanban,list,form,activity</field>
+        <field name="search_view_id" ref="base.view_res_partner_filter"/>
+        <field name="domain">[('go_entity', '=', 'merchant'), ('from_website', '=', True)]</field>
+        <field name="context">{ 'default_go_entity': 'merchant', 'default_from_website' : True, }</field>
+        <field name="help" type="html">
+            <p class="o_view_nocontent_smiling_face">Create a new merchant</p>
+            <p></p>
+        </field>
+    </record>
+
+</odoo>

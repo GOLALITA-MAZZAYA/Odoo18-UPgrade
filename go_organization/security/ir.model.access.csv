@@ -1,0 +1,6 @@
+id,name,model_id:id,group_id:id,perm_read,perm_write,perm_create,perm_unlink
+access_merchant_enquiry,access.merchant.enquiry,model_merchant_enquiry,base.group_user,1,1,1,1
+access_merchant_branch,access.merchant.branch,model_merchant_branch,base.group_user,1,1,1,1
+access_notin_app,access.notin.app,model_notin_app,base.group_user,1,1,1,1
+access_partner_category,access.partner.category,model_partner_category,base.group_user,1,1,1,1
+access_user_address,access.user.address,model_user_address,base.group_user,1,1,1,1

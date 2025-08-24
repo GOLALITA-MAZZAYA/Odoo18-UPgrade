@@ -1,0 +1,58 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+
+    <record id="contacts.res_partner_menu_config" model="ir.ui.menu">
+        <field name="sequence">5</field>
+    </record>
+
+    <menuitem
+            id="menu_customer"
+            parent="contacts.menu_contacts"
+            name="Customers"
+            sequence="3"
+    />
+
+
+    <menuitem
+            id="menu_customer_organization"
+            parent="go_organization.menu_customer"
+            name="Organisation"
+            sequence="5"
+            action="go_organization.action_partner_organisations"
+    />
+
+    <menuitem
+            id="menu_customer_merchant"
+            parent="go_organization.menu_customer"
+            name="Merchant"
+            sequence="10"
+            action="go_organization.action_partner_merchants"
+    />
+
+
+    <menuitem
+            id="menu_merchant_main_from_website"
+            action="go_organization.action_go_merchant_website"
+            parent="go_organization.menu_customer"
+            groups="base.group_system"
+            name="Merchant From Website"
+            sequence="15"
+    />
+
+    <menuitem
+            id="menu_merchant_enquiry"
+            action="go_organization.action_merchant_enquiry"
+            parent="go_organization.menu_customer"
+            name="Merchant Enquiry"
+            sequence="20"
+    />
+
+<!--    <menuitem id="menu_user_address"-->
+<!--              name="User Addresses"-->
+<!--              parent="go_organization.menu_customer"-->
+<!--              action="go_organization.action_user_address"-->
+<!--              sequence="25"-->
+<!--    />-->
+
+
+</odoo>

@@ -1,0 +1,93 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+
+    <record model="ir.ui.view" id="user_address_form_view">
+        <field name="name">user.address.form.view</field>
+        <field name="model">user.address</field>
+        <field name="arch" type="xml">
+            <form string="User Address">
+                <sheet>
+                    <group>
+                        <group string="Customer Information">
+                            <field name="customer_id"/>
+                            <field name="location_name"/>
+                        </group>
+
+                        <group string="Address Details">
+                            <field name="location_landmark"/>
+                            <field name="zone"/>
+                            <field name="street_number"/>
+                            <field name="building_number"/>
+                            <field name="apartment_number"/>
+                            <field name="floor"/>
+                        </group>
+                    </group>
+
+                    <group>
+                        <group string="Geo Location">
+                            <field name="lat"/>
+                            <field name="long"/>
+                        </group>
+                    </group>
+                </sheet>
+            </form>
+        </field>
+    </record>
+
+
+    <record model="ir.ui.view" id="user_address_tree_view">
+        <field name="name">user.address.tree.view</field>
+        <field name="model">user.address</field>
+        <field name="arch" type="xml">
+            <list string="User Addresses">
+                <field name="customer_id"/>
+                <field name="location_name"/>
+                <field name="location_landmark"/>
+                <field name="zone"/>
+                <field name="street_number"/>
+                <field name="building_number"/>
+                <field name="apartment_number"/>
+                <field name="floor"/>
+                <field name="lat"/>
+                <field name="long"/>
+            </list>
+        </field>
+    </record>
+
+
+    <record id="view_user_address_search" model="ir.ui.view">
+        <field name="name">user.address.search</field>
+        <field name="model">user.address</field>
+        <field name="arch" type="xml">
+            <search string="Search User Address">
+                <!-- Search fields -->
+                <field name="customer_id"/>
+                <field name="location_name"/>
+                <field name="location_landmark"/>
+                <field name="zone"/>
+
+                <!-- Group By -->
+                <group expand="0" string="Group By">
+                    <filter string="Customer" name="group_customer" context="{'group_by':'customer_id'}"/>
+                    <filter string="Zone" name="group_zone" context="{'group_by':'zone'}"/>
+                    <filter string="Floor" name="group_floor" context="{'group_by':'floor'}"/>
+                </group>
+            </search>
+        </field>
+    </record>
+
+
+    <record id="action_user_address" model="ir.actions.act_window">
+        <field name="name">User Addresses</field>
+        <field name="res_model">user.address</field>
+        <field name="view_mode">list,form</field>
+        <field name="search_view_id" ref="go_organization.view_user_address_search"/>
+        <field name="help" type="html">
+            <p class="o_view_nocontent_smiling_face">
+                Create a new User Address
+            </p>
+        </field>
+    </record>
+
+
+</odoo>
