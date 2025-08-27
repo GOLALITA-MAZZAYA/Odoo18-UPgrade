@@ -1,0 +1,77 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+
+    <record id="view_product_label_form" model="ir.ui.view">
+        <field name="name">product.label.form</field>
+        <field name="model">product.label</field>
+        <field name="arch" type="xml">
+            <form string="Product Label">
+                <sheet>
+                    <div class="oe_title">
+                        <h1>
+                            <field name="name" placeholder="Label Name"/>
+                        </h1>
+                    </div>
+                    <group>
+                        <group string="General Information">
+                            <field name="label_option"/>
+                        </group>
+
+                        <group string="Appearance Settings">
+                            <field name="label_color"/>
+                            <field name="label_text_color"/>
+                        </group>
+                    </group>
+
+                </sheet>
+            </form>
+        </field>
+    </record>
+
+
+    <record id="view_product_label_tree" model="ir.ui.view">
+        <field name="name">product.label.tree</field>
+        <field name="model">product.label</field>
+        <field name="arch" type="xml">
+            <list string="Product Labels">
+                <field name="name"/>
+                <field name="label_option"/>
+                <field name="label_color"/>
+                <field name="label_text_color"/>
+            </list>
+        </field>
+    </record>
+
+
+    <record id="view_product_label_search" model="ir.ui.view">
+        <field name="name">product.label.search</field>
+        <field name="model">product.label</field>
+        <field name="arch" type="xml">
+            <search string="Search Product Labels">
+                <field name="name"/>
+                <field name="label_option"/>
+                <field name="label_color"/>
+                <field name="label_text_color"/>
+
+                <filter string="Option 1" name="option_1" domain="[('label_option','=','option_1')]"/>
+                <filter string="Option 2" name="option_2" domain="[('label_option','=','option_2')]"/>
+                <filter string="Option 3" name="option_3" domain="[('label_option','=','option_3')]"/>
+                <filter string="Option 4" name="option_4" domain="[('label_option','=','option_4')]"/>
+                <filter string="Option 5" name="option_5" domain="[('label_option','=','option_5')]"/>
+
+                <group expand="0" string="Group By">
+                    <filter string="Label Option" name="group_label_option" context="{'group_by':'label_option'}"/>
+                </group>
+            </search>
+        </field>
+    </record>
+
+
+    <record id="action_product_label" model="ir.actions.act_window">
+        <field name="name">Product Labels</field>
+        <field name="res_model">product.label</field>
+        <field name="view_mode">list,form</field>
+    </record>
+
+
+</odoo>

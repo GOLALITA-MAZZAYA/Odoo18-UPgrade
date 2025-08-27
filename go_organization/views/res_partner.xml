@@ -13,17 +13,25 @@
                 <attribute name="string">Website Link</attribute>
             </xpath>
 
+            <xpath expr="//field[@name='category_id']" position="after">
+                <field
+                        name="organisation_linked_id"
+                        invisible="entity_type == 'organisation'"
+                        context="{'default_entity_type': entity_type}"
+                        eval="True"
+                />
+            </xpath>
+
+
             <!-- Quick flags & classification near VAT -->
             <xpath expr="//field[@name='vat']" position="before">
                 <field name="has_offers"/>
                 <field name="has_branches"/>
                 <field name="entity_type" widget="radio"/>
-                <field name="partner_category_ids" widget="many2many_tags"/>
+                <field name="partner_category_ids" widget="many2many_tags" invisible="entity_type != 'merchant'"/>
                 <field name="employee_type" widget="radio"
                        invisible="entity_type != 'employee'"
                        required="entity_type == 'employee'"/>
-
-
             </xpath>
 
             <!-- Promote commonly used operational fields near basic info -->
@@ -33,19 +41,25 @@
                 <field name="web_view_customer_id"/>
                 <field name="barcode"/>
                 <!-- keep legacy text visible but prefer date field in other views if you added it -->
-                <field name="user_expiry"/>
-                <field name="merchant_pin_new" invisible="entity_type != 'merchant'"/>
+                <field name="user_expiry_date"/>
+                <field name="merchant_pin" invisible="entity_type != 'merchant'"/>
                 <field name="partner_latitude" invisible="entity_type != 'merchant'"/>
                 <field name="partner_longitude" invisible="entity_type != 'merchant'"/>
+                <field name="client_type" invisible="entity_type in ('employee','family')"/>
             </xpath>
+
+            <!-- Main content notebook -->
             <xpath expr="//sheet/notebook" position="inside">
                 <page string="Family Details" invisible="entity_type not in ('employee','family')">
                     <group>
                         <!-- Relation type: only when the record is a family member -->
-                        <field name="relation_type"
-                               invisible="entity_type != 'family'"/>
-                        <field name="family_head_member_id"
-                               invisible="entity_type != 'employee'"/>
+                        <group>
+                            <field name="relation_type"
+                                   invisible="entity_type != 'family'"/>
+                            <field name="family_head_member_id"
+                                   invisible="entity_type != 'employee'"/>
+
+                        </group>
 
                         <field name="family_member_ids" nolabel="1"
                                context="{'default_entity_type': 'family', 'default_family_head_member_id': family_head_member_id}">
@@ -54,6 +68,8 @@
                                 <field name="relation_type"/>
                                 <field name="email"/>
                                 <field name="mobile"/>
+                                <field name="entity_type" column_invisible="True"/>
+                                <field name="family_head_member_id" column_invisible="True"/>
                             </list>
                             <form>
                                 <sheet>
@@ -70,10 +86,6 @@
                         </field>
                     </group>
                 </page>
-            </xpath>
-
-            <!-- Main content notebook -->
-            <xpath expr="//sheet/notebook" position="inside">
 
                 <!-- Merchant Settings -->
                 <page string="Merchant" invisible="entity_type != 'merchant'">
@@ -87,9 +99,6 @@
                         </group>
                         <group>
                             <field name="show_in_moi"/>
-                            <field name="premium_client"/>
-                            <field name="client_type"/>
-                            <field name="organisation_linked"/>
                         </group>
                     </group>
 
@@ -156,13 +165,14 @@
                 <page string="Contract">
                     <group>
                         <group>
-                            <field name="is_premium_merchant" invisible="entity_type != 'merchant'"/>
                             <field name="pdf_attached"/>
-                            <field name="company_registration"/>
+                            <field name="company_registration" invisible="1"/>
+                            <field name="company_registration_id" filename="company_registration" widget="binary"/>
                             <field name="company_registration_date"/>
                         </group>
                         <group>
                             <field name="contract_expiry"/>
+
                             <field name="contract_attachment_ids" widget="many2many_binary"/>
                             <field name="company_expiry_date"/>
                         </group>
@@ -184,6 +194,12 @@
                             <field name="device_id"/>
                             <field name="device_token"/>
                             <field name="token_permanent"/>
+                        </group>
+                        <group invisible="entity_type in ('merchant')">
+                            <field name="need_registration_code"/>
+                            <field name="registration_from"/>
+                            <field name="registration_to"/>
+                            <field name="is_expired" readonly="1"/>
                         </group>
                         <group>
                             <field name="notification_group"/>
@@ -291,6 +307,36 @@
         </field>
     </record>
 
+    <record id="view_res_partner_filter_inherit_entity_type" model="ir.ui.view">
+        <field name="name">res.partner.search.inherit.entity_type</field>
+        <field name="model">res.partner</field>
+        <field name="inherit_id" ref="base.view_res_partner_filter"/>
+        <field name="arch" type="xml">
+
+            <xpath expr="//filter[@name='type_company']" position="after">
+                <filter string="Organisations" name="filter_organisations"
+                        domain="[('entity_type','=','organisation')]"/>
+                <filter string="Merchants" name="filter_merchants"
+                        domain="[('entity_type','=','merchant')]"/>
+                <filter string="Employees" name="filter_employees"
+                        domain="[('entity_type','=','employee')]"/>
+                <filter string="Family Members" name="filter_family"
+                        domain="[('entity_type','=','family')]"/>
+            </xpath>
+
+            <xpath expr="//group[@name='group_by']" position="inside">
+                <filter string="Organisation" name="group_by_org"
+                        domain="[]" context="{'group_by':'parent_id'}"/>
+                <filter string="Entity Type" name="group_by_entity_type"
+                        domain="[]" context="{'group_by':'entity_type'}"/>
+            </xpath>
+
+        </field>
+    </record>
+
+
+
+
     <!-- Convenience actions -->
     <record id="action_partner_organisations" model="ir.actions.act_window">
         <field name="name">Organisations</field>
@@ -320,5 +366,9 @@
             <p></p>
         </field>
     </record>
+
+
+
+
 
 </odoo>

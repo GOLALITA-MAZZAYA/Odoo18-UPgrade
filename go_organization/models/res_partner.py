@@ -156,19 +156,17 @@ class ResPartner(models.Model):
         oldname="x_is_token_permanent",
         help="Only set if confirmed.",
     )
+    mobile_version = fields.Char("Mobile Version")
 
     barcode = fields.Char(
         string="Customer Barcode or Merchant PIN",
         help="Use a barcode to identify this contact.",
     )
-    user_expiry = fields.Char(
-        string="User Expiry", oldname="x_user_expiry"
-    )  # legacy (kept for history)
     user_expiry_date = fields.Date(
         string="User Expiry", help="Use this Date field; legacy text is migrated here."
     )
-    merchant_pin_new = fields.Char(
-        string="Merchant PIN (New)", oldname="x_merchant_pin_new"
+    merchant_pin = fields.Char(
+        string="Merchant PIN", oldname="x_merchant_pin_new"
     )
 
     # ───────────────────────────────────────────────────────────────────────────
@@ -198,14 +196,17 @@ class ResPartner(models.Model):
     )
     pdf_attached = fields.Boolean(string="PDF Attached", oldname="x_pdf_attached")
 
-    company_registration = fields.Char(
-        string="Company Registration", oldname="x_company_registartion"
+    company_registration = fields.Char()
+    company_registration_id = fields.Binary(
+        string="Company Registration File",
+        help="Company Registration and related files for this partner.",
     )
+
     company_registration_date = fields.Date(
         string="Company Registration Date", oldname="x_company_registartion_date"
     )
     company_expiry_date = fields.Date(
-        string="Company Expiry Date", oldname="x_company_expiry_date"
+        string="Company Registration Expiry Date", oldname="x_company_expiry_date"
     )
 
     contract_expiry = fields.Date(string="Contract Expiry", oldname="x_contract_expiry")
@@ -228,21 +229,8 @@ class ResPartner(models.Model):
     # ───────────────────────────────────────────────────────────────────────────
     # Misc & metrics
     # ───────────────────────────────────────────────────────────────────────────
-    organisation_linked = fields.Selection(
-        [
-            ("sjc", "SJC"),
-            ("gulfexchange", "Gulf Exchange"),
-            ("daam", "DAAM"),
-            ("qatarinsurance", "Qatar Insurance"),
-            ("golalita", "Golalita"),
-            ("masrif", "Masrif"),
-            ("barwa", "Barwa Bank"),
-            ("alzamanexchange", "Alzaman Exchange"),
-            ("moi", "MOI"),
-            ("qatar_post", "Qatar Post"),
-            ("hayyakam", "Hayyakam"),
-            ("qlm", "QLM"),
-        ],
+    organisation_linked_id = fields.Many2one(
+        "res.partner",
         string="Organisation Linked With",
         oldname="x_org_linked",
     )
@@ -346,12 +334,10 @@ class ResPartner(models.Model):
         readonly=True,
     )
 
-    merchant_mobile_count = fields.Integer(string="Mobile App Merchant Visits")
-
     # Public image URL for convenience (read-only)
-    image_url = fields.Char(
-        string="Public Image URL", compute="_compute_url", readonly=True
-    )
+    # image_url = fields.Char(
+    #     string="Public Image URL", compute="_compute_url", readonly=True
+    # )
 
     # Org codes / registration windows
     registration_from = fields.Date(string="Registration From")
@@ -392,15 +378,15 @@ class ResPartner(models.Model):
         for rec in self:
             rec.is_expired = bool(rec.registration_to and rec.registration_to < today)
 
-    @api.depends("image_1920")
-    def _compute_url(self):
-        base = self.env["ir.config_parameter"].sudo().get_param("web.base.url")
-        for rec in self:
-            rec.image_url = (
-                url_join(base, f"/go/api/image/{rec.id}/image_512/res.partner")
-                if rec.id
-                else False
-            )
+    # @api.depends("image_1920")
+    # def _compute_url(self):
+    #     base = self.env["ir.config_parameter"].sudo().get_param("web.base.url")
+    #     for rec in self:
+    #         rec.image_url = (
+    #             url_join(base, f"/go/api/image/{rec.id}/image_512/res.partner")
+    #             if rec.id
+    #             else False
+    #         )
 
     # ───────────────────────────────────────────────────────────────────────────
     # CONSTRAINTS & ONCHANGES
@@ -460,3 +446,4 @@ class ResPartner(models.Model):
             if country:
                 values["country_id"] = country.id
         return values
+

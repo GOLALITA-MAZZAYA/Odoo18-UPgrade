@@ -1,0 +1,103 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+
+    <!-- Tree (minimal) -->
+    <record id="view_partner_category_tree" model="ir.ui.view">
+        <field name="name">partner.category.tree</field>
+        <field name="model">partner.category</field>
+        <field name="arch" type="xml">
+            <list string="Partner Categories">
+                <field name="name"/>
+                <!--                <field name="active"/>-->
+                <field name="sequence"/>
+                <field name="scope"/>
+                <field name="country_ids" widget="many2many_tags" optional="hide"/>
+
+            </list>
+        </field>
+    </record>
+
+    <!-- Form (clean, grouped) -->
+    <record id="view_partner_category_form" model="ir.ui.view">
+        <field name="name">partner.category.form</field>
+        <field name="model">partner.category</field>
+        <field name="arch" type="xml">
+            <form string="Partner Category" class="oe_form_configuration">
+                <sheet>
+                    <!-- Icon + Title -->
+                    <field name="image_icon" widget="image" class="oe_avatar"/>
+                    <div class="oe_title">
+                        <label for="name" class="oe_edit_only"/>
+                        <h1>
+                            <field name="name" placeholder="e.g. Soft Drinks" required="1"/>
+                        </h1>
+                        <!--                        <h2 invisible="not complete_name">-->
+                        <!--                            <field name="complete_name" readonly="1" nolabel="1"/>-->
+                        <!--                        </h2>-->
+                    </div>
+
+                    <group>
+                        <group string="Hierarchy &amp; Basics">
+                            <!--                            <field name="active"/>-->
+                            <field name="parent_id"/>
+                            <field name="sequence"/>
+                            <field name="name_ar"/>
+                        </group>
+
+                        <group string="Classification">
+                            <field name="is_restaurant"/>
+                            <field name="scope" required="1"/>
+                            <field name="country_ids" widget="many2many_tags"/>
+                        </group>
+                    </group>
+
+                    <group>
+                        <group string="Organisations (optional)">
+                            <field name="organisation_ids" widget="many2many_tags"
+                                   options="{'color_field': 'color'}"/>
+                        </group>
+
+                    </group>
+
+                    <group string="Media">
+                        <field name="media_attachment_ids" widget="many2many_binary" nolabel="1"/>
+                    </group>
+                </sheet>
+            </form>
+        </field>
+    </record>
+
+    <!-- Search -->
+    <record id="view_partner_category_search" model="ir.ui.view">
+        <field name="name">partner.category.search</field>
+        <field name="model">partner.category</field>
+        <field name="arch" type="xml">
+            <search string="Search Partner Categories">
+                <field name="name"/>
+                <!--                <field name="complete_name"/>-->
+                <filter string="Active" name="active" domain="[('active','=',True)]" help="Show active categories"/>
+                <filter string="Restaurant" name="is_restaurant" domain="[('is_restaurant','=',True)]"/>
+                <filter string="Local" name="scope_local" domain="[('scope','=','local')]"/>
+                <filter string="Global" name="scope_global" domain="[('scope','=','global')]"/>
+                <filter string="Both" name="scope_both" domain="[('scope','=','both')]"/>
+            </search>
+        </field>
+    </record>
+
+    <!-- Action -->
+    <record id="action_partner_category" model="ir.actions.act_window">
+        <field name="name">Partner Categories</field>
+        <field name="res_model">partner.category</field>
+        <field name="view_mode">list,form</field>
+        <field name="search_view_id" ref="view_partner_category_search"/>
+    </record>
+
+    <!-- Menu (Contacts ▸ Configuration) - keep if you want it exposed -->
+    <menuitem id="menu_partner_category"
+              name="Partner Categories"
+              parent="contacts.res_partner_menu_config"
+              action="action_partner_category"
+              sequence="40"
+              groups="base.group_no_one"/>
+
+</odoo>

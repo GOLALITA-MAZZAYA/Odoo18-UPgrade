@@ -1,0 +1,82 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+
+<!--    website app menu-->
+    <menuitem
+            id="menu_product_brand"
+            action="go_product.action_product_brand"
+            parent="website_sale.menu_catalog"
+            name="Product Brand"
+            sequence="4"
+    />
+
+    <menuitem
+            id="menu_product_offer"
+            action="go_product.product_template_action_website_product_offer"
+            parent="website_sale.menu_catalog"
+            name="Offers"
+            sequence="2"
+    />
+
+
+    <menuitem
+            id="menu_product_sticker"
+            action="go_product.action_product_sticker"
+            parent="website_sale.menu_catalog"
+            name="Product Sticker"
+            sequence="5"
+    />
+
+    <menuitem
+            id="menu_product_label"
+            action="go_product.action_product_label"
+            parent="website_sale.menu_catalog"
+            name="Product Label"
+            sequence="6"
+    />
+
+<!--    sale app-->
+
+
+    <menuitem
+            id="menu_product_brand_sale"
+            action="go_product.action_product_brand"
+            parent="sale.product_menu_catalog"
+            name="Product Brand"
+            sequence="10"
+    />
+
+    <menuitem
+            id="menu_product_offer_sale"
+            action="go_product.product_template_action_website_product_offer"
+            parent="sale.product_menu_catalog"
+            name="Offers"
+            sequence="31"
+    />
+
+
+    <menuitem
+            id="menu_product_sticker_sale"
+            action="go_product.action_product_sticker"
+            parent="sale.product_menu_catalog"
+            name="Product Sticker"
+            sequence="32"
+    />
+
+    <menuitem
+            id="menu_product_label_sale"
+            action="go_product.action_product_label"
+            parent="sale.product_menu_catalog"
+            name="Product Label"
+            sequence="33"
+    />
+
+
+
+
+
+
+
+
+
+</odoo>
