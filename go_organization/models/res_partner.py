@@ -165,9 +165,7 @@ class ResPartner(models.Model):
     user_expiry_date = fields.Date(
         string="User Expiry", help="Use this Date field; legacy text is migrated here."
     )
-    merchant_pin = fields.Char(
-        string="Merchant PIN", oldname="x_merchant_pin_new"
-    )
+    merchant_pin = fields.Char(string="Merchant PIN", oldname="x_merchant_pin_new")
 
     # ───────────────────────────────────────────────────────────────────────────
     # Merchant operational settings (restaurant/delivery)
@@ -233,6 +231,7 @@ class ResPartner(models.Model):
         "res.partner",
         string="Organisation Linked With",
         oldname="x_org_linked",
+        domain=[("entity_type", "=", "organisation")],  # Only show organisations
     )
 
     merchant_mobile_visit_count = fields.Integer(
@@ -446,4 +445,3 @@ class ResPartner(models.Model):
             if country:
                 values["country_id"] = country.id
         return values
-

@@ -278,11 +278,52 @@
                 <!-- Branches & Enquiries -->
                 <page string="Branches &amp; Enquiries" invisible="entity_type != 'merchant'">
                     <group>
-                        <field name="branch_ids"/>
+                        <field name="branch_ids">
+                            <list>
+                                <field name="name"/>
+                                <field name="name_ar"/>
+
+                                <field name="code"/>
+                                <field name="partner_id" readonly="1" optional="hide"/>
+                                <field name="partner_sub_id" optional="hide"/>
+
+                            </list>
+                            <form string="Merchant Branch">
+                                <sheet>
+                                    <group>
+                                        <field name="name"/>
+                                        <field name="name_ar"/>
+                                        <field name="code"/>
+                                    </group>
+                                    <group>
+                                        <field name="partner_id" readonly="1"/>
+                                        <field name="partner_sub_id"/>
+                                        <field name="company_id" readonly="1"/>
+                                    </group>
+                                </sheet>
+                            </form>
+
+                        </field>
+                        <field name="not_linked_ids">
+                            <list editable="bottom">
+                                <field name="name"/>
+                                <field name="code"/>
+                            </list>
+                            <form string="Not Linked App">
+                                <sheet>
+                                    <group>
+                                        <field name="name"/>
+                                        <field name="code"/>
+                                    </group>
+                                    <group>
+                                        <field name="parent_id"/>
+                                    </group>
+                                </sheet>
+                            </form>
+
+                        </field>
                     </group>
-                    <group>
-                        <field name="not_linked_ids"/>
-                    </group>
+
                     <group string="Hotel Enquiries" invisible="not is_hotel_business">
                         <field name="merchant_enquiry_ids" mode="list" nolabel="1">
                             <list editable="bottom">
@@ -335,8 +376,6 @@
     </record>
 
 
-
-
     <!-- Convenience actions -->
     <record id="action_partner_organisations" model="ir.actions.act_window">
         <field name="name">Organisations</field>
@@ -366,9 +405,6 @@
             <p></p>
         </field>
     </record>
-
-
-
 
 
 </odoo>

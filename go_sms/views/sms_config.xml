@@ -1,0 +1,69 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+
+    <record id="view_sms_config_form" model="ir.ui.view">
+        <field name="name">sms.config.form</field>
+        <field name="model">sms.config</field>
+        <field name="arch" type="xml">
+            <form string="SMS Configuration">
+                <sheet>
+                    <widget name="web_ribbon"
+                            title="Active"
+                            bg_color="text-bg-success"
+                            invisible="active != True"/>
+
+                    <group>
+                        <group string="Authentication">
+                            <field name="user_name"/>
+                            <field name="password" password="True"/>
+                        </group>
+                        <group string="Connection">
+                            <field name="smpp_server"/>
+                            <field name="smpp_port"/>
+                            <field name="url" widget="url"/>
+                        </group>
+                    </group>
+                </sheet>
+            </form>
+        </field>
+    </record>
+
+    <record id="view_sms_config_list" model="ir.ui.view">
+        <field name="name">sms.config.list</field>
+        <field name="model">sms.config</field>
+        <field name="arch" type="xml">
+            <list>
+                <field name="user_name"/>
+                <field name="smpp_server"/>
+                <field name="smpp_port"/>
+                <field name="url" widget="url"/>
+            </list>
+        </field>
+    </record>
+
+    <record id="view_sms_config_search" model="ir.ui.view">
+        <field name="name">sms.config.search</field>
+        <field name="model">sms.config</field>
+        <field name="arch" type="xml">
+            <search>
+                <field name="user_name"/>
+                <separator/>
+                <filter string="Active" name="active_true" domain="[('active','=',True)]"/>
+                <filter string="Inactive" name="active_false" domain="[('active','=',False)]"/>
+            </search>
+        </field>
+    </record>
+
+
+    <record id="action_sms_config" model="ir.actions.act_window">
+        <field name="name">SMS Configurations</field>
+        <field name="res_model">sms.config</field>
+        <field name="view_mode">list,form</field>
+        <field name="help" type="html">
+            <p class="o_view_nocontent_smiling_face">
+                Configure your SMS gateway here.
+            </p>
+        </field>
+    </record>
+
+</odoo>

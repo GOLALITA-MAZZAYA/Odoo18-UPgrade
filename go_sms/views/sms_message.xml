@@ -1,0 +1,103 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+
+    <record id="view_sms_message_form" model="ir.ui.view">
+        <field name="name">sms.message.form</field>
+        <field name="model">sms.message</field>
+        <field name="arch" type="xml">
+            <form string="SMS Message">
+                <header>
+                    <field name="state" widget="statusbar" statusbar_visible="draft,pending,sent,error"/>
+                    <button
+                            name="action_state_draft"
+                            invisible="state in ['draft', 'sent']"
+                            string="Send To Draft" type="object"
+                            class="btn btn-primary me-1"
+                    />
+
+                    <button
+                            name="action_send_sms"
+                            type="object"
+                            invisible="state in ['sent', 'error']"
+                            class="o_primary"
+                            string="Send SMS"/>
+
+                </header>
+                <sheet>
+                    <group>
+                        <group string="Configuration &amp; Recipient">
+                            <field name="msg_config"/>
+                            <field name="recipient"/>
+                        </group>
+
+                        <group string="Gateway Info">
+                            <field name="status_msg"/>
+                            <field name="message_id"/>
+                        </group>
+                    </group>
+
+                    <group string="Message Content" colspan="2">
+                        <field name="msg" nolabel="1" colspan="2" class="oe_form_field_wide"/>
+                    </group>
+                </sheet>
+            </form>
+        </field>
+    </record>
+
+
+    <record id="view_sms_message_list" model="ir.ui.view">
+        <field name="name">sms.message.list</field>
+        <field name="model">sms.message</field>
+        <field name="arch" type="xml">
+            <list>
+                <field name="recipient"/>
+                <field name="msg_config"/>
+                <field name="status_msg"/>
+                <field name="message_id"/>
+                <field name="state" widget="badge"
+                       decoration-info="state == 'draft'"
+                       decoration-success="state == 'sent'"/>
+            </list>
+        </field>
+    </record>
+
+    <record id="view_sms_message_search" model="ir.ui.view">
+        <field name="name">sms.message.search</field>
+        <field name="model">sms.message</field>
+        <field name="arch" type="xml">
+            <search>
+
+                <field name="recipient"/>
+                <field name="msg_config"/>
+                <field name="status_msg"/>
+                <field name="message_id"/>
+
+                <separator/>
+                <filter string="Draft" name="filter_draft" domain="[('state','=','draft')]"/>
+                <filter string="Pending" name="filter_pending" domain="[('state','=','pending')]"/>
+                <filter string="Sent" name="filter_sent" domain="[('state','=','sent')]"/>
+                <filter string="Error" name="filter_error" domain="[('state','=','error')]"/>
+                <separator/>
+
+                <group expand="0" string="Group By">
+                    <filter string="State" name="group_state" context="{'group_by': 'state'}"/>
+                    <filter string="SMS Configuration" name="group_config" context="{'group_by': 'msg_config'}"/>
+                </group>
+            </search>
+        </field>
+    </record>
+
+
+    <record id="action_sms_message" model="ir.actions.act_window">
+        <field name="name">SMS Messages</field>
+        <field name="res_model">sms.message</field>
+        <field name="view_mode">list,form</field>
+        <field name="help" type="html">
+            <p class="o_view_nocontent_smiling_face">
+                Create and manage SMS messages here.
+            </p>
+        </field>
+    </record>
+
+
+</odoo>

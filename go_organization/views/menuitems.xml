@@ -47,12 +47,19 @@
             sequence="20"
     />
 
-<!--    <menuitem id="menu_user_address"-->
-<!--              name="User Addresses"-->
-<!--              parent="go_organization.menu_customer"-->
-<!--              action="go_organization.action_user_address"-->
-<!--              sequence="25"-->
-<!--    />-->
+    <menuitem id="menu_advert_banner_root"
+              name="Advert Banners"
+              parent="contacts.menu_contacts"
+              action="action_advert_banner"
+              sequence="80"/>
+
+
+    <!--    <menuitem id="menu_user_address"-->
+    <!--              name="User Addresses"-->
+    <!--              parent="go_organization.menu_customer"-->
+    <!--              action="go_organization.action_user_address"-->
+    <!--              sequence="25"-->
+    <!--    />-->
 
 
 </odoo>

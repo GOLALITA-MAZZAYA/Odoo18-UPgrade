@@ -46,9 +46,7 @@ class ProductSticker(models.Model):
     )
 
     # Text/HTML mode
-    sticker_text = fields.Text(
-        help="Sticker text"
-    )
+    sticker_text = fields.Text(help="Sticker text")
     font_size = fields.Integer(
         string="Font Size (px)",
         help="Font size in pixels for HTML sticker.",
@@ -107,14 +105,20 @@ class ProductSticker(models.Model):
             for fname in ("width", "height", "font_size"):
                 val = rec[fname]
                 if val is not None and val < 0:
-                    raise ValidationError(_("%s cannot be negative.") % dict(self._fields)[fname].string)
+                    raise ValidationError(
+                        _("%s cannot be negative.") % dict(self._fields)[fname].string
+                    )
 
     @api.constrains("bg_color", "text_color")
     def _check_hex_colors(self):
         import re
+
         hex_pat = re.compile(r"^#([0-9A-Fa-f]{6})$")
         for rec in self:
             for color_f in ("bg_color", "text_color"):
                 c = rec[color_f]
                 if c and not hex_pat.match(c):
-                    raise ValidationError(_("Invalid %s. Use hex like #RRGGBB.") % dict(self._fields)[color_f].string)
+                    raise ValidationError(
+                        _("Invalid %s. Use hex like #RRGGBB.")
+                        % dict(self._fields)[color_f].string
+                    )

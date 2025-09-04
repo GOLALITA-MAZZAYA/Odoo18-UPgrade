@@ -1,0 +1,181 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+
+    <!-- Tree (editable) -->
+    <record id="view_advert_banner_list" model="ir.ui.view">
+        <field name="name">advertisement.banner.list</field>
+        <field name="model">advertisement.banner</field>
+        <field name="arch" type="xml">
+            <list string="Advert Banners" editable="top">
+                <field name="sequence"/>
+                <field name="name" required="1"/>
+                <field name="slot" required="1"/>
+                <field name="image" widget="image" options="{'preview_image': 'image_256'}"/>
+                <field name="banner_url" widget="url"/>
+                <field name="tracking_code"/>
+                <field name="android"/>
+                <field name="ios"/>
+                <field name="internal"/>
+                <field name="sjc_code"/>
+                <field name="organisation_id"
+                       options="{'no_create': True, 'no_create_edit': True, 'no_open': True}"
+                       domain="[('entity_type','=','organisation')]"/>
+                <field name="merchant_id"
+                       domain="[('entity_type','=','merchant')]"
+                       context="{'default_entity_type': 'merchant'}"/>
+                <field name="company_id"/>
+                <!--                <button name="action_open_attachments" type="object" icon="fa-paperclip"-->
+                <!--                        title="Open Attachments"/>-->
+            </list>
+        </field>
+    </record>
+
+    <!-- Form -->
+    <record id="view_advert_banner_form" model="ir.ui.view">
+        <field name="name">advertisement.banner.form</field>
+        <field name="model">advertisement.banner</field>
+        <field name="arch" type="xml">
+            <form string="Advert Banner">
+                <sheet>
+                    <group>
+                        <group>
+                            <field name="active"/>
+                            <field name="sequence"/>
+                            <field name="name" required="1"/>
+                            <field name="slot" required="1"/>
+                            <field name="company_id"/>
+                        </group>
+                        <group>
+                            <field name="banner_url" widget="url"/>
+                            <field name="tracking_code"/>
+                            <field name="sjc_code"/>
+                            <field name="android"/>
+                            <field name="ios"/>
+                            <field name="internal"/>
+                        </group>
+                    </group>
+
+                    <group string="Media &amp; Links">
+                        <group>
+                            <field name="image" widget="image"
+                                   options="{'preview_image': 'image_512'}"/>
+                            <!--                            <button name="action_open_attachments" type="object"-->
+                            <!--                                    string="Open Attachments" class="btn-link"/>-->
+                        </group>
+                        <group>
+                            <field name="organisation_id"
+                                   options="{'no_create': True, 'no_create_edit': True, 'no_open': True}"
+                                   domain="[('entity_type','=','organisation')]"/>
+                            <field name="merchant_id"
+                                   domain="[('entity_type','=','merchant')]"
+                                   context="{'default_entity_type': 'merchant'}"/>
+                        </group>
+                    </group>
+                </sheet>
+
+                <chatter/>
+            </form>
+        </field>
+    </record>
+
+    <!-- Search -->
+    <!--    <record id="view_advertisement_banner_search" model="ir.ui.view">-->
+    <!--        <field name="name">advertisement.banner.search</field>-->
+    <!--        <field name="model">advertisement.banner</field>-->
+    <!--        <field name="arch" type="xml">-->
+    <!--            <search>-->
+    <!--                <field name="name"/>-->
+    <!--                <field name="slot"/>-->
+    <!--                <field name="company_id"/>-->
+    <!--                <field name="organisation_id"/>-->
+    <!--                <field name="merchant_id"/>-->
+    <!--                <filter string="Active" domain="[('active','=',True)]"/>-->
+    <!--                <filter string="Android" domain="[('android','=',True)]"/>-->
+    <!--                <filter string="iOS" domain="[('ios','=',True)]"/>-->
+    <!--                <filter string="Internal" domain="[('internal','=',True)]"/>-->
+    <!--                <group expand="0" string="Group By">-->
+    <!--                    <filter string="Company" context="{'group_by':'company_id'}"/>-->
+    <!--                    <filter string="Slot" context="{'group_by':'slot'}"/>-->
+    <!--                    <filter string="Organisation" context="{'group_by':'organisation_id'}"/>-->
+    <!--                    <filter string="Merchant" context="{'group_by':'merchant_id'}"/>-->
+    <!--                </group>-->
+    <!--            </search>-->
+    <!--        </field>-->
+    <!--    </record>-->
+    <record id="view_advertisement_banner_search" model="ir.ui.view">
+        <field name="model">advertisement.banner</field>
+        <field name="arch" type="xml">
+            <search>
+                <field name="name"/>
+                <field name="slot"/>
+                <field name="company_id"/>
+                <field name="organisation_id"/>
+                <field name="merchant_id"/>
+                <separator/>
+                <filter
+                        name="archived"
+                        string="Archived"
+                        domain="[('active', '=', False)]"
+                />
+                <separator/>
+                <filter
+                        name="android"
+                        string="Android"
+                        domain="[('android', '=', True)]"
+                />
+                <filter
+                        name="ios"
+                        string="IOS"
+                        domain="[('ios', '=', True)]"
+                />
+                <separator/>
+                <filter
+                        name="ad_1"
+                        string="Advertisement 1"
+                        domain="[('slot', '=', 'ad_1')]"
+                />
+                <filter
+                        name="ad_2"
+                        string="Advertisement 2"
+                        domain="[('slot', '=', 'ad_2')]"
+                />
+                <filter
+                        name="ad_3"
+                        string="Advertisement 3"
+                        domain="[('slot', '=', 'ad_3')]"
+                />
+                <group name="groupby">
+                    <filter
+                            name="groupby_company"
+                            string="Company"
+                            context="{'group_by': 'company_id'}"
+                    />
+                    <filter
+                            name="groupby_slot"
+                            string="Slot"
+                            context="{'group_by': 'slot'}"
+                    />
+                    <filter
+                            name="groupby_organisation"
+                            string="Organisation"
+                            context="{'group_by': 'organisation_id'}"
+                    />
+                    <filter
+                            name="groupby_merchant"
+                            string="Merchant"
+                            context="{'group_by': 'merchant_id'}"
+                    />
+                </group>
+            </search>
+        </field>
+    </record>
+
+    <!-- Action -->
+    <record id="action_advert_banner" model="ir.actions.act_window">
+        <field name="name">Advert Menu</field>
+        <field name="res_model">advertisement.banner</field>
+        <field name="view_mode">list,form</field>
+        <field name="search_view_id" ref="view_advertisement_banner_search"/>
+    </record>
+
+</odoo>

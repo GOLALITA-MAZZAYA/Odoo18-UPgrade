@@ -6,6 +6,7 @@
     "description": """ Extend functionalities related to partner""",
     "category": "Partner",
     "depends": ["contacts", "mail", "website", "base", "product"],
+    "author": "Dhiren Narola",
     "data": [
         "security/ir.model.access.csv",
         "views/res_partner.xml",
@@ -14,6 +15,8 @@
         "views/merchant_enquiry.xml",
         "views/partner_category.xml",
         "views/user_address.xml",
+        "views/advertisement_banner.xml",
+        "views/res_company.xml",
         "views/menuitems.xml",
     ],
     "demo": [],

@@ -1,0 +1,3 @@
+id,name,model_id:id,group_id:id,perm_read,perm_write,perm_create,perm_unlink
+access_sms_config,access.sms.config,model_sms_config,base.group_user,1,1,1,1
+access_sms_message,access_sms_message,model_sms_message,base.group_user,1,1,1,1

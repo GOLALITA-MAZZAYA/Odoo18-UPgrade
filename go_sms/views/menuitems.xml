@@ -1,0 +1,30 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <menuitem
+            id="menu_sms_root"
+            name="SMS"
+            sequence="10"
+            web_icon="go_sms,static/description/icon.png"
+    />
+
+
+    <menuitem
+            id="submenu_sms_config"
+            name="SMS Configurations"
+            action="action_sms_config"
+            parent="menu_sms_root"
+            sequence="30"
+    />
+
+    <menuitem
+            id="menu_sms_message_root"
+            name="SMS Messages"
+            parent="menu_sms_root"
+            action="action_sms_message"
+            sequence="25"
+    />
+
+
+
+
+</odoo>
