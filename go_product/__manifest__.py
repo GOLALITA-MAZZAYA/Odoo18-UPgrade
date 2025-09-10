@@ -9,17 +9,14 @@
     "author": "Dhiren Narola",
     "depends": [
         "product",
-        "website",
         "sale",
         "mail",
-        "website_sale",
         "account",
         "purchase",
     ],
     "data": [
         "security/ir.model.access.csv",
         "views/product_template.xml",
-        "views/product_brand.xml",
         "views/product_sticker.xml",
         "views/product_label.xml",
         "views/menuitems.xml",

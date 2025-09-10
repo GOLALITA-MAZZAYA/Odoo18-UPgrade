@@ -22,6 +22,7 @@ class ResPartner(models.Model):
         string="Entity Type",
         oldname="go_entity",
         index=True,
+        required=True,
         help="Functional role of the contact in your program.",
     )
 

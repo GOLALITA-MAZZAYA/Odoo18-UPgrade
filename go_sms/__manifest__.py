@@ -5,7 +5,7 @@
     "category": "SMS",
     "sequence": 500,
     "summary": "Send and manage SMS notifications from Odoo",
-    "author": "Dhieren Narola",
+    "author": "Dhiren Narola",
     "license": "OPL-1",
     "depends": ["web"],
     "data": [

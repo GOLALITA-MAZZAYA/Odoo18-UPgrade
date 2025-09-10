@@ -1,0 +1,46 @@
+<?xml version="1.0" encoding="utf-8"?>
+
+<odoo>
+    <record id="view_company_form_inherit_giftcard" model="ir.ui.view">
+        <field name="name">res.company.form.inherit.giftcard</field>
+        <field name="model">res.company</field>
+        <field name="inherit_id" ref="base.view_company_form"/>
+        <field name="arch" type="xml">
+
+            <!-- Insert after General Information page -->
+            <xpath expr="//notebook/page[@name='general_info']" position="after">
+                <page string="Gift &amp; Payment Configurations" name="gift_payment_config">
+
+                    <!-- Gift API -->
+                    <group string="Gift API Configurations">
+                        <group>
+                            <field name="gift_api_url"/>
+                            <field name="gift_api_key"/>
+                            <field name="gift_api_secret" password="True"/>
+                        </group>
+                    </group>
+
+                    <!-- Cardmoola -->
+                    <group string="Cardmoola Configurations">
+                        <group>
+                            <field name="cardmoola_api_url"/>
+                            <field name="cardmoola_api_key"/>
+                            <field name="cardmoola_api_secret" password="True"/>
+                        </group>
+                    </group>
+
+                    <!-- SkipCash -->
+                    <group string="SkipCash Configurations">
+                        <group>
+                            <field name="skipcash_api_url"/>
+                            <field name="skipcash_merchant_key"/>
+                            <field name="skipcash_merchant_password" password="True"/>
+                        </group>
+                    </group>
+
+                </page>
+            </xpath>
+
+        </field>
+    </record>
+</odoo>

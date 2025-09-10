@@ -90,46 +90,10 @@ class ProductTemplate(models.Model):
         string="Expired Offer", help="Indicates if this product's offer has expired."
     )
 
-    # ──────────────────────────────
-    # ONLINE STORE & MERCHANT
-    # ──────────────────────────────
-
-    merchant_id = fields.Many2one(
-        "res.partner",
-        string="Merchant",
-        default=lambda self: self.env.user.partner_id.id,
-    )
-    merchant_store_link = fields.Char(
-        string="Merchant Store Link",
-        help="URL to the merchant's online store.",
-        oldname="x_merchant_online_store",
-    )
-    product_buy_link = fields.Char(
-        string="Product Buy Link",
-        help="Direct purchase link for the product.",
-        oldname="x_buy_link",
-    )
-
-    available_online = fields.Boolean(
-        string="Available in Online Store",
-        help="Indicates if the product is available in the online store.",
-        oldname="x_online_store",
-    )
-
-    # ──────────────────────────────
-    # RESTAURANT-SPECIFIC
-    # ──────────────────────────────
-
     is_restaurant_item = fields.Boolean(
         string="Restaurant Item",
         help="Indicates if the product is part of a restaurant menu.",
     )
-
-    # restaurant_category_id = fields.Many2one(
-    #     'loyalty.restaurant.category',
-    #     string='Restaurant Category',
-    #     help="Restaurant category for this product."
-    # )
 
     # ──────────────────────────────
     # EMPLOYEE & ACCESS CONTROL
@@ -154,14 +118,6 @@ class ProductTemplate(models.Model):
         string="Sequence",
         help="Used to control product display order in lists.",
         oldname="x_sequence",
-    )
-
-    label_lines = fields.One2many(
-        "product.label.line",
-        "product_tmpl_id",
-        string="Product Labels",
-        help="Labels shown with the product.",
-        oldname="pro_label_line_ids",
     )
 
     product_sticker_ids = fields.Many2many(
@@ -206,10 +162,6 @@ class ProductTemplate(models.Model):
         help="Apps where this product should not appear.",
     )
 
-    brand_id = fields.Many2one(
-        "product.brand", string="Brand", oldname="product_brand_id"
-    )
-
     # ──────────────────────────────
     # TECHNICAL / STATE
     # ──────────────────────────────
@@ -237,15 +189,3 @@ class ProductTemplate(models.Model):
             res.update({"is_in_offer": True, "sale_ok": False, "purchase_ok": False})
         return res
 
-    def action_set_pending(self):
-        for rec in self:
-            rec.state = "pending"
-
-    def action_publish(self):
-        for rec in self:
-            rec.state = "publish"
-            rec.available_online = True
-
-    def action_reset(self):
-        for rec in self:
-            rec.state = "draft"

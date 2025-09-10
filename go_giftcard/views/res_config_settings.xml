@@ -1,0 +1,132 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+
+    <record id="res_config_settings_view_form_inherit_giftcard" model="ir.ui.view">
+        <field name="name">res.config.settings.giftcard</field>
+        <field name="model">res.config.settings</field>
+        <field name="inherit_id" ref="base.res_config_settings_view_form"/>
+        <field name="arch" type="xml">
+
+            <xpath expr="//app[@name='general_settings']" position="after">
+
+                <app string="Gift Card" name="giftcard_settings"
+                     logo="/go_giftcard/static/description/gift_card_logo.png">
+
+<!--                    <block title="Company Configuration" name="giftcard_company_settings_container">-->
+<!--                        <setting id="giftcard_company_setting" string="Company"-->
+<!--                                 help="Select the company for which these Gift Card configurations apply.">-->
+<!--                            <div class="row mt16">-->
+<!--                                <div class="col-12">-->
+<!--                                    <label for="company_id" class="o_light_label" string="Company"/>-->
+<!--                                    <field name="company_id" class="w-100"/>-->
+<!--                                </div>-->
+<!--                            </div>-->
+<!--                        </setting>-->
+<!--                    </block>-->
+
+                    <block title="Gift API Credentials" name="gift_api_settings_container">
+                        <setting id="gift_api_setting" string="Gift API Configuration"
+                                 help="Set API credentials to connect with the Gift service.">
+
+                            <div class="row mt16">
+                                <div class="col-12">
+                                    <label for="gift_api_url" class="o_light_label" string="API URL"/>
+                                    <field name="gift_api_url" placeholder="Enter Gift API URL" class="w-100"/>
+                                </div>
+                            </div>
+
+                            <div class="row mt16">
+                                <div class="col-12">
+                                    <label for="gift_api_key" class="o_light_label" string="API Key"/>
+                                    <field name="gift_api_key" placeholder="Enter Gift API Key" class="w-100"/>
+                                </div>
+                            </div>
+
+                            <div class="row mt16">
+                                <div class="col-12">
+                                    <label for="gift_api_secret" class="o_light_label" string="API Secret"/>
+                                    <field name="gift_api_secret" placeholder="Enter Gift API Secret" class="w-100"
+                                           password="True"/>
+                                </div>
+                            </div>
+
+                        </setting>
+                    </block>
+                    <block title="Cardmoola API Credentials" name="cardmoola_api_settings_container">
+                        <setting id="cardmoola_api_setting" string="Cardmoola API Configuration"
+                                 help="Set API credentials to connect with the Cardmoola Gift service.">
+
+                            <div class="row mt16">
+                                <div class="col-12">
+                                    <label for="cardmoola_api_url" class="o_light_label" string="API URL"/>
+                                    <field name="cardmoola_api_url" placeholder="Enter Cardmoola API URL"
+                                           class="w-100"/>
+                                </div>
+                            </div>
+
+                            <div class="row mt16">
+                                <div class="col-12">
+                                    <label for="cardmoola_api_key" class="o_light_label" string="API Key"/>
+                                    <field name="cardmoola_api_key" placeholder="Enter Cardmoola API Key"
+                                           class="w-100"/>
+                                </div>
+                            </div>
+
+                            <div class="row mt16">
+                                <div class="col-12">
+                                    <label for="cardmoola_api_secret" class="o_light_label" string="API Secret"/>
+                                    <field name="cardmoola_api_secret" placeholder="Enter Cardmoola API Secret"
+                                           class="w-100"
+                                           password="True"/>
+                                </div>
+                            </div>
+
+                        </setting>
+                    </block>
+                    <block title="SkipCash API Credentials" name="skipcash_api_settings_container">
+                        <setting id="skipcash_api_setting" string="SkipCash API Configuration"
+                                 help="Set API credentials to connect with the SkipCash payment gateway.">
+
+                            <div class="row mt16">
+                                <div class="col-12">
+                                    <label for="skipcash_api_url" class="o_light_label" string="API URL"/>
+                                    <field name="skipcash_api_url" placeholder="Enter SkipCash API URL" class="w-100"/>
+                                </div>
+                            </div>
+
+                            <div class="row mt16">
+                                <div class="col-12">
+                                    <label for="skipcash_merchant_key" class="o_light_label" string="Merchant Key"/>
+                                    <field name="skipcash_merchant_key" placeholder="Enter SkipCash Merchant Key"
+                                           class="w-100"/>
+                                </div>
+                            </div>
+
+                            <div class="row mt16">
+                                <div class="col-12">
+                                    <label for="skipcash_merchant_password" class="o_light_label"
+                                           string="Merchant Password"/>
+                                    <field name="skipcash_merchant_password"
+                                           placeholder="Enter SkipCash Merchant Password" class="w-100"
+                                           password="True"/>
+                                </div>
+                            </div>
+
+                        </setting>
+                    </block>
+                </app>
+
+            </xpath>
+        </field>
+    </record>
+
+
+    <record id="action_giftcard_settings" model="ir.actions.act_window">
+        <field name="name">Gift Card Settings</field>
+        <field name="res_model">res.config.settings</field>
+        <field name="view_mode">form</field>
+        <field name="target">inline</field>
+    </record>
+
+
+</odoo>

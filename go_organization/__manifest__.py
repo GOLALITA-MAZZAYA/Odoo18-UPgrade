@@ -5,7 +5,7 @@
     "sequence": 10,
     "description": """ Extend functionalities related to partner""",
     "category": "Partner",
-    "depends": ["contacts", "mail", "website", "base", "product"],
+    "depends": ["contacts", "mail", "base", "product"],
     "author": "Dhiren Narola",
     "data": [
         "security/ir.model.access.csv",

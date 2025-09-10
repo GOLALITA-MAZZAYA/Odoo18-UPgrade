@@ -1,0 +1,61 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+
+    <record id="view_ugo2gift_category_form" model="ir.ui.view">
+        <field name="name">ugo2gift.category.form</field>
+        <field name="model">ugo2gift.category</field>
+        <field name="arch" type="xml">
+            <form string="Gift Card Category">
+                <sheet>
+                    <field name="image" widget="image" class="oe_avatar" nolabel="1"/>
+
+                    <div class="oe_title">
+                        <h1>
+                            <field name="name" placeholder="e.g. Electronics, Fashion, Travel"/>
+                        </h1>
+                        <group>
+                            <group>
+                                <field name="category_id"/>
+                                <field name="brand_url" widget="url"/>
+                            </group>
+                        </group>
+                    </div>
+                </sheet>
+            </form>
+        </field>
+    </record>
+
+    <record id="view_ugo2gift_category_tree" model="ir.ui.view">
+        <field name="name">ugo2gift.category.tree</field>
+        <field name="model">ugo2gift.category</field>
+        <field name="arch" type="xml">
+            <list string="Gift Card Categories">
+                <field name="category_id"/>
+                <field name="name"/>
+                <field name="brand_url" widget="url"/>
+                <field name="active" widget="boolean_toggle"/>
+            </list>
+        </field>
+    </record>
+
+    <record id="view_ugo2gift_category_search" model="ir.ui.view">
+        <field name="name">ugo2gift.category.search</field>
+        <field name="model">ugo2gift.category</field>
+        <field name="arch" type="xml">
+            <search string="Search Categories">
+                <field name="name" string="Category Name"/>
+                <filter name="active" string="Active" domain="[('active','=',True)]"/>
+                <filter name="inactive" string="Inactive" domain="[('active','=',False)]"/>
+            </search>
+        </field>
+    </record>
+
+
+    <record id="action_ugo2gift_category" model="ir.actions.act_window">
+        <field name="name">Categories</field>
+        <field name="res_model">ugo2gift.category</field>
+        <field name="view_mode">list,form</field>
+    </record>
+
+
+</odoo>

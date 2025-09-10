@@ -1,0 +1,8 @@
+id,name,model_id:id,group_id:id,perm_read,perm_write,perm_create,perm_unlink
+access_ugo2gift_brand,access.ugo2gift.brand,model_ugo2gift_brand,base.group_user,1,1,1,1
+access_gift_card,access.gift.card,model_gift_card,base.group_user,1,1,1,1
+access_ugo2gift_image,access.ugo2gift.image,model_ugo2gift_image,base.group_user,1,1,1,1
+access_ugo2gift_category,access.ugo2gift.category,model_ugo2gift_category,base.group_user,1,1,1,1
+access_ugo2gift_denomination,access.ugo2gift.denomination,model_ugo2gift_denomination,base.group_user,1,1,1,1
+access_ugo2gift_country,access.ugo2gift.country,model_ugo2gift_country,base.group_user,1,1,1,1
+access_ugo2gift_language,access.ugo2gift.language,model_ugo2gift_language,base.group_user,1,1,1,1

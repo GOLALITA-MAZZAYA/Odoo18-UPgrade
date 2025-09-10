@@ -1,0 +1,77 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+
+    <record id="view_ugo2gift_denomination_form" model="ir.ui.view">
+        <field name="name">ugo2gift.denomination.form</field>
+        <field name="model">ugo2gift.denomination</field>
+        <field name="arch" type="xml">
+            <form string="Denomination">
+                <sheet>
+                    <group>
+                        <group string="General Information">
+                            <field name="brand_id"/>
+                            <field name="currency_id"/>
+
+                        </group>
+                        <group string="Amount Details">
+                            <field name="amount"/>
+                            <field name="min_amount"/>
+                            <field name="max_amount"/>
+                        </group>
+                    </group>
+                </sheet>
+            </form>
+        </field>
+    </record>
+
+
+    <record id="view_ugo2gift_denomination_tree" model="ir.ui.view">
+        <field name="name">ugo2gift.denomination.tree</field>
+        <field name="model">ugo2gift.denomination</field>
+        <field name="arch" type="xml">
+            <list string="Denominations">
+                <field name="brand_id"/>
+                <field name="currency_id"/>
+                <field name="amount"/>
+                <field name="min_amount"/>
+                <field name="max_amount"/>
+                <field name="active" widget="boolean_toggle"/>
+            </list>
+        </field>
+    </record>
+
+    <!-- Search View -->
+    <record id="view_ugo2gift_denomination_search" model="ir.ui.view">
+        <field name="name">ugo2gift.denomination.search</field>
+        <field name="model">ugo2gift.denomination</field>
+        <field name="arch" type="xml">
+            <search string="Search Denominations">
+
+                <field name="brand_id" string="Brand"/>
+                <field name="currency_id" string="Currency"/>
+
+                <filter string="Active" name="active" domain="[('active','=',True)]"/>
+                <filter string="Inactive" name="inactive" domain="[('active','=',False)]"/>
+
+                <group expand="0" string="Group By">
+                    <filter string="Brand" name="group_by_brand" context="{'group_by':'brand_id'}"/>
+                    <filter string="Currency" name="group_by_currency" context="{'group_by':'currency_id'}"/>
+                </group>
+            </search>
+        </field>
+    </record>
+
+
+    <record id="action_ugo2gift_denomination" model="ir.actions.act_window">
+        <field name="name">Denominations</field>
+        <field name="res_model">ugo2gift.denomination</field>
+        <field name="view_mode">list,form</field>
+        <field name="help" type="html">
+            <p class="o_view_nocontent_smiling_face">
+                Create a denomination to define available gift card values.
+            </p>
+        </field>
+    </record>
+
+
+</odoo>

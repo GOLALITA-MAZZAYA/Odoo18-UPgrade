@@ -77,12 +77,3 @@ class MerchantBranch(models.Model):
         recs = self.search(domain + args, limit=limit)
         return recs.name_get()
 
-    def name_get(self):
-        result = []
-        for rec in self:
-            disp = rec.display_name or rec.name or ""
-            # Add merchant suffix to disambiguate in dropdowns
-            if rec.partner_id:
-                disp = f"{disp} — {rec.partner_id.display_name}"
-            result.append((rec.id, disp))
-        return result

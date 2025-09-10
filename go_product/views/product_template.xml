@@ -22,59 +22,20 @@
                         invisible="not expired_offer"/>
             </xpath>
 
-            <xpath expr="//field[@name='is_published']" position="attributes">
-                <attribute name="invisible">0</attribute>
-            </xpath>
-
             <xpath expr="//field[@name='categ_id']" position="after">
                 <field
                         name="product_tags_ids"
                         widget="many2many_tags"
                 />
                 <field
-                        name="brand_id"
-                />
-
-                <field
                         name="employee_type"
                 />
 
             </xpath>
 
-
-            <xpath expr="//form/header" position="inside">
-
-                <field name="state"
-                       widget="statusbar"
-                       statusbar_visible="draft,pending,publish"
-                />
-
-                <button name="action_set_pending"
-                        string="Send for Approval"
-                        type="object"
-                        class="btn-primary"
-                        invisible="state in ['pending','publish']"/>
-
-
-                <button name="action_publish"
-                        string="Publish"
-                        type="object"
-                        class="btn-success"
-                        invisible="state in ['draft','publish']"/>
-
-
-                <button name="action_reset"
-                        string="Reset to Draft"
-                        type="object"
-                        class="btn-secondary"
-                        invisible="state in ['draft','pending']"/>
-            </xpath>
-
-
             <xpath expr="//page[@name='variants']" position="attributes">
                 <attribute name="invisible">1</attribute>
             </xpath>
-
 
             <xpath expr="//div[@class='oe_title']" position="replace">
                 <div class="oe_title">
@@ -128,11 +89,11 @@
                 </span>
             </xpath>
 
-            <xpath expr="//field[@name='type']" position="attributes">-->
+            <xpath expr="//field[@name='type']" position="attributes">
                 <attribute name="invisible">context.get('default_type', False)</attribute>
             </xpath>
 
-            <xpath expr="//field[@name='sale_ok']" position="attributes">-->
+            <xpath expr="//field[@name='sale_ok']" position="attributes">
                 <attribute name="invisible">is_in_offer</attribute>
             </xpath>
 
@@ -140,21 +101,8 @@
                 <attribute name="invisible">is_in_offer</attribute>
             </xpath>
 
-            <xpath expr="//page[@name='sales']" position="attributes">-->
+            <xpath expr="//page[@name='sales']" position="attributes">
                 <attribute name="invisible">is_in_offer or not sale_ok</attribute>
-                <attribute name="string">Sales &amp; E-Commerce</attribute>
-            </xpath>
-
-            <xpath expr="//div[@name='options']" position="inside">
-                <span class="d-inline-flex">
-                    <field name="available_online"
-                           invisible="context.get('from_product_offer_menu', False)"
-                    />
-
-                    <label for="available_online"
-                           invisible="context.get('from_product_offer_menu', False)"
-                    />
-                </span>
             </xpath>
 
             <xpath expr="//sheet/notebook" position="inside">
@@ -176,7 +124,6 @@
                                    widget="radio"
                                    required="is_in_offer"
                             />
-                            <field name="public_categ_ids" widget="many2many_tags"/>
                         </group>
                         <group string="Offer Validity &amp; Usage">
                             <field name="start_date" required="is_in_offer"/>
@@ -206,11 +153,11 @@
 
 
                     <group string="Additional Description">
-                            <field name="ar_description"
-                                   placeholder="Enter additional description..."
-                                   colspan="2"
-                                   nolabel="1"
-                            />
+                        <field name="ar_description"
+                               placeholder="Enter additional description..."
+                               colspan="2"
+                               nolabel="1"
+                        />
                     </group>
 
 
@@ -268,38 +215,6 @@
                 </page>
                 <page string="Product Stickers" name="product_stickers">
                     <field name="product_sticker_ids" widget="many2many" mode="tree,form"/>
-                </page>
-
-
-                <page name="online_store" string="Online Store" invisible="not available_online">
-                    <group>
-                        <group string="Merchant Information">
-                            <field name="merchant_id"/>
-                            <field name="merchant_store_link" widget="url"/>
-                        </group>
-                        <group string="Product Link">
-                            <field name="product_buy_link" widget="url"/>
-                        </group>
-                    </group>
-                </page>
-                <page name="customer_favorites" string="Customer Favorites" invisible="not available_online">
-                    <group>
-                        <field name="favourite_customer_ids" nolabel="1">
-                            <list editable="bottom">
-                                <field name="partner_id"/>
-                                <field name="is_save"/>
-                                <field name="is_voucher"/>
-                            </list>
-                            <form>
-                                <group>
-                                    <field name="partner_id"/>
-                                    <field name="product_id" invisible="1" readonly="1"/>
-                                    <field name="is_save"/>
-                                    <field name="is_voucher"/>
-                                </group>
-                            </form>
-                        </field>
-                    </group>
                 </page>
             </xpath>
 
@@ -376,43 +291,17 @@
         </field>
     </record>
 
+    <!--    These below actions are for the sales app-->
 
-    <record id="view_product_template_form_inherit_labels" model="ir.ui.view">
-        <field name="name">product.template.form.inherit.labels</field>
-        <field name="model">product.template</field>
-        <field name="inherit_id" ref="website_sale.product_template_form_view"/>
-        <field name="arch" type="xml">
-
-            <!-- Insert after the eCommerce Media group -->
-            <xpath expr="//group[@name='extra_info']" position="after">
-                <group string="Product Labels" name="product_labels" colspan="2">
-                    <field name="label_lines" nolabel="1">
-                        <list editable="bottom">
-                            <field name="website_id"/>
-                            <field name="label"/>
-                        </list>
-                        <form>
-                            <field name="website_id"/>
-                            <field name="label"/>
-                        </form>
-                    </field>
-                </group>
-            </xpath>
-
-        </field>
-    </record>
-
-
-    <record id="product_template_action_website_product_offer" model="ir.actions.act_window">
+    <record id="product_template_action_sales" model="ir.actions.act_window">
         <field name="name">Offers</field>
         <field name="res_model">product.template</field>
         <field name="view_mode">kanban,list,form,activity</field>
-        <field name="view_id"/>
-        <field name="search_view_id" ref="website_sale.product_template_search_view_website"/>
+        <field name="view_id" ref="product.product_template_kanban_view"/>
+        <field name="search_view_id" ref="product.product_template_search_view"/>
         <field name="context">{
-            'search_default_published': 1,
-            'list_view_ref': 'website_sale.product_template_view_tree_website_sale',
-            'kanban_view_ref': 'website_sale.product_template_view_kanban_website_sale',
+            "search_default_filter_to_sell":1,
+            "sale_multi_pricelist_product_template":1,
             'from_product_offer_menu':1,
             'default_is_in_offer' : True,
             'default_type':'service',
@@ -424,19 +313,18 @@
                 Create a new product
             </p>
             <p>
-                A product can be a service that you sell to your customers.
+                You must define a product for everything you sell or purchase,
+                whether it's a storable product, a consumable or a service.
             </p>
         </field>
     </record>
 
 
-    <record id="website_sale.product_template_action_website" model="ir.actions.act_window">
-        <field name="search_view_id" ref="website_sale.product_template_search_view_website"/>
+    <record id="sale.product_template_action" model="ir.actions.act_window">
         <field name="domain">[('is_in_offer', '=', False)]</field>
         <field name="context">{
-            'search_default_published': 1,
-            'list_view_ref': 'website_sale.product_template_view_tree_website_sale',
-            'kanban_view_ref': 'website_sale.product_template_view_kanban_website_sale',
+            "search_default_filter_to_sell":1,
+            "sale_multi_pricelist_product_template": 1,
             'from_normal_product':1,
             'default_is_in_offer' : False,
             }
