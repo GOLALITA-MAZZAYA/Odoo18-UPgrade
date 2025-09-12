@@ -46,12 +46,22 @@ class Ugo2GiftAPI:
             },
         )
 
-    def get_brand(self, endpoint="brands", country="QA"):
-        final_url = f"{self.base_url}/{endpoint}/?country={country}"
+    def get_brand(self, endpoint="brands"):
+        country_id = int(
+            self.env["ir.config_parameter"].sudo().get_param("go_giftcard.brand_country_id", 0)
+        )
+        country_code = "QA"
+        if country_id:
+            country = self.env["res.country"].browse(country_id)
+            if country.exists() and country.code:
+                country_code = country.code
+
+        final_url = f"{self.base_url}/{endpoint}/?country={country_code}"
+        # final_url = "https://private-anon-12659dab9a-ygagcorporaterewards.apiary-mock.com/corporate/api/v2-4/brands/"
         return self._request(final_url, method="GET")
 
     def create_gift_order(self, payload, auth):
-        final_url = f"{self.base_url}/orders/"
+        final_url = f"{self.base_url}/v2-4/orders/"
         return self._request(final_url, method="POST", payload=payload, auth=auth)
 
     def post_cardmoola_order(self, payload):
@@ -59,7 +69,7 @@ class Ugo2GiftAPI:
         return self._request(url, method="POST", payload=payload)
 
     def create_skipcash_payment(
-        self, payload, endpoint="/api/v1/payments", headers=None
+        self, payload, endpoint="/v1/payments", headers=None
     ):
         base_url = self.base_url.rstrip("/")
         endpoint = endpoint.lstrip("/")
@@ -84,20 +94,54 @@ class Ugo2GiftAPI:
             }
 
     def _get_request(self, url, params=None):
+        all_data = []
         try:
-            resp = requests.get(url, headers=self.headers, params=params)
-            success = resp.status_code in [200, 201]
-            try:
-                data = resp.json()
-            except Exception as e:
-                data = None
-                _logger.info(e)
+            page = 1
+            query_params = dict(params or {}, page=page)
+
+            while True:
+                resp = requests.get(url, headers=self.headers, params=query_params)
+                success = resp.status_code in (200, 201)
+
+                try:
+                    data = resp.json()
+                except Exception as e:
+                    _logger.warning("ugo2gift: JSON parse error: %s", e)
+                    data = {}
+
+                if not success:
+                    return {
+                        "status": resp.status_code,
+                        "success": False,
+                        "data": None,
+                        "error": data or resp.text,
+                    }
+
+                # Collect brand data if available
+                if isinstance(data, dict) and "brands" in data:
+                    current_page = data.get("current_page")
+                    next_page = data.get("next")
+
+                    if page == current_page:
+                        all_data.extend(data.get("brands", []))
+                    else:
+                        break
+
+                    if not next_page:
+                        break
+
+                    page += 1
+                    query_params = dict(params or {}, page=page)
+                else:
+                    break
+
             return {
-                "status": resp.status_code,
-                "success": success,
-                "data": data if success else None,
-                "error": None if success else data or resp.text,
+                "status": 200,
+                "success": True,
+                "data": all_data,
+                "error": None,
             }
+
         except requests.RequestException as e:
             return {"status": 0, "success": False, "data": None, "error": str(e)}
 

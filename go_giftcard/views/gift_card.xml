@@ -35,15 +35,6 @@
                             name="get_skipcash_url"
                             data-hotkey="q"
                     />
-
-<!--                    <button-->
-<!--                            string="Paid"-->
-<!--                            class="oe_highlight"-->
-<!--                            type="object"-->
-<!--                            name="action_paid_status"-->
-<!--                            data-hotkey="q"-->
-<!--                    />-->
-
                 </header>
                 <sheet>
                     <div class="oe_title">

@@ -33,7 +33,6 @@
                 <field name="category_id"/>
                 <field name="name"/>
                 <field name="brand_url" widget="url"/>
-                <field name="active" widget="boolean_toggle"/>
             </list>
         </field>
     </record>

@@ -8,13 +8,12 @@ class Ugo2GiftImage(models.Model):
     brand_id = fields.Many2one(
         "ugo2gift.brand",
         string="Brand",
-        required=True,
         help="Select the brand associated with this image.",
+        ondelete="cascade",
     )
 
     image_url = fields.Char(
         string="Image URL",
-        required=True,
         oldname="image",
         help="Enter the full URL where the image is stored.",
     )

@@ -149,8 +149,9 @@ class Ugo2GiftBrand(models.Model):
     rate = fields.Float(string="Currency Conversion Rate", oldname="x_rate")
 
     def action_fetch_brand(self):
-        api_url, api_key, api_secret = self._check_api_credentials()
-        headers = self._generate_headers(api_key)
+
+        api_url, api_key, api_secret = self.env["gift.card"]._check_api_credentials()
+        headers = self._generate_headers(api_key,api_secret)
 
         gift_api = Ugo2GiftAPI(self.env, api_url, api_key, api_secret, headers)
         response = gift_api.get_brand(endpoint="brands")
@@ -184,89 +185,156 @@ class Ugo2GiftBrand(models.Model):
             }
         }
 
-    def _generate_headers(self, api_key):
-        date = datetime.utcnow().strftime("%a, %d %b %Y %H:%M:%S GMT")
+    def _generate_headers(self, api_key,api_secret):
+        date = datetime.utcnow().strftime("%Y-%m-%dT%H:%M:%SZ")
         message = f"date: {date}"
 
         signature = base64.b64encode(
             hmac.new(
-                self.api_secret.encode("utf-8"), message.encode("utf-8"), hashlib.sha256
+                api_secret.encode("utf-8"), message.encode("utf-8"), hashlib.sha256
             ).digest()
         ).decode("utf-8")
 
         return {
-            "date": date,
-            "X-Api-Key": api_key,
+            "x-date": date,
+            "x-api-key": api_key,
             "Accept": "application/json",
-            "Authorization": f'Signature keyId="{api_key}",algorithm="hmac-sha256",headers="date",signature="{signature}"',
+            "authorization": (
+                f'Signature headers="x-date",'
+                f'keyId="{api_key}",'
+                f'algorithm="hmac-sha256",'
+                f'signature="{signature}"'
+            ),
         }
 
     def _prepare_brand_data(self, brand):
+        country = self.get_country_data(brand)
+        categories = self.get_category_data(brand)
+        Currency = self.env["res.currency"]
+
+        brand_accepted_currency = False
+        if brand.get("brand_accepted_currency"):
+            currency_code = brand["brand_accepted_currency"]
+            brand_accepted_currency = Currency.with_context(active_test=False).search(
+                [("name", "=", currency_code)], limit=1
+            )
+
+            if not brand_accepted_currency:
+                brand_accepted_currency = Currency.create(
+                    {
+                        "name": currency_code,
+                        "symbol": currency_code,
+                        "rounding": 0.01,
+                        "active": True,
+                    }
+                )
+            elif not brand_accepted_currency.active:
+                brand_accepted_currency.active = True
+
         return {
             "brand_id": brand.get("id") or 0,
             "brand_code": brand.get("brand_code") or "",
             "name": brand.get("name") or "Unnamed Brand",
-            "logo": brand.get("logo") or "",
-            "is_active": brand.get("is_active", True),
+            "logo_url": brand.get("logo") or "",
             "is_generic": brand.get("is_generic", False),
             "pin_redeemable": brand.get("pin_redeemable", False),
             "validity_in_months": brand.get("validity_in_months") or 6,
             "variable_amount": brand.get("variable_amount", False),
             "tagline": brand.get("tagline") or "",
             "description": brand.get("description") or "",
-            "brand_accepted_currency": brand.get("brand_accepted_currency") or "",
+            "brand_accepted_currency_id": brand_accepted_currency.id if brand_accepted_currency else False,
             "redemption_type": brand.get("redemption_type") or "",
             "redemption_instructions": brand.get("redemption_instructions") or "",
             "detail_url": brand.get("detail_url") or "",
             "locations_url": brand.get("locations_url") or "",
-            "product_image": brand.get("product_image") or "",
-            "country_ids": self.get_country_data(brand) or [],
-            "denomination_ids": self.get_denomination_data(brand) or [],
-            "category_ids": self.get_category_data(brand) or [],
-            "image_gallery": self.get_image_gallery_data(brand) or [],
+            "product_image_url": brand.get("product_image") or "",
+            # relations
+            "country_ids": [(6, 0, country.ids)] if country else [],
+            "category_ids": [(6, 0, categories.ids)] if categories else [],
+            "denomination_ids": self.get_denomination_data(brand),
+            "image_gallery_ids": self.get_image_gallery_data(brand),
         }
 
     def get_country_data(self, brand):
         country_info = brand.get("country", {})
         country_code = country_info.get("code")
-        if country_code:
-            return self.env["ugo2gift.country"].search([("code", "=", country_code)])
-        return self.env["ugo2gift.country"]
+        country_name = country_info.get("name")
+
+        if not country_code:
+            return self.env["ugo2gift.country"]
+
+        Country = self.env["ugo2gift.country"]
+        country = Country.search([("code", "=", country_code)], limit=1)
+        if not country:
+            country = Country.create(
+                {
+                    "code": country_code,
+                    "name": country_name or country_code,
+                }
+            )
+        return country
 
     def get_category_data(self, brand):
-        category_ids = []
+        Category = self.env["ugo2gift.category"]
+        category_records = self.env["ugo2gift.category"]
+
         for category_data in brand.get("categories", []):
             category_id = category_data.get("id")
-            if category_id:
-                category = self.env["ugo2gift.category"].search(
-                    [("category_id", "=", category_id)], limit=1
-                )
-                if category:
-                    category_ids.append(category.id)
+            category_name = category_data.get("name")
 
-        return category_ids
+            if not category_id:
+                continue
+
+            category = Category.search([("category_id", "=", category_id)], limit=1)
+            if not category:
+                category = Category.create(
+                    {
+                        "category_id": category_id,
+                        "name": category_name or str(category_id),
+                    }
+                )
+            category_records |= category
+
+        return category_records
 
     def get_image_gallery_data(self, brand):
-        image_gallery_records = []
-        for image in brand.get("image_gallery", []):
-            image_gallery_records.append((0, 0, {"image": image.get("image")}))
-        return image_gallery_records
+        images = []
+        for image_data in brand.get("image_gallery", []):
+            image_url = image_data.get("image")
+            if image_url:
+                images.append((0, 0, {"image_url": image_url}))
+        return images
 
     def get_denomination_data(self, brand):
         denominations = []
-        for currency, amounts in brand.get("denominations", {}).items():
+        Currency = self.env["res.currency"]
+
+        for currency_code, amounts in brand.get("denominations", {}).items():
+            currency = Currency.with_context(active_test=False).search([("name", "=", currency_code)], limit=1)
+
+            if not currency:
+                currency = Currency.create(
+                    {
+                        "name": currency_code,
+                        "symbol": currency_code,
+                        "rounding": 0.01,
+                    }
+                )
+            elif not currency.active:
+                currency.active = True
+
             if isinstance(amounts, dict):
                 amounts = [amounts]
             elif not isinstance(amounts, list):
-                continue  # Skip invalid structures
+                continue
 
             for amount_data in amounts:
                 res = {
-                    "currency": currency,
+                    "currency_id": currency.id,
                     "amount": amount_data.get("amount", 0),
-                    "is_active": amount_data.get("is_active", False),
                     "min_amount": amount_data.get("min", 0),
                     "max_amount": amount_data.get("max", 0),
                 }
                 denominations.append((0, 0, res))
+
         return denominations

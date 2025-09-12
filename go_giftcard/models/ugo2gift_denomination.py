@@ -6,7 +6,10 @@ class Ugo2GiftDenomination(models.Model):
     _description = "UGO2GIFT Denomination"
 
     brand_id = fields.Many2one(
-        "ugo2gift.brand", string="Brand", help="The brand this denomination belongs to."
+        "ugo2gift.brand",
+        string="Brand",
+        ondelete='cascade',
+        help="The brand this denomination belongs to."
     )
 
     currency_id = fields.Many2one(

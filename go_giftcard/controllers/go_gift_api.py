@@ -53,7 +53,7 @@ class GiftCardController(http.Controller):
 
         currency_org = (
             request.env["res.currency"]
-            .search([("code", "=", data.get("currency_org"))], limit=1)
+            .search([("name", "=", data.get("currency_org"))], limit=1)
             .id
             if data.get("currency_org")
             else False
@@ -69,12 +69,12 @@ class GiftCardController(http.Controller):
 
         base_vals = {
             "reference_id": data.get("reference_id", str(uuid.uuid4())),
-            "currency": qar_currency.id,
+            "currency_id": qar_currency,
             "amount": data.get("amount"),
             "message": data.get("message", ""),
             "customer_id": data.get("customer_id"),
             "return_url": data.get("return_url"),
-            "currency_org": currency_org,
+            "currency_org_id": currency_org,
             "amount_org": data.get("amount_org"),
         }
 
@@ -94,8 +94,8 @@ class GiftCardController(http.Controller):
                 {
                     "brand_code": data.get("brand_code"),
                     "notify": data.get("notify", False),
-                    "country": country,
-                    "delivery_language": delivery_language,
+                    "country_id": country,
+                    "delivery_language_id": delivery_language,
                     "receiver_name": data.get("receiver_name"),
                     "receiver_email": data.get("receiver_email"),
                     "receiver_phone": data.get("receiver_phone"),
@@ -116,7 +116,7 @@ class GiftCardController(http.Controller):
         return gift
 
     @http.route(
-        ["/create/db"],
+        ["/go/api/user/ugo2gift/create"],
         auth="public",
         website=True,
         methods=["POST"],
@@ -165,7 +165,7 @@ class GiftCardController(http.Controller):
         }
 
     @http.route(
-        ["/demo/payment/request"],
+        ["/cardmola/payment/request"],
         auth="public",
         website=True,
         methods=["POST"],
@@ -286,7 +286,7 @@ class GiftCardController(http.Controller):
         return [self._prepare_gift_response(gift) for gift in gifts]
 
     @http.route(
-        ["/demogo/gift/list"],
+        ["/go/api/user/ugo2gift/bought/list"],
         auth="public",
         website=True,
         methods=["POST"],
@@ -318,7 +318,7 @@ class GiftCardController(http.Controller):
         return [self._prepare_gift_response(gift) for gift in gifts]
 
     @http.route(
-        ["/demogo/gift/list/search"],
+        ["/go/api/user/ugo2gift/search/id"],
         auth="public",
         website=True,
         methods=["POST"],
@@ -350,7 +350,7 @@ class GiftCardController(http.Controller):
 
     @http.route(
         [
-            "/cardmoolademo/list",
+            "/go/api/user/cardmoola/search/id",
         ],
         auth="public",
         website=True,

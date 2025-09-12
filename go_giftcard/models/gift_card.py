@@ -188,9 +188,6 @@ class GiftCard(models.Model):
 
     active = fields.Boolean(string="Active", default=True)
 
-    def action_paid_status(self):
-        self.state = "paid"
-
     def create_order(self):
         self.ensure_one()
         api_url, api_key, api_secret = self._check_api_credentials()
@@ -199,9 +196,9 @@ class GiftCard(models.Model):
             "reference_id": self.reference_id,
             "notify": 1,
             "brand_code": self.brand_code,
-            "currency": self.currency,
+            "currency": self.currency_id.name,
             "amount": self.amount,
-            "country": self.country,
+            "country": self.country_id.name,
             "receiver_name": self.receiver_name,
             "receiver_email": self.receiver_email,
             "receiver_phone": self.receiver_phone,

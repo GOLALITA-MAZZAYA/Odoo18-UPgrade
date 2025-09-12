@@ -9,20 +9,9 @@
 
             <xpath expr="//app[@name='general_settings']" position="after">
 
-                <app string="Gift Card" name="giftcard_settings"
+                <app string="Gift Card" name="go_giftcard"
                      logo="/go_giftcard/static/description/gift_card_logo.png">
 
-<!--                    <block title="Company Configuration" name="giftcard_company_settings_container">-->
-<!--                        <setting id="giftcard_company_setting" string="Company"-->
-<!--                                 help="Select the company for which these Gift Card configurations apply.">-->
-<!--                            <div class="row mt16">-->
-<!--                                <div class="col-12">-->
-<!--                                    <label for="company_id" class="o_light_label" string="Company"/>-->
-<!--                                    <field name="company_id" class="w-100"/>-->
-<!--                                </div>-->
-<!--                            </div>-->
-<!--                        </setting>-->
-<!--                    </block>-->
 
                     <block title="Gift API Credentials" name="gift_api_settings_container">
                         <setting id="gift_api_setting" string="Gift API Configuration"
@@ -31,7 +20,8 @@
                             <div class="row mt16">
                                 <div class="col-12">
                                     <label for="gift_api_url" class="o_light_label" string="API URL"/>
-                                    <field name="gift_api_url" placeholder="Enter Gift API URL" class="w-100"/>
+                                    <field name="gift_api_url" placeholder="https://b2b.yougotagift.com/corporate/api"
+                                           class="w-100"/>
                                 </div>
                             </div>
 
@@ -51,6 +41,28 @@
                             </div>
 
                         </setting>
+
+                        <setting id="gift_brand_setting" string="Gift Brand Configuration"
+                                 help="Select the country for brands and fetch available brands from Gift API.">
+
+                            <div class="row mt16">
+                                <div class="col-12">
+                                    <label for="brand_country_id" class="o_light_label" string="Brand Country"/>
+                                    <field name="brand_country_id" options="{'no_open': True}" class="w-100"/>
+                                </div>
+                            </div>
+
+                            <div class="row mt16">
+                                <div class="col-12">
+                                    <button name="action_fetch_brands"
+                                            type="object"
+                                            string="Fetch Brands"
+                                            class="btn btn-primary"/>
+                                </div>
+                            </div>
+
+                        </setting>
+
                     </block>
                     <block title="Cardmoola API Credentials" name="cardmoola_api_settings_container">
                         <setting id="cardmoola_api_setting" string="Cardmoola API Configuration"
@@ -59,7 +71,7 @@
                             <div class="row mt16">
                                 <div class="col-12">
                                     <label for="cardmoola_api_url" class="o_light_label" string="API URL"/>
-                                    <field name="cardmoola_api_url" placeholder="Enter Cardmoola API URL"
+                                    <field name="cardmoola_api_url" placeholder="https://api.business.cardmoola.com"
                                            class="w-100"/>
                                 </div>
                             </div>
@@ -90,7 +102,8 @@
                             <div class="row mt16">
                                 <div class="col-12">
                                     <label for="skipcash_api_url" class="o_light_label" string="API URL"/>
-                                    <field name="skipcash_api_url" placeholder="Enter SkipCash API URL" class="w-100"/>
+                                    <field name="skipcash_api_url" placeholder="https://api.skipcash.app/api"
+                                           class="w-100"/>
                                 </div>
                             </div>
 
@@ -126,6 +139,7 @@
         <field name="res_model">res.config.settings</field>
         <field name="view_mode">form</field>
         <field name="target">inline</field>
+        <field name="context">{'module' : 'go_giftcard', 'bin_size': False}</field>
     </record>
 
 
