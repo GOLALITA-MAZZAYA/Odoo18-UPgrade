@@ -124,7 +124,7 @@ class GiftCardController(http.Controller):
         type="json",
     )
     def create_gift_card(self, **post):
-        data = self._get_json_request()
+        data = post or self._get_json_request()
         if "error" in data:
             return data
 
@@ -174,7 +174,7 @@ class GiftCardController(http.Controller):
     )
     def create_get_sales_cardmoola(self, **post):
 
-        data = self._get_json_request()
+        data = post or self._get_json_request()
         if "error" in data:
             return data
 
@@ -265,7 +265,7 @@ class GiftCardController(http.Controller):
     )
     def unpaid_sales_transaction_list(self, **post):
 
-        data = self._get_json_request()
+        data = post or self._get_json_request()
         if "error" in data:
             return data
 
@@ -295,7 +295,7 @@ class GiftCardController(http.Controller):
     )
     def paid_sales_transaction_list(self, **post):
 
-        data = self._get_json_request()
+        data = post or self._get_json_request()
         if "error" in data:
             return data
 
@@ -326,7 +326,7 @@ class GiftCardController(http.Controller):
         type="json",
     )
     def search_giftcard_by_reference(self, **post):
-        data = self._get_json_request()
+        data = post or self._get_json_request()
         if "error" in data:
             return data
 
@@ -359,7 +359,7 @@ class GiftCardController(http.Controller):
         type="json",
     )
     def search_cardmoola_by_reference(self, **post):
-        data = self._get_json_request()
+        data = post or self._get_json_request()
         if "error" in data:
             return data
 

@@ -188,6 +188,7 @@ class GiftCard(models.Model):
 
     active = fields.Boolean(string="Active", default=True)
 
+    # Used from Go Voucher
     def create_order(self):
         self.ensure_one()
         api_url, api_key, api_secret = self._check_api_credentials()
@@ -271,6 +272,7 @@ class GiftCard(models.Model):
 
         return api_url, api_key, api_secret
 
+    # Used from Go Voucher
     def create_cardmoola_order(self):
         self.ensure_one()
         api_url, api_key, api_secret = self._check_cardmoola_api_credentials()
@@ -322,6 +324,7 @@ class GiftCard(models.Model):
                 }
             )
 
+    # Used from Go Voucher
     def _prepare_and_send_cardmoola_order(self, token, api_url, api_key, api_secret):
         self.ensure_one()
 
@@ -370,6 +373,7 @@ class GiftCard(models.Model):
 
         return order_response
 
+    # Used from Go Voucher
     def _check_cardmoola_api_credentials(self):
 
         api_url = (

@@ -19,7 +19,6 @@
         "views/res_config_settings.xml",
         "views/ugo2gift_country.xml",
         "views/ugo2gift_language.xml",
-        # "views/res_company.xml",
         "views/menuitems.xml",
     ],
     "installable": True,

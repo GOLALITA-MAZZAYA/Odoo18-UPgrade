@@ -63,7 +63,6 @@
 
                     <!-- Tabs -->
                     <notebook>
-
                         <page string="General Information">
                             <group>
                                 <group>
@@ -113,7 +112,6 @@
                                 </group>
                             </group>
                         </page>
-
                     </notebook>
                 </sheet>
                 <chatter/>
@@ -140,7 +138,7 @@
                 <field name="amount_org" widget="monetary"/>
                 <field name="currency_org_id" column_invisible="True" />
                 <field name="expiry_date"/>
-                <field name="state" widget="badge"/>
+                <field name="state" widget="badge" decoration-success="state == 'paid'"/>
             </list>
         </field>
     </record>
@@ -185,6 +183,5 @@
             </p>
         </field>
     </record>
-
 
 </odoo>

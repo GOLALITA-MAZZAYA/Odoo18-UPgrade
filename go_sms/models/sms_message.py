@@ -16,6 +16,7 @@ SMS_STATUS = {
     "1715": "Response timeout.",
     "1032": "DND reject.",
     "1028": "Spam message.",
+    "F": "Failed / IP not allowed."
 }
 
 
