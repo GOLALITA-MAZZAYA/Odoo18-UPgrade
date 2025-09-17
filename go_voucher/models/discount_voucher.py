@@ -35,6 +35,7 @@ class DiscountVoucher(models.Model):
 
     code = fields.Char(
         string="Voucher Code",
+        copy=False,
         help="Unique code that customers will use to redeem the voucher.",
     )
     logo = fields.Binary(

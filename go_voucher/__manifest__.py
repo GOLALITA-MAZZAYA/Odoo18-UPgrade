@@ -1,7 +1,7 @@
 # noinspection PyStatementEffect
 {
     "name": "Go Voucher",
-    "version": "18.0.0.0.0",
+    "version": "18.0.1.0.0",
     "category": "Marketing",
     "sequence": 500,
     "summary": "Create, manage, and redeem discount vouchers with merchant and organisation support in Odoo.",
