@@ -1,0 +1,179 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<odoo>
+    <record id="view_discount_voucher_form" model="ir.ui.view">
+        <field name="name">discount.voucher.form</field>
+        <field name="model">discount.voucher</field>
+        <field name="arch" type="xml">
+            <form string="Discount Voucher">
+                <header>
+                    <button
+                            name="action_activate"
+                            string="Activate"
+                            class="oe_highlight"
+                            type="object"
+                            invisible="state in ('active', 'expired')"
+
+                    />
+                    <field name="state" widget="statusbar" statusbar_visible="draft,active,expired"/>
+                </header>
+                <sheet>
+                    <field name="logo" widget="image" class="oe_avatar" nolabel="1"/>
+
+                    <div class="oe_title">
+                        <h1>
+                            <field name="name" required="1" placeholder="Enter voucher name in English"/>
+                        </h1>
+                        <h2>
+                            <field name="name_arabic" placeholder="Enter voucher name in Arabic"/>
+                        </h2>
+                    </div>
+
+                    <group>
+                        <group string="Voucher Details">
+                            <field name="code" required="1"/>
+                            <field name="voucher_amount" required="1"/>
+                            <field name="expiry_date"/>
+                        </group>
+
+                        <group string="Business Details">
+                            <field name="merchant_ids" widget="many2many_tags"/>
+                            <field name="organisation_ids" widget="many2many_tags"/>
+                            <field name="phone"/>
+                            <field name="voucher_category_id"/>
+                            <field name="country_id"/>
+                        </group>
+                    </group>
+                    <notebook>
+                        <page string="Discount &amp; Payments">
+                            <group>
+                                <group string="Discount Information">
+                                    <field name="discount_type" required="1"/>
+                                    <field name="discount_value"/>
+                                </group>
+                                <group string="Payment &amp; Charges">
+                                    <field name="bank_charge"/>
+                                    <field name="cash"/>
+                                    <field name="delivery_charge"/>
+                                </group>
+                            </group>
+                        </page>
+
+                        <page string="Instruction">
+
+                            <group string="Voucher Guidelines">
+                                <field name="instruction" nolabel="1" widget="html"/>
+                            </group>
+
+                        </page>
+
+                        <page string="Terms &amp; Conditions">
+                            <group string="Terms &amp; Conditions (English)">
+                                <field name="terms_condition" widget="html" nolabel="1"/>
+                            </group>
+
+                            <group string="Terms &amp; Conditions (Arabic)">
+                                <field name="terms_condition_arabic" widget="html" nolabel="1"/>
+                            </group>
+
+                        </page>
+
+                        <page string="Redeemed Users">
+                            <field name="redeemed_user_ids" readonly="True">
+                                <list>
+                                    <field name="user_id"/>
+                                    <field name="redeemed_date"/>
+                                </list>
+                            </field>
+                        </page>
+
+                        <page string="Saved Users">
+                            <field name="voucher_saved_ids" readonly="True">
+                                <list>
+                                    <field name="user_id"/>
+                                    <field name="saved_date"/>
+                                </list>
+                            </field>
+                        </page>
+
+
+                        <page string="Purchased Users">
+                            <field name="voucher_purchased_ids" readonly="True">
+                                <list>
+                                    <field name="user_id"/>
+                                    <field name="purchase_date"/>
+                                    <field name="quantity"/>
+                                    <field name="voucher_price"/>
+                                    <field name="total_price" readonly="1"/>
+                                    <field name="payment_id"/>
+                                    <field name="remark"/>
+                                </list>
+                            </field>
+                        </page>
+
+                    </notebook>
+                </sheet>
+                <chatter/>
+            </form>
+        </field>
+    </record>
+
+
+    <record id="view_discount_voucher_tree" model="ir.ui.view">
+        <field name="name">discount.voucher.list</field>
+        <field name="model">discount.voucher</field>
+        <field name="arch" type="xml">
+            <list string="Discount Vouchers">
+                <field name="name"/>
+                <field name="code"/>
+                <field name="voucher_amount"/>
+                <field name="delivery_charge"/>
+                <field name="expiry_date"/>
+                <field name="discount_type"/>
+                <field name="discount_value"/>
+                <field name="country_id"/>
+                <field
+                        name="state"
+                        widget="badge"
+                        decoration-info="state == 'draft'"
+                        decoration-success="state == 'active'"
+                        decoration-danger="state == 'expired'"
+                />
+            </list>
+        </field>
+    </record>
+
+
+    <record id="view_discount_voucher_search" model="ir.ui.view">
+        <field name="name">discount.voucher.search</field>
+        <field name="model">discount.voucher</field>
+        <field name="arch" type="xml">
+            <search string="Discount Vouchers Search">
+
+                <field name="name" string="Voucher Name"/>
+                <field name="code" string="Code"/>
+                <field name="voucher_category_id" string="Category"/>
+                <field name="country_id" string="Country"/>
+
+                <filter name="draft" string="Draft" domain="[('state','=','draft')]"/>
+                <filter name="active" string="Active" domain="[('state','=','active')]"/>
+                <filter name="expired" string="Expired" domain="[('state','=','expired')]"/>
+
+                <group expand="0" string="Group By">
+                    <filter name="state" string="State" context="{'group_by':'state'}"/>
+                    <filter name="country" string="Country" context="{'group_by':'country_id'}"/>
+                </group>
+            </search>
+        </field>
+    </record>
+
+
+    <record id="action_discount_voucher" model="ir.actions.act_window">
+        <field name="name">Discount Vouchers</field>
+        <field name="res_model">discount.voucher</field>
+        <field name="search_view_id" ref="view_discount_voucher_search"/>
+        <field name="view_mode">list,form</field>
+
+    </record>
+
+
+</odoo>
