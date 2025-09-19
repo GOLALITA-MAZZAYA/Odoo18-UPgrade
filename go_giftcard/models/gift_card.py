@@ -244,6 +244,9 @@ class GiftCard(models.Model):
 
         return True
 
+    def marked_paid(self):
+        self.write({"state": "paid"})
+
     def _check_api_credentials(self):
 
         api_url = (

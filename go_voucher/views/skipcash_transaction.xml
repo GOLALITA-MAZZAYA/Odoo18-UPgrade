@@ -42,6 +42,33 @@
 
 
 
+    <record id="view_skipcash_transaction_search" model="ir.ui.view">
+        <field name="name">skipcash.transaction.search</field>
+        <field name="model">skipcash.transaction</field>
+        <field name="arch" type="xml">
+            <search string="Skipcash Transactions">
+
+                <field name="payment_id" string="Payment ID"/>
+                <field name="payment_status" string="Payment Status"/>
+                <field name="vis_id" string="Visa ID"/>
+                <field name="voucher_purchase_id" string="Voucher Purchase"/>
+
+
+                <filter name="filter_pending" string="Pending" domain="[('payment_status','=','pending')]"/>
+                <filter name="filter_successful" string="Successful" domain="[('payment_status','=','successful')]"/>
+                <filter name="filter_failed" string="Failed" domain="[('payment_status','=','failed')]"/>
+
+
+                <group expand="0" string="Group By">
+                    <filter name="group_by_status" string="Payment Status" context="{'group_by':'payment_status'}"/>
+                    <filter name="group_by_voucher" string="Voucher Purchase" context="{'group_by':'voucher_purchase_id'}"/>
+                </group>
+            </search>
+        </field>
+    </record>
+
+
+
     <record id="action_skipcash_transaction" model="ir.actions.act_window">
         <field name="name">Skipcash Transactions</field>
         <field name="res_model">skipcash.transaction</field>

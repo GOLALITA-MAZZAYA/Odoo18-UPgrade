@@ -1,6 +1,6 @@
 from odoo import api, fields, models, _
 from odoo.exceptions import ValidationError
-
+import re
 
 class ProductSticker(models.Model):
     _name = "product.sticker"
@@ -46,7 +46,7 @@ class ProductSticker(models.Model):
     )
 
     # Text/HTML mode
-    sticker_text = fields.Text(help="Sticker text")
+    sticker_text = fields.Text(help="Sticker text", translate=True)
     font_size = fields.Integer(
         string="Font Size (px)",
         help="Font size in pixels for HTML sticker.",
@@ -111,8 +111,6 @@ class ProductSticker(models.Model):
 
     @api.constrains("bg_color", "text_color")
     def _check_hex_colors(self):
-        import re
-
         hex_pat = re.compile(r"^#([0-9A-Fa-f]{6})$")
         for rec in self:
             for color_f in ("bg_color", "text_color"):

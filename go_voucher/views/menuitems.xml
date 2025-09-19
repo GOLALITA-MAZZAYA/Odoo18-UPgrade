@@ -22,4 +22,25 @@
               sequence="10"
     />
 
+
+    <menuitem id="menu_voucher_purchases"
+              name="Purchased Vouchers"
+              parent="menu_discount_parent"
+              action="action_voucher_purchased_user"
+              sequence="12"
+    />
+
+    <menuitem id="menu_voucher_redeemed"
+              name="Redeemed Vouchers"
+              parent="menu_discount_parent"
+              action="action_voucher_redeemed_user"
+              sequence="13"
+    />
+
+    <menuitem id="menu_voucher_saved"
+              name="Saved Vouchers"
+              parent="menu_discount_parent"
+              action="action_voucher_saved_user"
+    />
+
 </odoo>

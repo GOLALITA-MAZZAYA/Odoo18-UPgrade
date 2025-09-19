@@ -2,6 +2,7 @@ from odoo import http, _
 from odoo.http import request
 import json
 from datetime import datetime, timedelta
+import requests
 
 
 class Voucher(http.Controller):
@@ -538,3 +539,128 @@ class Voucher(http.Controller):
             "state": voucher.state,
             "logo": voucher.logo,
         }
+
+    @http.route(
+        ["/go/api/user/payment/skipcash/return/data"],
+        auth="public",
+        website=True,
+        methods=["POST"],
+        csrf=False,
+        type="json",
+        cors="*",
+    )
+    def get_skipcash_response_data(self, **post):
+        data = post or self._get_json_request()
+
+        if "error" in data:
+            return data
+
+        PaymentId = data.get("PaymentId")
+        result_obj = self._fetch_skipcash_payment(PaymentId)
+
+        if not result_obj or not isinstance(result_obj, dict):
+            return {"error": "Invalid response received from SkipCash API."}
+
+        status_id = result_obj.get("statusId")
+
+        subscription = (
+            request.env["subscription.history"]
+            .sudo()
+            .search([("payment_reference", "=", data.get("TransactionId"))], limit=1)
+        )
+        if subscription and status_id == 2:
+            subscription.payment_state = "paid"
+            subscription._compute_is_active()
+
+        self._process_giftcard_payment(PaymentId, status_id, data)
+
+        self._process_voucher_transaction(PaymentId, status_id, data)
+
+    def _fetch_skipcash_payment(self, PaymentId):
+        config = request.env["ir.config_parameter"].sudo()
+        api_url = config.get_param("go_giftcard.skipcash_api_url")
+        authorization_key = config.get_param("go_voucher.skipcash_authorization_key")
+
+        # Validate mandatory credentials
+        missing_params = []
+        if not api_url:
+            missing_params.append("API URL")
+        if not authorization_key:
+            missing_params.append("Authorization Key")
+
+        if missing_params:
+            return {
+                "error": f"Missing SkipCash configuration parameters: {', '.join(missing_params)}"
+            }
+
+        url = f"{api_url}/v1/payments/{PaymentId}"
+        headers = {"Authorization": authorization_key}
+
+        try:
+            response = requests.get(url=url, headers=headers)
+            if not response or response.status_code != 200:
+                return {
+                    "error": f"Failed to retrieve SkipCash details for PaymentId: {PaymentId}"
+                }
+
+            result_obj = response.json().get("resultObj", {})
+            return result_obj
+
+        except Exception as e:
+            return {"error": f"Exception while fetching SkipCash payment: {str(e)}"}
+
+    def _process_giftcard_payment(self, PaymentId, status_id, data):
+        """Process Gift Card payment if it exists"""
+        giftcard = (
+            request.env["gift.card"]
+            .sudo()
+            .search([("payment_id", "=", PaymentId)], limit=1)
+        )
+        if giftcard and status_id == 2:
+            giftcard.vis_id = data.get("VisaId")
+            giftcard.payment_status = "Paid"
+            giftcard.marked_paid()
+            if giftcard.is_cardmoola:
+                giftcard.create_cardmoola_order()
+            else:
+                giftcard.create_order()
+            return True
+        return False
+
+
+    def _process_voucher_transaction(self, PaymentId, status_id, data):
+        """Process Voucher Purchase transactions if it exists"""
+        transaction = (
+            request.env["skipcash.transaction"]
+            .sudo()
+            .search([("payment_id", "=", PaymentId)], limit=1)
+        )
+        if transaction and status_id == 2:
+            transaction.vis_id = data.get("VisaId")
+            transaction.payment_status = "Paid"
+
+            purchase = transaction.voucher_purchase_id
+            if purchase:
+                purchase.vis_id = data.get("VisaId")
+                purchase.payment_status = "Paid"
+
+                # Get sender email from config, fallback if not set
+                config = request.env["ir.config_parameter"].sudo()
+                email_from = (
+                    config.get_param("go_voucher.voucher_email_from")
+                    or "Golalita<info@golalita.com>"
+                )
+
+                template_id = request.env.ref(
+                    "go_voucher.voucher_purchased_notification"
+                ).sudo()
+                template_id.send_mail(
+                    purchase.id,
+                    force_send=True,
+                    email_values={
+                        "email_from": email_from,
+                        "email_to": purchase.partner_id.email,
+                    },
+                )
+            return True
+        return False

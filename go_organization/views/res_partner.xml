@@ -398,8 +398,8 @@
         <field name="res_model">res.partner</field>
         <field name="view_mode">kanban,list,form,activity</field>
         <field name="search_view_id" ref="base.view_res_partner_filter"/>
-        <field name="domain">[('go_entity', '=', 'merchant'), ('from_website', '=', True)]</field>
-        <field name="context">{ 'default_go_entity': 'merchant', 'default_from_website' : True, }</field>
+        <field name="domain">[('entity_type', '=', 'merchant'), ('from_website', '=', True)]</field>
+        <field name="context">{ 'default_entity_type': 'merchant', 'default_from_website' : True, }</field>
         <field name="help" type="html">
             <p class="o_view_nocontent_smiling_face">Create a new merchant</p>
             <p></p>

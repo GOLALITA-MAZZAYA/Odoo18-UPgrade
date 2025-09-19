@@ -115,7 +115,7 @@
                                 </div>
                             </div>
 
-                            <div class="row mt16">
+                            <div class="row mt16" id="skipcash_merchant_password_setting">
                                 <div class="col-12">
                                     <label for="skipcash_merchant_password" class="o_light_label"
                                            string="Merchant Password"/>

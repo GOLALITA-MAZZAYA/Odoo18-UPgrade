@@ -1,7 +1,7 @@
 id,name,model_id:id,group_id:id,perm_read,perm_write,perm_create,perm_unlink
 access_favourite_product,access.favourite.product,model_favourite_product,base.group_user,1,1,1,1
-access_product_label,access.product.label,model_product_label,,1,1,1,1
-access_product_sticker,access.product.sticker,model_product_sticker,,1,1,1,1
-access_offer_limits,access.offer.limits,model_offer_limits,,1,1,1,1
-access_multi_offers,access.multi.offers,model_multi_offers,,1,1,1,1
-access_product_tags,access.product.tags,model_product_tags,,1,1,1,1
+access_product_label,access.product.label,model_product_label,base.group_user,1,1,1,1
+access_product_sticker,access.product.sticker,model_product_sticker,base.group_user,1,1,1,1
+access_offer_limits,access.offer.limits,model_offer_limits,base.group_user,1,1,1,1
+access_multi_offers,access.multi.offers,model_multi_offers,base.group_user,1,1,1,1
+access_product_tags,access.product.tags,model_product_tags,base.group_user,1,1,1,1

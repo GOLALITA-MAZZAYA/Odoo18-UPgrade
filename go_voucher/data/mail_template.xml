@@ -1,0 +1,42 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+
+    <data noupdate="1">
+
+        <record id="voucher_purchased_notification" model="mail.template">
+            <field name="name">Voucher Purchase</field>
+            <field name="model_id" ref="go_voucher.model_voucher_purchased_user"/>
+            <field name="subject">${object.discount_voucher_id.name} Voucher Purchased</field>
+
+            <field name="email_to">${(object.user_id.partner_id.email_to_send or '') | safe}</field>
+            <field name="email_cc">${(object.user_id.partner_id.email_to_cc or '') | safe}</field>
+
+            <field name="body_html" type="html">
+                <div>
+                    Dear ${object.user_id.name},
+                    <br/>
+                    New Voucher Is Purchased
+                    <br/>
+                    <b>Name :-</b>${object.discount_voucher_id.name}
+                    <br/>
+                    <b>Code :-</b>${object.discount_voucher_id.code}
+                    <br/>
+                    <b>Discount Value :-</b>${object.discount_voucher_id.discount_value}
+                    <br/>
+                    <b>Discount Type :-</b>${object.discount_voucher_id.discount_type}
+                    <br/>
+                    <b>Expiry date :-</b>${object.discount_voucher_id.expiry_date}
+                    <br/>
+                    <b>Instruction :-</b>${object.discount_voucher_id.instruction}
+                    <br/>
+                    <br/>
+                    Thank you,
+                </div>
+            </field>
+
+            <field name="auto_delete" eval="True"/>
+        </record>
+    </data>
+
+
+</odoo>

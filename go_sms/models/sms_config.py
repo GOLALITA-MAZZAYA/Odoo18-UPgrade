@@ -3,7 +3,6 @@ from odoo import models, fields, api
 
 class SMSConfig(models.Model):
     _name = "sms.config"
-    _rec_name = "user_name"
     _description = "SMS Configuration"
 
     user_name = fields.Char(
@@ -43,4 +42,13 @@ class SMSConfig(models.Model):
                 f"{config.smpp_server.rstrip('/')}/{service_endpoint}"
                 if config.smpp_server
                 else False
+            )
+
+    @api.depends("user_name", "smpp_server")
+    def _compute_display_name(self):
+        for rec in self:
+            rec.display_name = (
+                f"{rec.user_name} ({rec.smpp_server})"
+                if rec.user_name and rec.smpp_server
+                else rec.user_name or rec.smpp_server or "Unnamed"
             )

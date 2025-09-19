@@ -11,21 +11,21 @@
                            statusbar_visible="pending_payment,paid,confirmed,delivered"
                            string="Status"/>
 
-                    <button
-                            string="Create Order"
-                            class="oe_highlight"
-                            type="object"
-                            name="create_order"
-                            data-hotkey="q"
-                    />
+<!--                    <button-->
+<!--                            string="Create Order"-->
+<!--                            class="oe_highlight"-->
+<!--                            type="object"-->
+<!--                            name="create_order"-->
+<!--                            data-hotkey="q"-->
+<!--                    />-->
 
-                    <button
-                            string="Cardmoola Create Order"
-                            class="oe_highlight"
-                            type="object"
-                            name="create_cardmoola_order"
-                            data-hotkey="q"
-                    />
+<!--                    <button-->
+<!--                            string="Cardmoola Create Order"-->
+<!--                            class="oe_highlight"-->
+<!--                            type="object"-->
+<!--                            name="create_cardmoola_order"-->
+<!--                            data-hotkey="q"-->
+<!--                    />-->
 
 
                     <button

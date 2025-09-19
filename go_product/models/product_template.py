@@ -20,7 +20,7 @@ class ProductTemplate(models.Model):
         help="Type of promotional offer applied.",
     )
 
-    discount_flat = fields.Float(string="Flat Discount")
+    discount_flat = fields.Float(string="Flat Discount", oldname="discount")
 
     discount_percent = fields.Float(
         string="Discount (%)",
@@ -186,6 +186,6 @@ class ProductTemplate(models.Model):
     def default_get(self, fields_list):
         res = super(ProductTemplate, self).default_get(fields_list)
         if self.env.context.get("from_product_offer_menu"):
-            res.update({"is_in_offer": True, "sale_ok": False, "purchase_ok": False})
+            res.update({"is_in_offer": True, "sale_ok": False})
         return res
 

@@ -11,8 +11,6 @@
         "product",
         "sale",
         "mail",
-        "account",
-        "purchase",
     ],
     "data": [
         "security/ir.model.access.csv",

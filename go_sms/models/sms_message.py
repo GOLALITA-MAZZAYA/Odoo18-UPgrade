@@ -33,11 +33,13 @@ class SMSMessage(models.Model):
     )
     recipient = fields.Char(
         string="Recipient Number",
+        required=True,
         help="Enter the mobile number of the recipient (including country code).",
     )
     msg = fields.Text(
         string="Message Content",
         translate=True,
+        required=True,
         help="Content of the SMS message to be sent.",
     )
     state = fields.Selection(
@@ -47,7 +49,7 @@ class SMSMessage(models.Model):
             ("sent", "Sent"),
             ("error", "Error"),
         ],
-        string="Status",
+        string="State",
         default="draft",
         help="Current state of the SMS message.",
     )

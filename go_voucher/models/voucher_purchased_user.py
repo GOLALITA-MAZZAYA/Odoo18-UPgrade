@@ -4,10 +4,12 @@ from odoo.exceptions import ValidationError
 
 class VoucherPurchasedUser(models.Model):
     _name = "voucher.purchased.user"
+    _inherit = ["mail.thread", "mail.activity.mixin"]
     _description = "Purchased Voucher"
 
     user_id = fields.Many2one(
-        "res.users", string="User", help="The user who purchased the voucher."
+        "res.users", string="User",
+        help="The user who purchased the voucher.",
     )
     purchase_date = fields.Datetime(
         string="Purchase Date", help="The date and time when the voucher was purchased."
@@ -37,6 +39,7 @@ class VoucherPurchasedUser(models.Model):
         string="Payment Status",
         default="Not Paid",
         help="Current status of the payment for this purchase.",
+        tracking=True,
     )
 
     payment_id = fields.Char(

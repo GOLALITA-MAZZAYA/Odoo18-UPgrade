@@ -21,6 +21,7 @@
         "views/ugo2gift_language.xml",
         "views/menuitems.xml",
     ],
+    "python_dependencies": ["httpsig"],
     "installable": True,
     "auto_install": False,
     "application": True,
