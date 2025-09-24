@@ -20,6 +20,6 @@ class Ugo2GiftLanguage(models.Model):
     country_id = fields.Many2one(
         "ugo2gift.country",
         string="Country",
-        ondelete='cascade',
+        ondelete="cascade",
         help="Select the country to which this language belongs.",
     )

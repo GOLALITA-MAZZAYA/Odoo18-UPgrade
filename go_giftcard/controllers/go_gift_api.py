@@ -1,8 +1,10 @@
-from odoo import http, _
-from odoo.http import request
-import uuid
 import json
 import logging
+import uuid
+
+from odoo.http import request
+
+from odoo import http, _
 
 _logger = logging.getLogger(__name__)
 

@@ -8,8 +8,8 @@ class Ugo2GiftDenomination(models.Model):
     brand_id = fields.Many2one(
         "ugo2gift.brand",
         string="Brand",
-        ondelete='cascade',
-        help="The brand this denomination belongs to."
+        ondelete="cascade",
+        help="The brand this denomination belongs to.",
     )
 
     currency_id = fields.Many2one(

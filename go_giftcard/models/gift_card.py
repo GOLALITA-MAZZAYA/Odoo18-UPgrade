@@ -1,13 +1,13 @@
-from odoo import api, fields, models
-import requests
+import base64
 import logging
 import uuid
-import re
-import base64
-from httpsig.requests_auth import HTTPSignatureAuth
-from datetime import date, datetime
-from odoo.exceptions import ValidationError
+from datetime import datetime
+
 from Crypto.Hash import HMAC, SHA256
+from httpsig.requests_auth import HTTPSignatureAuth
+from odoo.exceptions import ValidationError
+
+from odoo import api, fields, models
 from .ugo2gift_api_request import Ugo2GiftAPI
 
 _logger = logging.getLogger(__name__)
@@ -45,13 +45,13 @@ class GiftCard(models.Model):
         help="The brand associated with this gift card.",
     )
     currency_id = fields.Many2one(
-        'res.currency',
+        "res.currency",
         help="Currency in which the gift card amount is defined.",
     )
 
     amount = fields.Monetary(
         string="Amount",
-        currency_field='currency_id',
+        currency_field="currency_id",
         help="Monetary value of the gift card.",
     )
 

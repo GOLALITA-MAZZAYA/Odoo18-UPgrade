@@ -99,7 +99,7 @@ class Ugo2GiftBrand(models.Model):
     country_ids = fields.Many2many(
         "ugo2gift.country",
         string="Available in Countries",
-        help="Countries where this brand is available or valid."
+        help="Countries where this brand is available or valid.",
     )
 
     category_ids = fields.Many2many(
@@ -151,7 +151,7 @@ class Ugo2GiftBrand(models.Model):
     def action_fetch_brand(self):
 
         api_url, api_key, api_secret = self.env["gift.card"]._check_api_credentials()
-        headers = self._generate_headers(api_key,api_secret)
+        headers = self._generate_headers(api_key, api_secret)
 
         gift_api = Ugo2GiftAPI(self.env, api_url, api_key, api_secret, headers)
         response = gift_api.get_brand(endpoint="brands")
@@ -185,7 +185,7 @@ class Ugo2GiftBrand(models.Model):
             }
         }
 
-    def _generate_headers(self, api_key,api_secret):
+    def _generate_headers(self, api_key, api_secret):
         date = datetime.utcnow().strftime("%Y-%m-%dT%H:%M:%SZ")
         message = f"date: {date}"
 
@@ -242,7 +242,9 @@ class Ugo2GiftBrand(models.Model):
             "variable_amount": brand.get("variable_amount", False),
             "tagline": brand.get("tagline") or "",
             "description": brand.get("description") or "",
-            "brand_accepted_currency_id": brand_accepted_currency.id if brand_accepted_currency else False,
+            "brand_accepted_currency_id": (
+                brand_accepted_currency.id if brand_accepted_currency else False
+            ),
             "redemption_type": brand.get("redemption_type") or "",
             "redemption_instructions": brand.get("redemption_instructions") or "",
             "detail_url": brand.get("detail_url") or "",
@@ -310,7 +312,9 @@ class Ugo2GiftBrand(models.Model):
         Currency = self.env["res.currency"]
 
         for currency_code, amounts in brand.get("denominations", {}).items():
-            currency = Currency.with_context(active_test=False).search([("name", "=", currency_code)], limit=1)
+            currency = Currency.with_context(active_test=False).search(
+                [("name", "=", currency_code)], limit=1
+            )
 
             if not currency:
                 currency = Currency.create(

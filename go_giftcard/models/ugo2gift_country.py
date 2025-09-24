@@ -1,5 +1,6 @@
-from odoo import models, fields
 import pytz
+
+from odoo import models, fields
 
 
 def _tz_get(self):

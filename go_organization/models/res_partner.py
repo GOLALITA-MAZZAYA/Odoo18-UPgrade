@@ -1,8 +1,9 @@
 # -*- coding: utf-8 -*-
-from odoo import api, fields, models, _
-from odoo.exceptions import ValidationError
-from werkzeug.urls import url_join
 from datetime import date
+
+from odoo.exceptions import ValidationError
+
+from odoo import api, fields, models, _
 
 
 class ResPartner(models.Model):
