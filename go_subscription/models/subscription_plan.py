@@ -4,6 +4,7 @@ from odoo import models, fields, api
 class SubscriptionPlan(models.Model):
     _name = 'subscription.plan'
     _description = 'Subscription Plan'
+    _inherit = ["mail.thread", "mail.activity.mixin"]
 
     name = fields.Char(
         string="Plan Name",
@@ -17,6 +18,7 @@ class SubscriptionPlan(models.Model):
     code = fields.Char(
         string="Plan Code",
         required=True,
+        tracking=True,
         help="A unique internal code to identify this subscription plan."
     )
     duration_days = fields.Integer(
@@ -50,4 +52,6 @@ class SubscriptionPlan(models.Model):
         domain=[('is_active', '=', True)],
         help="All active subscriptions currently linked to this plan."
     )
+
+
 

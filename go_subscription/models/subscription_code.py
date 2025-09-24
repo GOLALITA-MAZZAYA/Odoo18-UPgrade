@@ -4,11 +4,17 @@ from odoo import models, fields
 class SubscriptionCode(models.Model):
     _name = 'subscription.code'
     _description = 'Subscription Access Code'
+    _inherit = ["mail.thread", "mail.activity.mixin"]
+
+    _sql_constraints = [
+        ("name_unique", "unique(name)", "The subscription code must be unique!")
+    ]
 
     name = fields.Char(
-        string="Access Code",
+        string="Code",
         required=True,
-        help="A unique code that provides access to a subscription plan."
+        copy=False,
+        help="A unique code that provides access to a subscription plan.",
     )
 
     plan_id = fields.Many2one(
@@ -39,12 +45,10 @@ class SubscriptionCode(models.Model):
     redeemed_by = fields.Many2one(
         'res.users',
         string="Redeemed By",
-        readonly=True,
         help="The user who redeemed this access code."
     )
 
     redeemed_on = fields.Datetime(
         string="Redeemed On",
-        readonly=True,
         help="The date and time when the access code was redeemed."
     )
