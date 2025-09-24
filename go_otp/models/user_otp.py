@@ -1,9 +1,8 @@
 # -*- coding: utf-8 -*-
 import logging
 import random
+
 from dateutil.relativedelta import relativedelta
-import odoo
-from odoo import models, fields, api, SUPERUSER_ID
 
 from odoo import models, fields, api, SUPERUSER_ID
 
@@ -81,13 +80,30 @@ class AuthOTP(models.Model):
         return fields.Datetime.now()
 
     @api.autovacuum
-    def _gc_expired_otps(self):
+    def _vacuum_expired_otp(self):
         """Periodic cleanup for expired or stale OTPs."""
         # Expired
         expired = self.search([("otp_expire_date", "<", self._now())])
         if expired:
             _logger.info("OTP GC: removing %s expired OTP(s)", len(expired))
             expired.unlink()
+
+    @api.model
+    def is_valid_otp(self, login, otp, otp_type="reset"):
+        """Verify OTP and mark it as used."""
+        user_otp = self.search(
+            [
+                ("otp_code", "=", otp),
+                ("otp_login", "=", login),
+                ("otp_type", "=", otp_type),
+                ("is_used", "=", False),
+                ("otp_expire_date", ">", fields.Datetime.now()),
+            ],
+            limit=1,
+        )
+        if user_otp:
+            user_otp.is_used = True
+        return bool(user_otp)
 
     @api.model
     def generate_and_send_otp(self, login, phone, otp_type="reset"):
@@ -129,24 +145,7 @@ class AuthOTP(models.Model):
             return False
 
     @api.model
-    def is_valid_otp(self, login, otp, otp_type="reset"):
-        """Verify OTP and mark it as used."""
-        user_otp = self.search(
-            [
-                ("otp_code", "=", otp),
-                ("otp_login", "=", login),
-                ("otp_type", "=", otp_type),
-                ("is_used", "=", False),
-                ("otp_expire_date", ">", fields.Datetime.now()),
-            ],
-            limit=1,
-        )
-        if user_otp:
-            user_otp.is_used = True
-        return bool(user_otp)
-
-    @api.model
-    def _send_otp_email(self, email, otp_type):
+    def _send_otp_email(self, email):
         """Send OTP via email."""
         body = f"""
             <p>Dear Customer,</p>
@@ -171,7 +170,7 @@ class AuthOTP(models.Model):
         return True
 
     @api.model
-    def _send_otp(self, phone, otp_type):
+    def _send_otp(self, phone):
         """Send OTP via SMS."""
         message_provider = self.env["sms.config"].sudo().search([], limit=1)
         if not message_provider:
