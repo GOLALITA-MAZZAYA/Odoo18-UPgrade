@@ -6,7 +6,6 @@ import base64
 from odoo.addons.go_giftcard.models.ugo2gift_api_request import Ugo2GiftAPI
 
 
-
 class DiscountVoucher(models.Model):
     _name = "discount.voucher"
     _inherit = ["mail.thread", "mail.activity.mixin"]

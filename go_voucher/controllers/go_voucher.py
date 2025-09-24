@@ -51,14 +51,14 @@ class Voucher(http.Controller):
 
     @http.route(
         [
-            '/go/api/user/voucher/list',
+            "/go/api/user/voucher/list",
         ],
         auth="public",
         website=True,
-        methods=['POST'],
+        methods=["POST"],
         csrf=False,
-        type='json',
-        cors='*'
+        type="json",
+        cors="*",
     )
     def get_voucher_list(self, **post):
         data = post or self._get_json_request()
@@ -69,7 +69,7 @@ class Voucher(http.Controller):
         if isinstance(user, dict) and "error" in user:
             return user
 
-        discount_vouchers = request.env['discount.voucher'].sudo().search([])
+        discount_vouchers = request.env["discount.voucher"].sudo().search([])
 
         result = []
         for voucher in discount_vouchers:
@@ -477,7 +477,8 @@ class Voucher(http.Controller):
             "logo": voucher.logo,
             "instruction": (
                 voucher.action_convert_html_text(voucher.instruction)
-                if voucher.instruction else ""
+                if voucher.instruction
+                else ""
             ),
         }
 
@@ -626,7 +627,6 @@ class Voucher(http.Controller):
                 giftcard.create_order()
             return True
         return False
-
 
     def _process_voucher_transaction(self, PaymentId, status_id, data):
         """Process Voucher Purchase transactions if it exists"""
