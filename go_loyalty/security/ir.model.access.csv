@@ -1,0 +1,8 @@
+id,name,model_id:id,group_id:id,perm_read,perm_write,perm_create,perm_unlink
+access_loyalty_restaurant_order,access.loyalty.restaurant.order,model_loyalty_restaurant_order,base.group_user,1,1,1,1
+access_loyalty_restaurant_order_line,access.loyalty.restaurant.order.line,model_loyalty_restaurant_order_line,base.group_user,1,1,1,1
+access_loyalty_restaurant_category,access.loyalty.restaurant.category,model_loyalty_restaurant_category,base.group_user,1,1,1,1
+access_user_address,access.user.address,model_user_address,base.group_user,1,1,1,1
+access_loyalty_point_generator,access.loyalty.point.generator,model_loyalty_point_generator,base.group_user,1,1,1,1
+access_loyalty_point_transfer_line,access.loyalty.point.transfer.line,model_loyalty_point_transfer_line,base.group_user,1,1,1,1
+access_loyalty_point_transfer,access.loyalty.point.transfer,model_loyalty_point_transfer,base.group_user,1,1,1,1

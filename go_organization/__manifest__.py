@@ -4,7 +4,7 @@
     "version": "1.3",
     "sequence": 10,
     "description": """ Extend functionalities related to partner""",
-    "category": "Partner",
+    "category": "Tools",
     "depends": ["contacts", "mail", "base", "product"],
     "author": "Dhiren Narola",
     "data": [
@@ -14,7 +14,6 @@
         "views/res_bank_type.xml",
         "views/merchant_enquiry.xml",
         "views/partner_category.xml",
-        "views/user_address.xml",
         "views/advertisement_banner.xml",
         "views/res_company.xml",
         "views/menuitems.xml",

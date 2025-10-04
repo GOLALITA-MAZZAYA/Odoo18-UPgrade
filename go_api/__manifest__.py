@@ -1,22 +1,20 @@
 # noinspection PyStatementEffect
 {
-    "name": "WhatsApp Base Connector",
+    "name": "GO REST API",
     "version": "18.0.0.0.0",
+    "summary": "Provides a secure REST API (JSON POST) to access and manage Odoo models",
+    "description": """""",
     "category": "Tools",
-    "sequence": 500,
-    "summary": "Base WhatsApp integration with Odoo.",
     "author": "Dhiren Narola",
     "license": "OPL-1",
     "depends": [
         "base",
-        'sms',
+        "web"
     ],
     "data": [
-        "views/res_config_settings.xml",
+        "views/res_partner.xml",
     ],
     "installable": True,
     "auto_install": False,
     "application": True,
 }
-
-

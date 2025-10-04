@@ -2,7 +2,7 @@
 {
     "name": "Go GiftCard",
     "version": "18.0.0.0.0",
-    "category": "Product",
+    "category": "Tools",
     "sequence": 500,
     "summary": "End-to-end solution to sell and manage digital gift cards in Odoo",
     "license": "OPL-1",

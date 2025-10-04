@@ -2,7 +2,7 @@
 {
     "name": "Go OTP",
     "version": "18.0.0.0.0",
-    "category": "Authentication",
+    "category": "Tools",
     "sequence": 500,
     "summary": "Generate and send OTP (One-Time Password) via SMS for authentication and verification",
     "license": "OPL-1",

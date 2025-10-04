@@ -1,0 +1,181 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+
+    <record id="view_loyalty_restaurant_order_form" model="ir.ui.view">
+        <field name="name">loyalty.restaurant.order.form</field>
+        <field name="model">loyalty.restaurant.order</field>
+        <field name="arch" type="xml">
+            <form string="Restaurant Order">
+                <header>
+                    <button
+                            name="action_confirm"
+                            type="object"
+                            string="Confirm"
+                            invisible="state != 'draft'"
+                            class="oe_highlight"
+                    />
+                    <button
+                            name="action_cancel"
+                            type="object"
+                            string="Cancel"
+                            invisible="state not in ['draft', 'sent', 'sale']"
+                            class="oe_highlight"
+                    />
+
+                    <button
+                            name="action_draft"
+                            type="object"
+                            string="Draft"
+                            invisible="state != 'cancel'"
+                            class="oe_highlight"
+                    />
+
+                    <field name="state" widget="statusbar" statusbar_visible="draft,sale,done,cancel"/>
+                </header>
+                <sheet>
+                    <group>
+                        <group>
+                            <field name="name" readonly="1"/>
+                            <field name="date_order"/>
+                            <field name="delivery_type"/>
+                            <field name="voucher_value"/>
+                            <field name="voucher_applied"/>
+                        </group>
+                        <group>
+                            <field name="partner_id"/>
+                            <field name="customer_phone"/>
+                            <field name="customer_address_id"/>
+                            <field name="merchant_id"/>
+                            <field name="user_id"/>
+                        </group>
+                    </group>
+
+                    <notebook>
+                        <page string="Order Lines">
+                            <field name="line_ids">
+                                <list editable="bottom">
+                                    <field name="sequence" widget="handle"/>
+                                    <field name="product_id"/>
+                                    <field name="name"/>
+                                    <field name="product_uom_qty" string="Quantity"/>
+                                    <field name="product_uom"/>
+                                    <field name="price_unit"/>
+                                    <field name="tax_id" widget="many2many_tags"/>
+                                    <field name="currency_id" column_invisible="True"/>
+                                    <field name="price_subtotal" readonly="1" widget="monetary"
+                                           options="{'currency_field': 'currency_id'}"
+                                    />
+                                </list>
+                            </field>
+
+                            <group name="note_group" col="6" class="mt-2 mt-md-0">
+                                <group colspan="4">
+                                    <field name="note" nolabel="1" placeholder="Terms and conditions..."/>
+                                </group>
+                                <group class="oe_subtotal_footer oe_right" colspan="2" name="sale_total">
+                                    <field name="amount_untaxed" widget='monetary'
+                                           options="{'currency_field': 'currency_id'}"/>
+                                    <field name="amount_tax" widget='monetary'
+                                           options="{'currency_field': 'currency_id'}"/>
+                                    <div class="oe_subtotal_footer_separator oe_inline o_td_label">
+                                        <label for="amount_total"/>
+                                    </div>
+                                    <field name="amount_total" nolabel="1" class="oe_subtotal_footer_separator"
+                                           widget='monetary' options="{'currency_field': 'currency_id'}"/>
+                                </group>
+                                <div class="oe_clear"/>
+                            </group>
+
+                        </page>
+
+                        <page string="Other Information">
+                            <group>
+
+                                <group string="Geo Location">
+                                    <field name="partner_latitude"/>
+                                    <field name="partner_longitude"/>
+                                </group>
+                                <group string="Finance">
+                                    <field name="pricelist_id"/>
+                                    <field name="currency_id"/>
+                                    <field name="fiscal_position_id"/>
+                                </group>
+                            </group>
+                        </page>
+                    </notebook>
+                </sheet>
+                <chatter/>
+            </form>
+
+        </field>
+    </record>
+
+    <record id="view_loyalty_restaurant_order_list" model="ir.ui.view">
+        <field name="name">loyalty.restaurant.order.list</field>
+        <field name="model">loyalty.restaurant.order</field>
+        <field name="arch" type="xml">
+            <list string="Restaurant Orders">
+                <field name="name"/>
+                <field name="state"/>
+                <field name="date_order"/>
+                <field name="partner_id"/>
+                <field name="merchant_id"/>
+                <field name="amount_total"/>
+                <field name="currency_id"/>
+                <field name="user_id"/>
+            </list>
+        </field>
+    </record>
+
+
+    <record id="view_loyalty_restaurant_order_search" model="ir.ui.view">
+        <field name="name">loyalty.restaurant.order.search</field>
+        <field name="model">loyalty.restaurant.order</field>
+        <field name="arch" type="xml">
+            <search string="Restaurant Orders">
+
+                <!-- Search Fields -->
+                <field name="name" string="Order Reference"/>
+                <field name="partner_id" string="Customer"/>
+                <field name="merchant_id" string="Merchant"/>
+                <field name="user_id" string="Salesperson"/>
+                <field name="date_order" string="Order Date"/>
+                <field name="delivery_type" string="Delivery Type"/>
+
+                <!-- Filters -->
+                <filter name="filter_draft" string="Draft Orders" domain="[('state','=','draft')]"/>
+                <filter name="filter_confirmed" string="Confirmed Orders" domain="[('state','=','sale')]"/>
+                <filter name="filter_done" string="Locked Orders" domain="[('state','=','done')]"/>
+                <filter name="filter_cancelled" string="Cancelled Orders" domain="[('state','=','cancel')]"/>
+                <filter name="filter_delivery" string="Delivery Orders" domain="[('delivery_type','=','delivery')]"/>
+                <filter name="filter_takeaway" string="Take Away Orders" domain="[('delivery_type','=','take_away')]"/>
+                <filter name="filter_voucher" string="Orders with Voucher" domain="[('voucher_applied','=',True)]"/>
+
+
+                <group expand="0" string="Group By">
+                    <filter name="group_by_state" domain="[]" string="By Status" context="{'group_by':'state'}"/>
+                    <filter name="group_by_user" domain="[]" string="By Salesperson" context="{'group_by':'user_id'}"/>
+                    <filter name="group_by_merchant" domain="[]" string="By Merchant"
+                            context="{'group_by':'merchant_id'}"/>
+                    <filter name="group_by_delivery_type" domain="[]" string="By Delivery Type"
+                            context="{'group_by':'delivery_type'}"/>
+                </group>
+
+            </search>
+        </field>
+    </record>
+
+
+    <record id="action_loyalty_restaurant_order" model="ir.actions.act_window">
+        <field name="name">Restaurant Orders</field>
+        <field name="res_model">loyalty.restaurant.order</field>
+        <field name="view_mode">list,form</field>
+        <field name="help" type="html">
+            <p class="o_view_nocontent_smiling_face">
+                Create your first restaurant order
+            </p>
+        </field>
+    </record>
+
+
+</odoo>

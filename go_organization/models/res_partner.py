@@ -349,6 +349,17 @@ class ResPartner(models.Model):
         string="Registration Expired", compute="_compute_is_expired", store=True
     )
 
+    owner_name = fields.Char(
+        string="Owner Name",
+        help="Enter the full name of the business owner or primary contact person for this partner.",
+    )
+
+    type = fields.Selection(
+        selection_add=[
+            ("branch", "Branch"),
+        ],
+    )
+
     # ───────────────────────────────────────────────────────────────────────────
     # COMPUTES
     # ───────────────────────────────────────────────────────────────────────────

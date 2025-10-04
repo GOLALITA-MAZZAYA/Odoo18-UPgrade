@@ -2,7 +2,7 @@
 {
     "name": "Go Voucher",
     "version": "18.0.0.0.0",
-    "category": "Marketing",
+    "category": "Tools",
     "sequence": 500,
     "summary": "Create, manage, and redeem discount vouchers with merchant and organisation support in Odoo.",
     "author": "Dhiren Narola",

@@ -2,7 +2,7 @@
 {
     "name": "Go Product",
     "version": "18.0.0.0.0",
-    "category": "Product",
+    "category": "Tools",
     "sequence": 500,
     "summary": "Enhanced the functionalities of product from website side",
     "license": "OPL-1",

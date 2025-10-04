@@ -1,0 +1,74 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+
+    <record id="action_go_customer" model="ir.actions.act_window">
+        <field name="name">Customers</field>
+        <field name="type">ir.actions.act_window</field>
+        <field name="res_model">res.partner</field>
+        <field name="domain">[('entity_type', '=', False)]</field>
+        <field name="view_mode">kanban,list,form,activity</field>
+        <field name="search_view_id" ref="base.view_res_partner_filter"/>
+        <field name="context">{'default_is_company': True}</field>
+        <field name="help" type="html">
+            <p class="o_view_nocontent_smiling_face">
+                No customers yet
+            </p>
+            <p>
+                Add a new customer to keep your contacts organized.
+            </p>
+        </field>
+    </record>
+
+
+    <record id="action_go_organisation" model="ir.actions.act_window">
+        <field name="name">Organisation</field>
+        <field name="type">ir.actions.act_window</field>
+        <field name="res_model">res.partner</field>
+        <field name="view_mode">kanban,list,form,activity</field>
+        <field name="search_view_id" ref="base.view_res_partner_filter"/>
+        <field name="domain">[('entity_type', '=', 'organisation')]</field>
+        <field name="context">{'default_entity_type': 'organisation'}</field>
+        <field name="help" type="html">
+            <p class="o_view_nocontent_smiling_face">
+                Create a new organisation
+            </p>
+        </field>
+    </record>
+
+
+    <record id="action_go_merchant" model="ir.actions.act_window">
+        <field name="name">Merchant</field>
+        <field name="type">ir.actions.act_window</field>
+        <field name="res_model">res.partner</field>
+        <field name="view_mode">kanban,list,form,activity</field>
+        <field name="search_view_id" ref="base.view_res_partner_filter"/>
+        <field name="domain">[('entity_type', '=', 'merchant')]</field>
+        <field name="context">{'default_entity_type': 'merchant'}</field>
+        <field name="help" type="html">
+            <p class="o_view_nocontent_smiling_face">
+                Create a new merchant
+            </p>
+        </field>
+    </record>
+
+
+    <record id="action_go_merchant_website" model="ir.actions.act_window">
+        <field name="name">Merchants from Website</field>
+        <field name="type">ir.actions.act_window</field>
+        <field name="res_model">res.partner</field>
+        <field name="view_mode">kanban,list,form,activity</field>
+        <field name="search_view_id" ref="base.view_res_partner_filter"/>
+        <field name="domain">[('entity_type', '=', 'merchant'), ('from_website', '=', True)]</field>
+        <field name="context">{'default_entity_type': 'merchant','default_from_website': True}</field>
+        <field name="help" type="html">
+            <p class="o_view_nocontent_smiling_face">
+                No merchants from website yet
+            </p>
+            <p>
+                Add a merchant created through the website to keep them organized.
+            </p>
+        </field>
+    </record>
+
+
+</odoo>

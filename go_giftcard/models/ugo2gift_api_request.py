@@ -7,7 +7,6 @@ _logger = logging.getLogger(__name__)
 
 
 class Ugo2GiftAPI:
-
     def __init__(self, env, api_url, api_key, api_secret, headers=None):
         self.env = env
         self.api_key = api_key
@@ -48,7 +47,9 @@ class Ugo2GiftAPI:
 
     def get_brand(self, endpoint="brands"):
         country_id = int(
-            self.env["ir.config_parameter"].sudo().get_param("go_giftcard.brand_country_id", 0)
+            self.env["ir.config_parameter"]
+            .sudo()
+            .get_param("go_giftcard.brand_country_id", 0)
         )
         country_code = "QA"
         if country_id:
@@ -56,8 +57,8 @@ class Ugo2GiftAPI:
             if country.exists() and country.code:
                 country_code = country.code
 
-        final_url = f"{self.base_url}/{endpoint}/?country={country_code}"
-        # final_url = "https://private-anon-12659dab9a-ygagcorporaterewards.apiary-mock.com/corporate/api/v2-4/brands/"
+        # final_url = f"{self.base_url}/{endpoint}/?country={country_code}"
+        final_url = "https://private-anon-12659dab9a-ygagcorporaterewards.apiary-mock.com/corporate/api/v2-4/brands/"
         return self._request(final_url, method="GET")
 
     def create_gift_order(self, payload, auth):
@@ -68,9 +69,7 @@ class Ugo2GiftAPI:
         url = f"{self.base_url}/order/save"
         return self._request(url, method="POST", payload=payload)
 
-    def create_skipcash_payment(
-        self, payload, endpoint="/v1/payments", headers=None
-    ):
+    def create_skipcash_payment(self, payload, endpoint="/v1/payments", headers=None):
         base_url = self.base_url.rstrip("/")
         endpoint = endpoint.lstrip("/")
         final_url = f"{base_url}/{endpoint}"

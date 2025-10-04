@@ -1,4 +1,4 @@
-from odoo import models, fields, api
+from odoo import models, fields, api,_
 
 
 class UserAddress(models.Model):
@@ -109,19 +109,19 @@ class UserAddress(models.Model):
     # ─────────────────────────────────────────────────────────────────────
     # SEARCH UX
     # ─────────────────────────────────────────────────────────────────────
-    def name_search(self, name="", args=None, operator="ilike", limit=100):
-        args = args or []
-        domain = []
-        if name:
-            domain = [
-                "|",
-                "|",
-                ("location_name", operator, name),
-                ("location_landmark", operator, name),
-                ("customer_id.name", "ilike", name),
-            ]
-        recs = self.search(domain + args, limit=limit)
-        return recs.name_get()
+    # def name_search(self, name="", args=None, operator="ilike", limit=100):
+    #     args = args or []
+    #     domain = []
+    #     if name:
+    #         domain = [
+    #             "|",
+    #             "|",
+    #             ("location_name", operator, name),
+    #             ("location_landmark", operator, name),
+    #             ("customer_id.name", "ilike", name),
+    #         ]
+    #     recs = self.search(domain + args, limit=limit)
+    #     return recs.name_get()
 
     def name_get(self):
         res = []

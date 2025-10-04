@@ -3,5 +3,4 @@ access_merchant_enquiry,access.merchant.enquiry,model_merchant_enquiry,base.grou
 access_merchant_branch,access.merchant.branch,model_merchant_branch,base.group_user,1,1,1,1
 access_notin_app,access.notin.app,model_notin_app,base.group_user,1,1,1,1
 access_partner_category,access.partner.category,model_partner_category,base.group_user,1,1,1,1
-access_user_address,access.user.address,model_user_address,base.group_user,1,1,1,1
 access_advertisement_banner,access.advertisement.banner,model_advertisement_banner,base.group_user,1,1,1,1

@@ -4,7 +4,7 @@
     "name": "Password Reveal Widget",
     "version": "18.0.1.0.0",
     "summary": "Adds an eye icon to toggle visibility for password-like fields.",
-    "category": "Extra Tools",
+    "category": "Tools",
     "author": "Dhiren Narola",
     "license": "LGPL-3",
     "depends": [

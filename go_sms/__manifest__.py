@@ -2,7 +2,7 @@
 {
     "name": "Go SMS",
     "version": "18.0.0.0.0",
-    "category": "SMS",
+    "category": "Tools",
     "sequence": 500,
     "summary": "Send and manage SMS notifications from Odoo",
     "author": "Dhiren Narola",

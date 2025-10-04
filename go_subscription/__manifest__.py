@@ -2,7 +2,7 @@
 {
     "name": "Go Subscription",
     "version": "18.0.0.0.0",
-    "category": "subscription",
+    "category": "Tools",
     "sequence": 500,
     "summary": "Subscription management with discount vouchers, merchants, and user tracking.",
     "author": "Dhiren Narola",
