@@ -139,4 +139,56 @@
     />
 
 
+    <menuitem
+            id="menu_loyalty_configuration"
+            name="Configuration"
+            parent="menu_go_loyalty_root"
+            sequence="25"
+    />
+
+    <menuitem id="menu_loyalty_rule"
+              name="Loyalty Rules"
+              parent="menu_loyalty_configuration"
+              action="action_loyalty_rule"
+              sequence="7"
+    />
+
+
+    <menuitem
+            id="menu_loyalty_sale"
+            name="Loyalty Sales"
+            parent="menu_loyalty_configuration"
+            action="action_loyalty_sale"
+            sequence="10"
+    />
+
+
+    <menuitem id="menu_loyalty_notification"
+              name="Loyalty Notifications"
+              parent="menu_loyalty_configuration"
+              action="action_loyalty_notification"
+              sequence="12"/>
+
+
+    <menuitem id="menu_loyalty_notification_message_root"
+              name="Notification Messages"
+              parent="menu_loyalty_configuration"
+              action="action_loyalty_notification_message"
+              sequence="13"/>
+
+    <menuitem id="menu_loyalty_notifications"
+              name="Notifications List"
+              parent="menu_loyalty_configuration"
+              action="action_loyalty_notification_list"
+              sequence="14"/>
+
+    <menuitem id="menu_loyalty_contact_us_root"
+              name="Contact Us"
+              parent="menu_loyalty_configuration"
+              action="action_loyalty_contact_us"
+              sequence="15"/>
+
+
+
+
 </odoo>

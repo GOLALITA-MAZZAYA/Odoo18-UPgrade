@@ -26,4 +26,13 @@
     </record>
 
 
+    <record id="seq_loyalty_sale" model="ir.sequence">
+        <field name="name">Loyalty Sale</field>
+        <field name="code">loyalty.sale</field>
+        <field name="prefix">LSALE-</field>
+        <field name="padding">5</field>
+        <field name="company_id" eval="False"/>
+    </record>
+
+
 </odoo>

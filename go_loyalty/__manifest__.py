@@ -11,6 +11,7 @@
         "product",
         "account",
         "mail",
+        "product",
         "go_organization"
     ],
     "data": [
@@ -22,6 +23,12 @@
         "views/user_address.xml",
         "views/loyalty_point_generator.xml",
         "views/loyalty_point_transfer.xml",
+        "views/loyalty_rule.xml",
+        "views/loyalty_sale.xml",
+        "views/loyalty_notification.xml",
+        "views/loyalty_notification_message.xml",
+        "views/loyalty_contact_us.xml",
+        "views/loyalty_notification_list.xml",
         "views/menus.xml"
     ],
     "installable": True,

@@ -6,3 +6,14 @@ access_user_address,access.user.address,model_user_address,base.group_user,1,1,1
 access_loyalty_point_generator,access.loyalty.point.generator,model_loyalty_point_generator,base.group_user,1,1,1,1
 access_loyalty_point_transfer_line,access.loyalty.point.transfer.line,model_loyalty_point_transfer_line,base.group_user,1,1,1,1
 access_loyalty_point_transfer,access.loyalty.point.transfer,model_loyalty_point_transfer,base.group_user,1,1,1,1
+access_loyalty_rule,access.loyalty.rule,model_loyalty_rule,base.group_user,1,1,1,1
+access_loyalty_rule_line,access.loyalty.rule.line,model_loyalty_rule_line,base.group_user,1,1,1,1
+access_loyalty_rule_merchant,access.loyalty.rule.merchant,model_loyalty_rule_merchant,base.group_user,1,1,1,1
+access_loyalty_sale,access.loyalty.sale,model_loyalty_sale,base.group_user,1,1,1,1
+access_loyalty_sale_line,access.loyalty.sale.line,model_loyalty_sale_line,base.group_user,1,1,1,1
+access_loyalty_notification,access.loyalty.notification,model_loyalty_notification,base.group_user,1,1,1,1
+access_loyalty_notification_line,access.loyalty.notification.line,model_loyalty_notification_line,base.group_user,1,1,1,1
+access_loyalty_notification_message,access.loyalty.notification.message,model_loyalty_notification_message,base.group_user,1,1,1,1
+access_loyalty_contact_us,access.loyalty.contact.us,model_loyalty_contact_us,base.group_user,1,1,1,1
+access_loyalty_notification_list,access.loyalty.notification.list,model_loyalty_notification_list,base.group_user,1,1,1,1
+

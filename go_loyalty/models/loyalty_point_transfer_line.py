@@ -52,11 +52,11 @@ class LoyaltyPointTransferLine(models.Model):
         string='Generated From',
         help='The loyalty point generator that created this transfer line.'
     )
-    # sale_id = fields.Many2one(
-    #     'loyalty.sale',
-    #     string='Related Sale',
-    #     help='Related sale order linked to this transfer line, if any.'
-    # )
+    sale_id = fields.Many2one(
+        'loyalty.sale',
+        string='Related Sale',
+        help='Related sale order linked to this transfer line, if any.'
+    )
 
     @api.depends('credit', 'debit')
     def _compute_balance(self):

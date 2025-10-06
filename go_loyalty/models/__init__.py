@@ -7,5 +7,13 @@ from . import loyalty_point_generator
 from . import loyalty_point_transfer
 from . import loyalty_point_transfer_line
 from . import res_partner
-
-
+from . import loyalty_sale
+from . import loyalty_rule
+from . import loyalty_rule_line
+from . import loyalty_rule_merchant
+from . import loyalty_sale_line
+from . import loyalty_notification
+from . import loyalty_notification_line
+from . import loyalty_notification_message
+from . import loyalty_contact_us
+from . import loyalty_notification_list

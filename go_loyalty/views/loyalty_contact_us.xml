@@ -1,0 +1,79 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+
+    <record id="view_loyalty_contact_us_form" model="ir.ui.view">
+        <field name="name">loyalty.contact.us.form</field>
+        <field name="model">loyalty.contact.us</field>
+        <field name="arch" type="xml">
+            <form string="Contact Us">
+                <sheet>
+                    <group>
+                        <group>
+                            <field name="partner_id"/>
+                            <field name="email"/>
+                            <field name="phone"/>
+                        </group>
+
+                        <group>
+                            <field name="date" readonly="1"/>
+<!--                            <field name="priority" widget="priority" options="{'max':5}"/>-->
+
+                        </group>
+
+                    </group>
+
+                    <notebook>
+                        <page string="Notes">
+                            <field name="note" nolabel="1" placeholder="Enter customer query or notes here..."/>
+                        </page>
+                    </notebook>
+
+
+                </sheet>
+            </form>
+        </field>
+    </record>
+
+    <record id="view_loyalty_contact_us_tree" model="ir.ui.view">
+        <field name="name">loyalty.contact.us.tree</field>
+        <field name="model">loyalty.contact.us</field>
+        <field name="arch" type="xml">
+            <list string="Contact Us Queries" default_order="date desc">
+                <field name="partner_id"/>
+                <field name="email"/>
+                <field name="phone"/>
+                <!--                <field name="rating" widget="priority"/>-->
+                <field name="date"/>
+            </list>
+        </field>
+    </record>
+
+    <record id="view_loyalty_contact_us_search" model="ir.ui.view">
+        <field name="name">loyalty.contact.us.search</field>
+        <field name="model">loyalty.contact.us</field>
+        <field name="arch" type="xml">
+            <search string="Contact Us Queries">
+                <field name="partner_id" string="Partner"/>
+                <field name="email" string="Email"/>
+                <field name="phone" string="Phone"/>
+
+                <group expand="0" string="Group By">
+                    <filter string="Partner" name="group_by_partner" context="{'group_by':'partner_id'}"/>
+                    <!--                    <filter string="Rating" name="group_by_rating" context="{'group_by':'rating'}"/>-->
+                    <filter string="Date" name="group_by_date" context="{'group_by':'date'}"/>
+                </group>
+            </search>
+        </field>
+    </record>
+
+
+    <record id="action_loyalty_contact_us" model="ir.actions.act_window">
+        <field name="name">Contact Us Queries</field>
+        <field name="res_model">loyalty.contact.us</field>
+        <field name="view_mode">list,form</field>
+        <field name="help" type="html">
+            <p>Manage customer inquiries, feedback, and ratings here.</p>
+        </field>
+    </record>
+
+</odoo>
