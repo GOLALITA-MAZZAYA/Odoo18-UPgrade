@@ -17,3 +17,6 @@ from . import loyalty_notification_line
 from . import loyalty_notification_message
 from . import loyalty_contact_us
 from . import loyalty_notification_list
+from . import merchant_enquiry
+from . import res_company
+

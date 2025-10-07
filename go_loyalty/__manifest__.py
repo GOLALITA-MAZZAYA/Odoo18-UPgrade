@@ -11,8 +11,7 @@
         "product",
         "account",
         "mail",
-        "product",
-        "go_organization"
+        "uom",
     ],
     "data": [
         "data/data.xml",
@@ -29,6 +28,7 @@
         "views/loyalty_notification_message.xml",
         "views/loyalty_contact_us.xml",
         "views/loyalty_notification_list.xml",
+        "views/merchant_enquiry.xml",
         "views/menus.xml"
     ],
     "installable": True,

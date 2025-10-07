@@ -1,6 +1,25 @@
 <?xml version="1.0" encoding="utf-8"?>
 <odoo>
 
+
+    <record id="view_partner_form_inherit_loyalty" model="ir.ui.view">
+        <field name="name">res.partner.form.inherit.partner.enhanced</field>
+        <field name="model">res.partner</field>
+        <field name="inherit_id" ref="base.view_partner_form"/>
+        <field name="arch" type="xml">
+
+            <xpath expr="//field[@name='vat']" position="after">
+                <field name="entity_type" widget="radio"/>
+                <field name="employee_type" widget="radio"/>
+                <field name="points"/>
+                <field name="from_website" />
+            </xpath>
+
+        </field>
+    </record>
+
+
+
     <record id="action_go_customer" model="ir.actions.act_window">
         <field name="name">Customers</field>
         <field name="type">ir.actions.act_window</field>

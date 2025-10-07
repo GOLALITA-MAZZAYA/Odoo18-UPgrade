@@ -16,4 +16,5 @@ access_loyalty_notification_line,access.loyalty.notification.line,model_loyalty_
 access_loyalty_notification_message,access.loyalty.notification.message,model_loyalty_notification_message,base.group_user,1,1,1,1
 access_loyalty_contact_us,access.loyalty.contact.us,model_loyalty_contact_us,base.group_user,1,1,1,1
 access_loyalty_notification_list,access.loyalty.notification.list,model_loyalty_notification_list,base.group_user,1,1,1,1
+access_merchant_enquiry,access.merchant.enquiry,model_merchant_enquiry,base.group_user,1,1,1,1
 

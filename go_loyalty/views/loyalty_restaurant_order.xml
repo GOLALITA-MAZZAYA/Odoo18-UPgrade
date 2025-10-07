@@ -40,6 +40,7 @@
                             <field name="delivery_type"/>
                             <field name="voucher_value"/>
                             <field name="voucher_applied"/>
+                            <field name="pricelist_id"/>
                         </group>
                         <group>
                             <field name="partner_id"/>
@@ -96,7 +97,6 @@
                                     <field name="partner_longitude"/>
                                 </group>
                                 <group string="Finance">
-                                    <field name="pricelist_id"/>
                                     <field name="currency_id"/>
                                     <field name="fiscal_position_id"/>
                                 </group>

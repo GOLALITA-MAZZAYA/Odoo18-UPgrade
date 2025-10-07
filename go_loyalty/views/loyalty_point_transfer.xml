@@ -58,7 +58,6 @@
                             <field name="go_transaction" readonly="state == 'transfer'"/>
                         </group>
                         <group string="Status">
-                            <field name="approval_status" readonly="state == 'transfer'"/>
                             <field name="user_id"/>
                         </group>
                     </group>

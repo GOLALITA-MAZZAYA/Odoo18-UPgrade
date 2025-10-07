@@ -11,7 +11,6 @@ class LoyaltySale(models.Model):
     date = fields.Datetime(
         string="Transaction Date",
         default=fields.Datetime.now(),
-        states={"confirm": [("readonly", True)]},
         help="Date and time when the transaction took place.",
     )
     state = fields.Selection(
@@ -77,7 +76,6 @@ class LoyaltySale(models.Model):
         ],
         default="reward",
         tracking=True,
-        states={"confirm": [("readonly", True)]},
         string="Transaction Type",
         help="Defines whether this transaction rewards or redeems points.",
     )
@@ -110,7 +108,7 @@ class LoyaltySale(models.Model):
     # Products
     # --------------------------------------------------------
     include_product = fields.Boolean(
-        string="Include Products", states={"confirm": [("readonly", True)]}
+        string="Include Products"
     )
     sale_line_ids = fields.One2many(
         "loyalty.sale.line", "sale_id", string="Transaction Products"
@@ -148,9 +146,6 @@ class LoyaltySale(models.Model):
         #     sale.onchange_amount_transfer_point_type()
 
         return sales
-
-    def action_confirm(self):
-        pass
 
     def action_cancel(self):
         self.state = "cancel"

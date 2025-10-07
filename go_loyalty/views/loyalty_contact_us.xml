@@ -17,7 +17,6 @@
                         <group>
                             <field name="date" readonly="1"/>
 <!--                            <field name="priority" widget="priority" options="{'max':5}"/>-->
-
                         </group>
 
                     </group>

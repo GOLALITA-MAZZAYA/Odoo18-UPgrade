@@ -16,6 +16,23 @@ class ResPartner(models.Model):
         help="Category for organisation employees.",
     )
 
+    from_website = fields.Boolean()
+
+    entity_type = fields.Selection(
+        [
+            ("platform", "Platform"),
+            ("organisation", "Organisation"),
+            ("merchant", "Merchant"),
+            ("employee", "Employee"),
+            ("family", "Family Member"),
+        ],
+        string="Entity Type",
+        oldname="go_entity",
+        index=True,
+        required=True,
+        help="Functional role of the contact in your program.",
+    )
+
     @api.depends("line_ids.partner_id", "line_ids.balance")
     def _compute_points(self):
         for p in self:

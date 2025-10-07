@@ -13,8 +13,6 @@ class LoyaltyRestaurantOrder(models.Model):
         string="Order Reference",
         required=True,
         copy=False,
-        readonly=True,
-        states={"draft": [("readonly", False)]},
         index=True,
         default="New",
         help="Unique reference number for the restaurant order.",
@@ -41,9 +39,7 @@ class LoyaltyRestaurantOrder(models.Model):
     date_order = fields.Datetime(
         string="Order Date",
         required=True,
-        readonly=True,
         index=True,
-        states={"draft": [("readonly", False)]},
         copy=False,
         default=fields.Datetime.now,
         help="For draft orders: the creation date.\nFor confirmed orders: the confirmation date.",
@@ -62,9 +58,6 @@ class LoyaltyRestaurantOrder(models.Model):
         index=True,
         tracking=2,
         default=lambda self: self.env.user,
-        domain=lambda self: "[('groups_id', 'in', [{}]), ('share', '=', False), ('company_ids', '=', company_id)]".format(
-            self.env.ref("sales_team.group_sale_salesman").id
-        ),
         help="User responsible for handling this order.",
     )
 

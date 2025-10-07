@@ -7,7 +7,12 @@ class LoyaltyNotificationList(models.Model):
     _description = "Notification List"
 
     partner_id = fields.Many2one("res.partner", string="Customer", tracking=True)
-    merchant_id = fields.Many2one("res.partner", string="Merchant", tracking=True)
+    merchant_id = fields.Many2one(
+        "res.partner",
+        string="Merchant",
+        domain=[("entity_type", "=", "merchant")],
+        tracking=True,
+    )
     description = fields.Text(string="Description")
     date = fields.Datetime(
         string="Date",
@@ -23,7 +28,7 @@ class LoyaltyNotificationList(models.Model):
             ("product", "Product"),
         ],
         string="Notification Type",
-        tracking=True
+        tracking=True,
     )
     state = fields.Selection(
         [("unread", "Unread"), ("read", "Read")],

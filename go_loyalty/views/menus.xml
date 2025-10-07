@@ -64,7 +64,7 @@
 
     <menuitem
             id="menu_merchant_enquiry"
-            action="go_organization.action_merchant_enquiry"
+            action="action_merchant_enquiry_loyalty"
             parent="loyalty_customer_root"
             name="Merchant Enquiry"
             groups="base.group_system"
@@ -78,15 +78,6 @@
             name="Customer Address"
             groups="base.group_system"
             sequence="7"
-    />
-
-    <menuitem
-            id="menu_merchant_enquiry"
-            action="go_organization.action_merchant_enquiry"
-            parent="loyalty_customer_root"
-            name="Merchant Enquiry"
-            groups="base.group_system"
-            sequence="6"
     />
 
 
