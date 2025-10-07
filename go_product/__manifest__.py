@@ -11,6 +11,7 @@
         "product",
         "sale",
         "mail",
+        "go_organization",
     ],
     "data": [
         "security/ir.model.access.csv",
