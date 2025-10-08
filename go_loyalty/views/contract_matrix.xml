@@ -1,0 +1,77 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+
+    <record id="view_contract_matrix_form" model="ir.ui.view">
+        <field name="name">contract.matrix.form</field>
+        <field name="model">contract.matrix</field>
+        <field name="arch" type="xml">
+            <form string="Contract Matrix">
+                <sheet>
+                    <group>
+                        <group string="Merchant Details">
+                            <field name="res_partner_id"/>
+                            <field name="organisation_id" widget="many2many_tags"/>
+                        </group>
+
+                        <group string="Contract Details">
+                            <field name="contract_file" filename="contract_filename"/>
+                            <field name="contract_filename"/>
+                            <field name="contract_file_url" widget="url"/>
+                        </group>
+                    </group>
+
+                    <group string="Record Info">
+                        <field name="create_date" readonly="1"/>
+                        <field name="create_uid" string="Created By" readonly="1"/>
+                    </group>
+                </sheet>
+            </form>
+        </field>
+    </record>
+
+    <record id="view_contract_matrix_tree" model="ir.ui.view">
+        <field name="name">contract.matrix.tree</field>
+        <field name="model">contract.matrix</field>
+        <field name="arch" type="xml">
+            <list string="Contract Matrices">
+                <field name="res_partner_id"/>
+                <field name="organisation_id" widget="many2many_tags"/>
+                <field name="contract_filename" optional="hide"/>
+                <field name="contract_file_url" widget="url" optional="hide"/>
+                <field name="create_date"/>
+                <field name="create_uid" string="Created By"/>
+            </list>
+        </field>
+    </record>
+
+
+    <record id="view_contract_matrix_search" model="ir.ui.view">
+        <field name="name">contract.matrix.search</field>
+        <field name="model">contract.matrix</field>
+        <field name="arch" type="xml">
+            <search string="Contract Matrices Search">
+                <field name="res_partner_id" string="Merchant"/>
+                <field name="organisation_id" string="Organisation"/>
+                <field name="contract_filename" string="Contract File Name"/>
+                <filter name="has_file" string="With File" domain="[('contract_file','!=',False)]"/>
+                <group expand="1" string="Group By">
+                    <filter name="group_by_merchant" string="Merchant" context="{'group_by':'res_partner_id'}"/>
+                </group>
+            </search>
+        </field>
+    </record>
+
+
+    <record id="action_contract_matrix" model="ir.actions.act_window">
+        <field name="name">Contract Matrices</field>
+        <field name="res_model">contract.matrix</field>
+        <field name="view_mode">list,form</field>
+        <field name="help" type="html">
+            <p class="o_view_nocontent_smiling_face">
+                Upload and manage your merchant contracts here.
+            </p>
+        </field>
+    </record>
+
+
+</odoo>

@@ -1,0 +1,70 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+
+    <record id="view_merchant_branch_form_loyalty" model="ir.ui.view">
+        <field name="name">merchant.branch.form</field>
+        <field name="model">merchant.branch</field>
+        <field name="arch" type="xml">
+            <form string="Merchant Branch" class="o_form_full">
+                <sheet>
+                    <group>
+                        <group string="Branch Information">
+                            <field name="name"/>
+                            <field name="name_ar"/>
+                            <field name="code"/>
+                        </group>
+
+                        <group string="Merchant Details">
+                            <field name="partner_id"/>
+                            <field name="partner_sub_id"/>
+                        </group>
+                    </group>
+                </sheet>
+            </form>
+        </field>
+    </record>
+
+
+    <record id="view_merchant_branch_tree_loyalty" model="ir.ui.view">
+        <field name="name">merchant.branch.tree</field>
+        <field name="model">merchant.branch</field>
+        <field name="arch" type="xml">
+            <list string="Merchant Branches">
+                <field name="name"/>
+                <field name="code"/>
+                <field name="partner_id"/>
+                <field name="partner_sub_id"/>
+            </list>
+        </field>
+    </record>
+
+
+    <record id="view_merchant_branch_search_loyalty" model="ir.ui.view">
+        <field name="name">merchant.branch.search</field>
+        <field name="model">merchant.branch</field>
+        <field name="arch" type="xml">
+            <search string="Search Merchant Branches">
+                <field name="name" string="Branch Name"/>
+                <field name="code" string="Code"/>
+                <field name="partner_id" string="Merchant"/>
+                <field name="partner_sub_id" string="Partner Sub Account"/>
+
+                <group expand="1" string="Group By">
+                    <filter name="group_by_merchant" string="Merchant" context="{'group_by':'partner_id'}"/>
+                </group>
+            </search>
+        </field>
+    </record>
+
+    <record id="action_merchant_branch_loyalty" model="ir.actions.act_window">
+        <field name="name">Merchant Branches</field>
+        <field name="res_model">merchant.branch</field>
+        <field name="view_mode">list,form</field>
+        <field name="help" type="html">
+            <p class="o_view_nocontent_smiling_face">
+                Create your first merchant branch record
+            </p>
+        </field>
+    </record>
+
+</odoo>

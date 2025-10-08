@@ -157,5 +157,35 @@
         </field>
     </record>
 
+    <record id="action_loyalty_point_transfer_sent" model="ir.actions.act_window">
+        <field name="name">Loyalty Point Transfers - Sent</field>
+        <field name="res_model">loyalty.point.transfer</field>
+        <field name="view_mode">list,form</field>
+        <field name="context">{'default_transaction_type': 'sent'}</field>
+        <field name="search_view_id" ref="view_loyalty_point_transfer_search"/>
+        <field name="domain">[('transaction_type','=','sent')]</field>
+        <field name="help" type="html">
+            <p class="o_view_nocontent_smiling_face">
+                View all loyalty point transfers that have been sent.
+            </p>
+        </field>
+    </record>
+
+
+
+    <record id="action_loyalty_point_transfer_received" model="ir.actions.act_window">
+        <field name="name">Loyalty Point Transfers - Received</field>
+        <field name="res_model">loyalty.point.transfer</field>
+        <field name="view_mode">list,form</field>
+        <field name="search_view_id" ref="view_loyalty_point_transfer_search"/>
+        <field name="context">{'default_transaction_type': 'receive'}</field>
+        <field name="domain">[('transaction_type','=','receive')]</field>
+        <field name="help" type="html">
+            <p class="o_view_nocontent_smiling_face">
+                View all loyalty point transfers that have been received.
+            </p>
+        </field>
+    </record>
+
 
 </odoo>

@@ -19,4 +19,11 @@ from . import loyalty_contact_us
 from . import loyalty_notification_list
 from . import merchant_enquiry
 from . import res_company
+from . import track_list
+from . import advertisement_tracking
+from . import merchant_branch
+from . import contract_matrix
+from . import notin_app
+from . import terms_matrix
+
 

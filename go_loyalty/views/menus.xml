@@ -118,7 +118,7 @@
             name="Point Generators"
             parent="menu_loyalty_point_generator_root"
             action="action_loyalty_point_generator"
-            sequence="5"
+            sequence="1"
     />
 
 
@@ -126,7 +126,27 @@
               name="Point Transfers"
               parent="menu_loyalty_point_generator_root"
               action="action_loyalty_point_transfer"
-              sequence="7"
+              sequence="2"
+    />
+
+    <menuitem id="menu_loyalty_point_sent"
+              name="Points to Send"
+              parent="menu_loyalty_point_generator_root"
+              action="action_loyalty_point_transfer_sent"
+              sequence="3"/>
+
+    <menuitem id="menu_loyalty_point_received"
+              name="Points to Receive"
+              parent="menu_loyalty_point_generator_root"
+              action="action_loyalty_point_transfer_received"
+              sequence="4"/>
+
+    <menuitem
+            id="menu_point_transaction"
+            name="Points Transactions"
+            parent="menu_loyalty_point_generator_root"
+            action="action_loyalty_point_transfer_line"
+            sequence="5"
     />
 
 
@@ -179,7 +199,51 @@
               action="action_loyalty_contact_us"
               sequence="15"/>
 
+    <menuitem
+            id="action_track_list"
+            name="Track List"
+            parent="menu_loyalty_configuration"
+            action="action_track_list_loyalty"
+            sequence="16"
+    />
 
+    <menuitem
+            id="menu_advertisement_tracking_root"
+            parent="menu_loyalty_configuration"
+            name="Advertisement Tracking"
+            action="action_advertisement_tracking"
+            sequence="17"
+    />
+
+    <menuitem id="menu_merchant_branch_main"
+              name="Merchant Branches"
+              parent="menu_loyalty_configuration"
+              action="action_merchant_branch_loyalty"
+              sequence="20"/>
+
+    <menuitem id="menu_contract_matrix"
+              name="Contract Matrices"
+              parent="menu_loyalty_configuration"
+              action="action_contract_matrix"
+              sequence="21"
+    />
+
+    <menuitem
+            id="menu_notin_app_root"
+            name="Not Linked Apps"
+            parent="menu_loyalty_configuration"
+            action="action_notin_app"
+            sequence="22"
+    />
+
+
+    <menuitem
+            id="menu_terms_matrix_root"
+            name="Terms Conditions Matrix"
+            parent="menu_loyalty_configuration"
+            action="action_terms_matrix"
+            sequence="23"
+    />
 
 
 </odoo>

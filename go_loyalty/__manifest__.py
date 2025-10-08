@@ -29,6 +29,13 @@
         "views/loyalty_contact_us.xml",
         "views/loyalty_notification_list.xml",
         "views/merchant_enquiry.xml",
+        "views/track_list.xml",
+        "views/advertisement_tracking.xml",
+        "views/merchant_branch.xml",
+        "views/contract_matrix.xml",
+        "views/notin_app.xml",
+        "views/terms_matrix.xml",
+        "views/loyalty_point_transfer_line.xml",
         "views/menus.xml"
     ],
     "installable": True,
