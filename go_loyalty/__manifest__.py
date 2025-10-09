@@ -12,6 +12,7 @@
         "account",
         "mail",
         "uom",
+        "auth_signup"
     ],
     "data": [
         "data/data.xml",

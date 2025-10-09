@@ -25,5 +25,6 @@ from . import merchant_branch
 from . import contract_matrix
 from . import notin_app
 from . import terms_matrix
+from . import res_users
 
 
