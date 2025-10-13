@@ -12,10 +12,7 @@ class MerchantEnquiry(models.Model):
     )
     phone = fields.Char(tracking=True)
     email = fields.Char(tracking=True)
-    country_id = fields.Many2one(
-        "res.country",
-        string="Country to Visit",
-        help="Destination country for the trip/hotel.",
+    country = fields.Char(
     )
     city = fields.Char(string="City")
 
@@ -45,6 +42,14 @@ class MerchantEnquiry(models.Model):
         string="Product Price", currency_field="currency_id", oldname="x_product_price"
     )
 
+    company_id = fields.Many2one(
+        "res.company",
+        string="Company",
+        default=lambda self: self.env.company,
+        required=True,
+        tracking=True,
+    )
+
     state = fields.Selection(
         [
             ("draft", "Draft"),
@@ -56,3 +61,14 @@ class MerchantEnquiry(models.Model):
         tracking=True,
         required=True,
     )
+
+    def action_send_mail(self):
+        template = self.env.ref(
+            "go_loyalty.merchant_enquiry_notification", raise_if_not_found=False
+        )
+        if not template:
+            return False
+        for record in self:
+            if record.state != "sent":
+                template.sudo().send_mail(record.id, force_send=True)
+                record.sudo().write({"state": "sent"})

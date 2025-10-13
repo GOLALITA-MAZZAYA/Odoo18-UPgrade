@@ -65,9 +65,7 @@ class LoyaltySale(models.Model):
     # Transaction Details
     # --------------------------------------------------------
     amount = fields.Float(
-        string="Transaction Amount",
-        required=True,
-        compute="_compute_total_amount",
+        string="Transaction Amount"
     )
     transfer_point_type = fields.Selection(
         [
@@ -121,10 +119,9 @@ class LoyaltySale(models.Model):
                 sale.amount - sale.discount - sale.extra_merchant_discount
             )
 
-    @api.depends("sale_line_ids", "sale_line_ids.subtotal")
-    def _compute_total_amount(self):
-        for sale in self:
-            sale.amount = sum(sale.sale_line_ids.mapped("subtotal"))
+    @api.onchange("sale_line_ids")
+    def _onchange_lines(self):
+        self.amount = sum(self.sale_line_ids.mapped("subtotal"))
 
     @api.onchange("partner_id")
     def onchange_partner_id(self):

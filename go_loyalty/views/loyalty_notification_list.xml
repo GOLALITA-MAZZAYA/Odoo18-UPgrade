@@ -28,6 +28,11 @@
                                 <field name="description" nolabel="1" placeholder="Enter description here..."/>
                             </group>
                         </page>
+                        <page string="Descriptions Arabic">
+                            <group>
+                                <field name="description_ar" nolabel="1" placeholder="Enter description here..."/>
+                            </group>
+                        </page>
                         <page string="Offer &amp; Image">
                             <group>
                                 <field name="url" widget="url"/>

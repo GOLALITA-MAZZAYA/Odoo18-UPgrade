@@ -12,7 +12,8 @@
         "account",
         "mail",
         "uom",
-        "auth_signup"
+        "auth_signup",
+        "website_sale"
     ],
     "data": [
         "data/data.xml",
@@ -37,6 +38,7 @@
         "views/notin_app.xml",
         "views/terms_matrix.xml",
         "views/loyalty_point_transfer_line.xml",
+        "views/partner_category.xml",
         "views/menus.xml"
     ],
     "installable": True,

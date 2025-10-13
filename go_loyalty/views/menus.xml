@@ -245,5 +245,13 @@
             sequence="23"
     />
 
+    <menuitem
+            id="menu_partner_category"
+            name="Partner Categories"
+            parent="menu_loyalty_configuration"
+            action="action_partner_category"
+            sequence="25"
+    />
+
 
 </odoo>

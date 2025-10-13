@@ -23,5 +23,7 @@ access_merchant_branch_loyalty,access.merchant.branch,model_merchant_branch,base
 access_contract_matrix,access.contract.matrix,model_contract_matrix,base.group_user,1,1,1,1
 access_notin_app,access.notin.app,model_notin_app,base.group_user,1,1,1,1
 access_terms_matrix,access.terms.matrix,model_terms_matrix,base.group_user,1,1,1,1
+access_user_otp,access.user.otp,model_user_otp,base.group_user,1,1,1,1
+access_partner_category,access.artner.category,model_partner_category,base.group_user,1,1,1,1
 
 

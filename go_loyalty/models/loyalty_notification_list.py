@@ -14,6 +14,7 @@ class LoyaltyNotificationList(models.Model):
         tracking=True,
     )
     description = fields.Text(string="Description")
+    description_ar = fields.Text(string="Description Arabic", oldname="x_description_arabic")
     date = fields.Datetime(
         string="Date",
         default=fields.Datetime.now,
@@ -37,9 +38,13 @@ class LoyaltyNotificationList(models.Model):
         default="unread",
     )
 
-    url = fields.Char(string="Notification URL")
-    product_id = fields.Many2one("product.template", string="Product")
+    description_html = fields.Html(string="Description HTML", oldname = "x_description_html")
+    description_html_arabic = fields.Html(string="Description HTML Arabic",  oldname="x_description_html_arabic")
+
+    url = fields.Char(string="Notification URL" ,oldname="x_url")
+    product_id = fields.Many2one("product.template", string="Product", oldname="x_product_id")
     offer_image = fields.Binary(string="Offer Image")
+    imp_notification = fields.Boolean(string="Important Notification", default=False, oldname="x_imp_notification")
 
     @api.depends("notification_type", "partner_id", "date")
     def _compute_display_name(self):

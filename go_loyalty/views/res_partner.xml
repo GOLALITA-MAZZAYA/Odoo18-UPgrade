@@ -13,6 +13,10 @@
                 <field name="employee_type" widget="radio"/>
                 <field name="points"/>
                 <field name="from_website" />
+                <field name="is_published" />
+                <field name="merchant_type" />
+                <field name="partner_category_id" />
+                <field name="is_published" />
             </xpath>
 
         </field>

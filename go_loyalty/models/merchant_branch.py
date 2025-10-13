@@ -7,7 +7,6 @@ class MerchantBranch(models.Model):
     _inherit = ["mail.thread", "mail.activity.mixin"]
     _order = "partner_id, name, id"
 
-
     # Core
     name = fields.Char(required=True, tracking=True, help="Public branch name.")
     name_ar = fields.Char(string="Name (Arabic)", help="Arabic name for the branch.")
@@ -27,6 +26,7 @@ class MerchantBranch(models.Model):
         required=True,
         index=True,
         ondelete="cascade",
+        domain="[('entity_type', '=', 'merchant')]",
         tracking=True,
         help="Owning merchant/company for this branch.",
     )
@@ -52,5 +52,3 @@ class MerchantBranch(models.Model):
             left = f"[{rec.code}] " if rec.code else ""
             right = rec.name or ""
             rec.display_name = f"{left}{right}"
-
-

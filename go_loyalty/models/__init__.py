@@ -1,3 +1,4 @@
+from . import res_partner
 from . import res_config_settings
 from . import loyalty_restaurant_order
 from . import loyalty_restaurant_order_line
@@ -6,7 +7,6 @@ from . import user_address
 from . import loyalty_point_generator
 from . import loyalty_point_transfer
 from . import loyalty_point_transfer_line
-from . import res_partner
 from . import loyalty_sale
 from . import loyalty_rule
 from . import loyalty_rule_line
@@ -26,5 +26,10 @@ from . import contract_matrix
 from . import notin_app
 from . import terms_matrix
 from . import res_users
+from . import user_otp
+from . import product_template
+from . import partner_category
+
+
 
 

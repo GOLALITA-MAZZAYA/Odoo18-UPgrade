@@ -16,7 +16,7 @@
 
                         <group string="Travel Details">
                             <field name="city"/>
-                            <field name="country_id"/>
+                            <field name="country"/>
                             <field name="departure_date"/>
                             <field name="return_date"/>
                             <field name="hotel_name"/>
@@ -44,7 +44,7 @@
                 <field name="phone"/>
                 <field name="email"/>
                 <field name="city"/>
-                <field name="country_id"/>
+                <field name="country"/>
                 <field name="departure_date"/>
                 <field name="return_date"/>
                 <field name="product_id"/>
@@ -91,7 +91,7 @@
                 <!-- Group By Options -->
                 <group expand="1" string="Group By...">
                     <filter string="State" name="group_state" context="{'group_by':'state'}"/>
-                    <filter string="Country" name="group_country" context="{'group_by':'country_id'}"/>
+                    <filter string="Country" name="group_country" context="{'group_by':'country'}"/>
                     <filter string="City" name="group_city" context="{'group_by':'city'}"/>
                     <filter string="Partner" name="group_partner" context="{'group_by':'partner_id'}"/>
                     <filter string="Product" name="group_product" context="{'group_by':'product_id'}"/>

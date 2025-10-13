@@ -67,6 +67,132 @@ class ResPartner(models.Model):
 
     user_expiry = fields.Date(oldname="x_user_expiry")
 
+    relation_type = fields.Selection(
+        [
+            ("sister", "Sister"),
+            ("daughter", "Daughter"),
+            ("father", "Father"),
+            ("mother", "Mother"),
+            ("wife", "Wife"),
+            ("brother", "Brother"),
+            ("son", "Son"),
+        ],
+        string="Relation Type",
+    )
+
+    employee_type = fields.Selection(
+        selection=[
+            ("vip", "VIP"),
+            ("standard", "Standard"),
+            ("both", "Both"),
+        ],
+        string="Employee Type",
+        help="Select whether the employee is VIP, Standard, or Both.",
+        oldname="x_for_employee_type",
+    )
+
+    arabic_name = fields.Char(string="Arabic Name", oldname="x_arabic_name")
+
+    open_from = fields.Datetime(string="Restro Open From", oldname="x_open_from")
+    open_till = fields.Datetime(string="Restro Open Till", oldname="x_open_till")
+    ribbon_text = fields.Char(string="Ribbon Text")
+    ribbon_text_ar = fields.Char(
+        string="Ribbon Text (Arabic)", oldname="x_ribbon_text_arabic"
+    )
+
+    ribbon_color = fields.Char(string="Ribbon Background Color")
+    ribbon_position = fields.Selection(
+        [("left", "Left"), ("right", "Right")], default="left"
+    )
+
+    merchant_details_en = fields.Html(
+        string="Merchant Details (EN)", oldname="merchant_details"
+    )
+    merchant_details_ar = fields.Html(
+        string="Merchant Details (AR)", oldname="x_merchant_details_ar"
+    )
+    merchant_details_moi_en = fields.Html(
+        string="Merchant Details (MOI EN)", oldname="x_merchant_details_moi"
+    )
+    merchant_details_moi_ar = fields.Html(
+        string="Merchant Details (MOI AR)", oldname="x_merchant_details__moi_ar"
+    )
+    merchant_details_masrif_en = fields.Html(
+        string="Merchant Details (Masrif EN)", oldname="x_merchant_details_masrif"
+    )
+    merchant_details_masrif_ar = fields.Html(
+        string="Merchant Details (Masrif AR)", oldname="x_merchant_details_masrif_ar"
+    )
+
+    go_loyalty_point = fields.Boolean(
+        string="Accept Go Loyalty Point ?",
+        help="Select True if this merchant accept Go Loyalty Points",
+        oldname="x_go_loyalty_point"
+    )
+
+    image_url = fields.Char()
+
+    terms_conditions_en = fields.Html(
+        string="Terms & Conditions (EN)", oldname="x_terms_condition_new"
+    )
+
+    terms_conditions_ar = fields.Html(
+        string="Terms & Conditions (AR)", oldname="x_terms_condition_arabic_new"
+    )
+
+    ar_contact_number = fields.Char(
+        string="Arabic Contact Number", oldname="x_contact_number_ar"
+    )
+    show_in_moi = fields.Boolean(
+        string="Show in MOI",
+        oldname="x_moi_show",
+        help="Expose merchant in MOI channel.",
+    )
+
+    ar_email = fields.Char(string="Arabic Email", oldname="x_email_ar")
+    ar_street = fields.Char(string="Arabic Street", oldname="x_street_ar")
+    ar_city = fields.Char(string="Arabic City", oldname="x_city_ar")
+    ar_country = fields.Char(string="Arabic Country", oldname="x_country_ar")
+    ar_time_from = fields.Char(string="Arabic Time From", oldname="x_time_from_ar")
+    ar_time_to = fields.Char(string="Arabic Time To", oldname="x_time_to_ar")
+    sequence = fields.Integer()
+
+    online_store = fields.Boolean(string="Online Store", oldname="x_online_store")
+
+    merchant_rating = fields.Selection(
+        [
+            ("1", "Bad"),
+            ("2", "Average"),
+            ("3", "Good"),
+            ("4", "Very Good"),
+            ("5", "Excellent"),
+        ],
+        string="Merchant Rating",
+        default="4",
+        help="Internal quality score.",
+    )
+
+    partner_category_id = fields.Many2one("partner.category")
+    arabic_name = fields.Char(string="Arabic Name", oldname="x_arabic_name")
+
+    points_earn = fields.Integer()
+    points_used = fields.Integer()
+    points_values = fields.Integer()
+    enable_whatsapp = fields.Boolean(string="Enable WhatsApp Notifications")
+    whatsapp_title = fields.Char(string="WhatsApp Title")
+    whatsapp_number = fields.Char(string="WhatsApp Number")
+    email_verified = fields.Boolean(string="Email Verified")
+    whatsapp_prefill_message = fields.Text(string="WhatsApp Prefill Message")
+
+    comment = fields.Text()
+    is_published = fields.Boolean(string="Is Published", default=False)
+    merchant_type = fields.Selection(
+        [("standard", "Standard"), ("premium", "Premium")], default="standard"
+    )
+    need_registration_code = fields.Boolean(string="Requires Registration Code")
+    reg_hide = fields.Boolean(string="Hide Registration Code",oldname="x_reg_hide")
+    map_banner = fields.Binary(string="Map Banner")
+
     @api.depends("line_ids.partner_id", "line_ids.balance")
     def _compute_points(self):
         for p in self:
