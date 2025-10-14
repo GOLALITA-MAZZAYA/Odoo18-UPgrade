@@ -1,26 +1,15 @@
-from odoo import models, fields
-
+from odoo import models, fields, api
 
 class AdvertisementTracking(models.Model):
-    _name = "advertisement.tracking"
-    _description = "Advertisement Tracking"
-    _rec_name = "tracking_code"
+    _name = 'advertisement.tracking'
+    _description = 'Advertisement Tracking'
+    _rec_name = 'tracking_code'
+    _order = 'date desc'
 
-    partner_id = fields.Many2one("res.partner", string="Customer")
-    customer_name = fields.Char(
-        string="Customer Name",
-    )
-    email = fields.Char(string="Email")
-    phone = fields.Char(string="Phone")
-    tracking_code = fields.Char(
-        string="Tracking Code",
-        required=True,
-        index=True,
-        help="Unique tracking code for advertisement",
-    )
+    customer_name = fields.Char(required=True)
+    partner_id = fields.Many2one('res.partner', required=True, ondelete='cascade')
+    email = fields.Char(required=True)
+    phone = fields.Char(required=True)
+    tracking_code = fields.Char(required=True)
+    date = fields.Datetime(required=True, default=fields.Datetime.now)
 
-    date = fields.Datetime(
-        string="Tracking Date",
-        default=fields.Datetime.now,
-        help="Date and time of tracking",
-    )

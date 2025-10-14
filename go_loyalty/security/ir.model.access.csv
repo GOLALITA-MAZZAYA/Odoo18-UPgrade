@@ -24,6 +24,9 @@ access_contract_matrix,access.contract.matrix,model_contract_matrix,base.group_u
 access_notin_app,access.notin.app,model_notin_app,base.group_user,1,1,1,1
 access_terms_matrix,access.terms.matrix,model_terms_matrix,base.group_user,1,1,1,1
 access_user_otp,access.user.otp,model_user_otp,base.group_user,1,1,1,1
-access_partner_category,access.artner.category,model_partner_category,base.group_user,1,1,1,1
+access_partner_category,access.partner.category,model_partner_category,base.group_user,1,1,1,1
+access_advertisement_banner,access.advertisement.banner,model_advertisement_banner,base.group_user,1,1,1,1
+access_advertisement_tracking,access.advertisement.tracking,model_advertisement_tracking,base.group_user,1,1,1,1
+access_org_registration_code,access.org.registration.code,model_org_registration_code,base.group_user,1,1,1,1
 
 

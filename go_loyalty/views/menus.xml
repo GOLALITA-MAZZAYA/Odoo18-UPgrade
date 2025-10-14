@@ -253,5 +253,14 @@
             sequence="25"
     />
 
+    <menuitem
+            id="menu_org_registration_code"
+            name="Codes"
+            parent="menu_loyalty_configuration"
+            action="action_org_registration_code"
+            sequence="26"
+    />
+
+
 
 </odoo>

@@ -11,3 +11,14 @@ class ResCompany(models.Model):
         domain="[('entity_type', '=', 'platform')]",
         help="Optional platform partner.",
     )
+
+    rule_id = fields.Many2one("loyalty.rule", string="Loyalty Rule")
+    ad_1_ids = fields.One2many(
+        "advertisement.banner", "company_id", domain=[("advertisement", "=", "ad_1")]
+    )
+    ad_2_ids = fields.One2many(
+        "advertisement.banner", "company_id", domain=[("advertisement", "=", "ad_2")]
+    )
+    ad_3_ids = fields.One2many(
+        "advertisement.banner", "company_id", domain=[("advertisement", "=", "ad_3")]
+    )

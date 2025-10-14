@@ -193,6 +193,16 @@ class ResPartner(models.Model):
     reg_hide = fields.Boolean(string="Hide Registration Code",oldname="x_reg_hide")
     map_banner = fields.Binary(string="Map Banner")
 
+    code_ids = fields.One2many(
+        "org.registration.code", "partner_id", string="Registration Codes"
+    )
+
+    pause_notification = fields.Boolean()
+
+
+    def _is_registred(self, code):
+        return code in self.code_ids.filtered(lambda l: l.assign_id).mapped("code")
+
     @api.depends("line_ids.partner_id", "line_ids.balance")
     def _compute_points(self):
         for p in self:

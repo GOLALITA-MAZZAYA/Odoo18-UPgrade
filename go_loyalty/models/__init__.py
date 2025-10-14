@@ -29,6 +29,10 @@ from . import res_users
 from . import user_otp
 from . import product_template
 from . import partner_category
+from . import advertisement_banner
+from . import advertisement_tracking
+from . import org_registration_code
+
 
 
 

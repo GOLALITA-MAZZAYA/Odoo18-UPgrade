@@ -1,0 +1,60 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+
+    <record id="view_org_registration_code_form" model="ir.ui.view">
+        <field name="name">org.registration.code.form</field>
+        <field name="model">org.registration.code</field>
+        <field name="arch" type="xml">
+            <form>
+                <sheet>
+                    <group>
+                        <group>
+                            <field name="code"/>
+                            <field name="partner_id"/>
+                            <field name="assign_id"/>
+                        </group>
+                        <group>
+                            <field name="assigned_on"/>
+                            <field name="vip"/>
+                        </group>
+                    </group>
+                </sheet>
+            </form>
+        </field>
+    </record>
+
+    <record id="view_org_registration_code_tree" model="ir.ui.view">
+        <field name="name">org.registration.code.tree</field>
+        <field name="model">org.registration.code</field>
+        <field name="arch" type="xml">
+            <list>
+                <field name="code"/>
+                <field name="partner_id"/>
+                <field name="assign_id"/>
+                <field name="assigned_on"/>
+                <field name="vip"/>
+            </list>
+        </field>
+    </record>
+
+    <record id="view_org_registration_code_search" model="ir.ui.view">
+        <field name="name">org.registration.code.search</field>
+        <field name="model">org.registration.code</field>
+        <field name="arch" type="xml">
+            <search>
+                <field name="code"/>
+                <field name="partner_id"/>
+                <field name="assign_id"/>
+                <filter string="VIP" name="vip" domain="[('vip', '=', True)]"/>
+            </search>
+        </field>
+    </record>
+
+    <record id="action_org_registration_code" model="ir.actions.act_window">
+        <field name="name">Registration Codes</field>
+        <field name="res_model">org.registration.code</field>
+        <field name="view_mode">list,form</field>
+    </record>
+
+
+</odoo>

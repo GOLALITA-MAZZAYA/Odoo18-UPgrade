@@ -13,6 +13,7 @@
         "mail",
         "uom",
         "auth_signup",
+        "website",
         "website_sale"
     ],
     "data": [
@@ -39,6 +40,8 @@
         "views/terms_matrix.xml",
         "views/loyalty_point_transfer_line.xml",
         "views/partner_category.xml",
+        "views/res_company.xml",
+        "views/org_registration_code.xml",
         "views/menus.xml"
     ],
     "installable": True,

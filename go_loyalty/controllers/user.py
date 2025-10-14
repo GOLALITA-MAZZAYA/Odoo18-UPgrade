@@ -738,4 +738,26 @@ class User(http.Controller):
         except Exception as e:
             return {"error": _("Something went wrong: %s") % str(e)}
 
+    @http.route(
+        ["/go/api/user/save/offers/v2"],
+        auth="public",
+        website=True,
+        methods=["POST"],
+        csrf=False,
+        type="json",
+    )
+    def get_api_save_offers_v2(self, **post):
+        try:
+            data = post or self._get_json_request()
+            if "error" in data:
+                return data
 
+            current_user = self._validate_token(data)
+            if isinstance(current_user, dict):
+                return current_user
+
+            response = [{"status": "Offer Saved Successfully"}]
+            return response
+
+        except Exception as e:
+            return {"error": _("Something went wrong: %s") % str(e)}
