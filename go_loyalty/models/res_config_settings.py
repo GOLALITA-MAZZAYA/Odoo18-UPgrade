@@ -6,3 +6,8 @@ from odoo import fields, models
 class ResConfigSettings(models.TransientModel):
     _inherit = "res.config.settings"
 
+    restaurant_payment_url = fields.Char(
+        string="Restaurant Payment URL",
+        config_parameter="go_loyalty.payment_url",
+        help="Base URL used for initiating restaurant order payments.",
+    )

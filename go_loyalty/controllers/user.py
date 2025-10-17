@@ -1,6 +1,7 @@
 from odoo import http, fields, _
 from odoo.http import request
 import json
+import ast
 from werkzeug.urls import url_join
 
 
@@ -230,7 +231,7 @@ class User(http.Controller):
 
     @http.route(
         [
-            "/go/api/user/archive",
+            "/go/api/user/archive","/go/api/user/account/delete",
         ],
         auth="public",
         website=True,
@@ -239,31 +240,6 @@ class User(http.Controller):
         type="json",
     )
     def go_user_archive(self, **post):
-        data = post or self._get_json_request()
-        if "error" in data:
-            return data
-
-        current_user = self._validate_token(data)
-        if isinstance(current_user, dict):
-            return current_user
-
-        partner = current_user.partner_id
-        current_user.sudo().unlink()
-        partner.sudo().unlink()
-
-        return {"success": _("User deleted successfully")}
-
-    @http.route(
-        [
-            "/go/api/user/account/delete",
-        ],
-        auth="public",
-        website=True,
-        methods=["POST"],
-        csrf=False,
-        type="json",
-    )
-    def go_user_new_delete(self, **post):
         data = post or self._get_json_request()
         if "error" in data:
             return data
@@ -758,6 +734,528 @@ class User(http.Controller):
 
             response = [{"status": "Offer Saved Successfully"}]
             return response
+
+        except Exception as e:
+            return {"error": _("Something went wrong: %s") % str(e)}
+
+    @http.route(
+        "/go/api/user/location/create",
+        type="json",
+        auth="public",
+        website=True,
+        methods=["POST"],
+        csrf=False,
+    )
+    def create_user_location(self, **post):
+        try:
+            data = post or self._get_json_request()
+            if "error" in data:
+                return data
+
+            current_user = self._validate_token(data)
+            if isinstance(current_user, dict):
+                return current_user
+
+            required_fields = [
+                "customer_id",
+                "location_name",
+                "zone",
+                "building_number",
+                "street_number",
+            ]
+            missing_fields = [f for f in required_fields if not data.get(f)]
+            if missing_fields:
+                return {"error": _("%s Missing") % ", ".join(missing_fields)}
+
+            customer = (
+                request.env["res.partner"].sudo().browse(int(data["customer_id"]))
+            )
+            if not customer.exists():
+                return {"error": _("Customer not found in the system")}
+
+            vals = {
+                "customer_id": customer.id,
+                "location_name": data.get("location_name"),
+                "location_landmark": data.get("location_landmark"),
+                "zone": data.get("zone"),
+                "building_number": data.get("building_number"),
+                "street_number": data.get("street_number"),
+                "apartment_number": data.get("apartment_number"),
+                "floor": data.get("floor"),
+                "lat": data.get("lat"),
+                "long": data.get("long"),
+            }
+
+            address = request.env["user.address"].sudo().create(vals)
+            return {
+                "success": _("Address created successfully!"),
+                "address_id": address.id,
+            }
+
+        except Exception as e:
+            return {"error": _("Something went wrong: %s") % str(e)}
+
+    @http.route(
+        "/go/api/user/voucher/code/search",
+        type="json",
+        auth="public",
+        website=True,
+        methods=["POST"],
+        csrf=False,
+    )
+    def get_user_voucher_code_search(self, **post):
+        try:
+            data = post or request.env["ir.http"]._get_json_request()
+            if "error" in data:
+                return data
+
+            current_user = request.env["ir.http"]._validate_token(data)
+            if isinstance(current_user, dict):
+                return current_user
+
+            required_fields = ["customer_id", "voucher_code"]
+            missing_fields = [f for f in required_fields if not data.get(f)]
+            if missing_fields:
+                return {"error": _("%s Missing") % ", ".join(missing_fields)}
+
+            customer = (
+                request.env["res.partner"].sudo().browse(int(data["customer_id"]))
+            )
+            if not customer.exists():
+                return {"error": _("Customer not found in the system")}
+
+            valid_voucher_code = "GETVALUESJC15"
+            if data.get("voucher_code") != valid_voucher_code:
+                return {"error": _("Invalid Voucher Code")}
+
+            return [
+                {
+                    "voucher_code": valid_voucher_code,
+                    "voucher_value": 15,
+                    "customer_name": customer.name,
+                    "customer_id": customer.id,
+                }
+            ]
+        except Exception as e:
+            return {"error": _("Something went wrong: %s") % str(e)}
+
+    @http.route(
+        "/go/api/user/restaurant/create/order",
+        type="json",
+        auth="public",
+        website=True,
+        methods=["POST"],
+        csrf=False,
+    )
+    def create_user_restaurant_order(self, **post):
+        try:
+            data = post or self._get_json_request()
+            if "error" in data:
+                return data
+
+            current_user = self._validate_token(data)
+            if isinstance(current_user, dict):
+                return current_user
+
+            required_fields = [
+                "customer_id",
+                "customer_phone",
+                "customer_address_id",
+                "merchant_id",
+                "voucher_applied",
+                "delivery_type",
+                "order_line",
+            ]
+            missing_fields = [f for f in required_fields if not data.get(f)]
+            if missing_fields:
+                return {"error": _("%s Missing") % ", ".join(missing_fields)}
+
+            try:
+                order_lines = (
+                    data["order_line"]
+                    if isinstance(data["order_line"], list)
+                    else ast.literal_eval(data["order_line"])
+                )
+            except Exception:
+                return {"error": _("Invalid order_line format")}
+
+            vals = {
+                "partner_id": data.get("customer_id"),
+                "merchant_id": data.get("merchant_id"),
+                "customer_address_id": data.get("customer_address_id"),
+                "customer_phone": data.get("customer_phone"),
+                "voucher_applied": data.get("voucher_applied"),
+                "voucher_value": data.get("voucher_value"),
+                "delivery_type": data.get("delivery_type"),
+                "line_ids": [
+                    (
+                        0,
+                        0,
+                        {
+                            "product_id": line["product_id"],
+                            "name": line["product_id"],
+                            "product_uom_qty": line["quantity"],
+                            "price_unit": line["price"],
+                        },
+                    )
+                    for line in order_lines
+                ],
+            }
+
+            order = request.env["loyalty.restaurant.order"].sudo().create(vals)
+            return {
+                "success": True,
+                "message": _("Order created successfully"),
+                "id": order.id,
+                "name": order.name,
+            }
+
+        except Exception as e:
+            return {"error": _("Something went wrong: %s") % str(e)}
+
+    @http.route(
+        "/go/user/api/user/restro/order/list",
+        type="json",
+        auth="public",
+        website=True,
+        methods=["POST"],
+        csrf=False,
+    )
+    def get_user_restro_order_list(self, **post):
+        try:
+            data = post or self._get_json_request()
+            if "error" in data:
+                return data
+
+            current_user = self._validate_token(data)
+            if isinstance(current_user, dict):
+                return current_user
+
+            domain = []
+            if data.get("customer_id"):
+                domain.append(("partner_id", "=", data["customer_id"]))
+            if data.get("merchant_id"):
+                domain.append(("merchant_id", "=", data["merchant_id"]))
+            if data.get("order_id"):
+                domain.append(("id", "=", data["order_id"]))
+
+            orders = request.env["loyalty.restaurant.order"].sudo().search(domain)
+            web_base_url = (
+                request.env["ir.config_parameter"].sudo().get_param("web.base.url")
+            )
+            result = []
+
+            for order in orders:
+                result.append(
+                    {
+                        "customer": order.partner_id.name,
+                        "customer_id": order.partner_id.id,
+                        "order_id": order.id,
+                        "order_reference": order.name,
+                        "order_status": order.state,
+                        "order_create_date": order.create_date,
+                        "merchant_id": order.merchant_id.id,
+                        "merchant_name": order.merchant_id.name,
+                        "merchant_logo": (
+                            url_join(
+                                web_base_url,
+                                f"/go/api/image/{order.merchant_id.id}/image_1920/res.partner",
+                            )
+                            if order.merchant_id
+                            else False
+                        ),
+                        "delivery_type": order.delivery_type,
+                        "customer_phone": order.customer_phone,
+                        "customer_address_id": (
+                            order.customer_address_id.id
+                            if order.customer_address_id
+                            else None
+                        ),
+                        "voucher_applied": order.voucher_applied,
+                        "voucher_value": order.voucher_value,
+                        "lines": [
+                            {
+                                "product_id": line.product_id.id,
+                                "product_name": line.product_id.name,
+                                "quantity": line.product_uom_qty,
+                                "price": line.price_unit,
+                                "price_subtotal": line.price_subtotal,
+                            }
+                            for line in order.line_ids
+                        ],
+                    }
+                )
+            return result
+
+        except Exception as e:
+            return {"error": _("Something went wrong: %s") % str(e)}
+
+    @http.route(
+        "/go/api/user/restaurant/order/payment/start",
+        type="json",
+        auth="public",
+        website=True,
+        methods=["POST"],
+        csrf=False,
+    )
+    def restaurant_order_payment_start(self, **post):
+        try:
+            data = post or self._get_json_request()
+            if "error" in data:
+                return data
+
+            current_user = self._validate_token(data)
+            if isinstance(current_user, dict):
+                return current_user
+
+            if not data.get("order_id"):
+                return {"error": _("Order ID Missing")}
+
+            pay_url_base = (
+                request.env["ir.config_parameter"]
+                .sudo()
+                .get_param("go_loyalty.payment_url")
+            )
+            if not pay_url_base:
+                return {"error": _("Payment URL is not configured in system settings")}
+
+            res = [{"order_id": data.get("order_id"), "payUrl": pay_url_base}]
+
+            return res
+
+        except Exception as e:
+            return {"error": _("Something went wrong: %s") % str(e)}
+
+    @http.route(
+        "/go/api/user/terms-conditions",
+        type="json",
+        auth="public",
+        website=True,
+        methods=["POST"],
+        csrf=False,
+    )
+    def get_terms_conditions(self, **post):
+        try:
+            data = post or self._get_json_request()
+            if "error" in data:
+                return data
+
+            current_user = self._validate_token(data)
+            if isinstance(current_user, dict):
+                return current_user
+
+            app_id = current_user.parent_id.id
+            domain = [("organisation_id", "in", [app_id])]
+
+            if data.get("merchant_id"):
+                domain.append(("res_partner_id", "=", data.get("merchant_id")))
+
+            terms_matrix = request.env["terms.matrix"].sudo().search(domain, limit=1)
+            if not terms_matrix:
+                return {
+                    "error": _("No Terms and Conditions found for the given criteria.")
+                }
+
+            res = [
+                {
+                    "merchant_id": terms_matrix.res_partner_id.id,
+                    "terms_condition": terms_matrix.terms_condition,
+                    "terms_condition_ar": terms_matrix.terms_condition_ar,
+                    "organisation_id": [org.id for org in terms_matrix.organisation_id],
+                }
+            ]
+
+            return res
+
+        except Exception as e:
+            return {"error": _("Something went wrong: %s") % str(e)}
+
+    @http.route(
+        "/go/api/user/contracts",
+        type="json",
+        auth="public",
+        website=True,
+        methods=["POST"],
+        csrf=False,
+    )
+    def get_contract_matrix(self, **post):
+        try:
+            data = post or self._get_json_request()
+            if "error" in data:
+                return data
+
+            current_user = self._validate_token(data)
+            if isinstance(current_user, dict):
+                return current_user
+
+            app_id = current_user.parent_id.id
+            domain = [("organisation_id", "in", [app_id])]
+
+            if data.get("merchant_id"):
+                domain.append(("res_partner_id", "=", data.get("merchant_id")))
+
+            contract_matrix = (
+                request.env["contract.matrix"].sudo().search(domain, limit=1)
+            )
+            if not contract_matrix:
+                return {"error": _("No Contract found for the given criteria.")}
+
+            web_base_url = (
+                request.env["ir.config_parameter"].sudo().get_param("web.base.url")
+            )
+
+            res = [
+                {
+                    "merchant_id": contract_matrix.res_partner_id.id,
+                    "contract_file_url": url_join(
+                        web_base_url,
+                        f"/web/binary/matrix_contract_download_pdf/{contract_matrix.id}",
+                    ),
+                    "organisation_id": [
+                        org.id for org in contract_matrix.organisation_id
+                    ],
+                }
+            ]
+
+            return res
+
+        except Exception as e:
+            return {"error": _("Something went wrong: %s") % str(e)}
+
+    @http.route(
+        "/go/api/user/merchant/count/premium",
+        auth="public",
+        methods=["POST"],
+        csrf=False,
+        type="json",
+        cors="*",
+    )
+    def get_premium_merchant_count(self, **post):
+        try:
+            data = post or self._get_json_request()
+            if "error" in data:
+                return data
+
+            current_user = self._validate_token(data)
+            if isinstance(current_user, dict):
+                return current_user
+
+            # Fetch app IDs linked to the user's parent
+            apps = (
+                request.env["notin.app"]
+                .sudo()
+                .search([("parent_id", "=", current_user.parent_id.id)])
+            )
+            app_ids = apps.ids
+
+            domain = [
+                ("is_premium_merchant", "=", True),
+                ("active", "=", True),
+                ("not_linked_ids", "not in", app_ids),
+                ("not_in_list", "=", False),
+            ]
+
+            total_count = request.env["res.partner"].sudo().search_count(domain)
+
+            return {"total_premium_merchants": total_count}
+
+        except Exception as e:
+            return {"error": _("Something went wrong: %s") % str(e)}
+
+    @http.route(
+        "/go/api/user/merchant/count/gpoint",
+        auth="public",
+        methods=["POST"],
+        csrf=False,
+        type="json",
+        cors="*",
+    )
+    def get_gpoint_merchant_count(self, **post):
+        try:
+            data = post or self._get_json_request()
+            if "error" in data:
+                return data
+
+            current_user = self._validate_token(data)
+            if isinstance(current_user, dict):
+                return current_user
+
+            apps = (
+                request.env["notin.app"]
+                .sudo()
+                .search([("parent_id", "=", current_user.parent_id.id)])
+            )
+            app_ids = apps.ids
+
+            domain = [
+                ("is_premium_merchant", "=", True),
+                ("active", "=", True),
+                ("not_linked_ids", "not in", app_ids),
+                ("not_in_list", "=", False),
+            ]
+
+            total_count = request.env["res.partner"].sudo().search_count(domain)
+
+            return {"total_gpoint_merchants": total_count}
+
+        except Exception as e:
+            return {"error": _("Something went wrong: %s") % str(e)}
+
+    @http.route(
+        "/go/api/user/offers-discount-tag",
+        type="json",
+        auth="public",
+        website=True,
+        methods=["POST"],
+        csrf=False,
+    )
+    def get_user_offer_discount_tag(self, **post):
+        try:
+            data = post or self._get_json_request()
+            if "error" in data:
+                return data
+
+            current_user = self._validate_token(data)
+            if isinstance(current_user, dict):
+                return current_user
+
+            app_id = current_user.parent_id.id
+            domain = [("organisation_id", "in", [app_id])]
+
+            if data.get("x_for_employee_type"):
+                domain += [
+                    "|",
+                    ("employee_type", "=", data["x_for_employee_type"]),
+                    ("employee_type", "=", "both"),
+                ]
+
+            if data.get("merchant_id"):
+                domain.append(("res_partner_id", "=", data["merchant_id"]))
+
+            merchant_matrix = (
+                request.env["merchant.matrix"].sudo().search(domain, limit=1)
+            )
+
+            if not merchant_matrix:
+                return {
+                    "error": _(
+                        "No offers or discount tags found for the given criteria."
+                    )
+                }
+
+            res = []
+            for matrix in merchant_matrix:
+                res.append(
+                    {
+                        "merchant_id": matrix.res_partner_id.id,
+                        "ribbon_text": matrix.discount_tag,
+                        "x_discount_tag_arabic": matrix.discount_tag_arabic,
+                        "ribbon_color": matrix.offer_details,
+                        "organisation_id": [org.id for org in matrix.organisation_id],
+                    }
+                )
+
+            return res
 
         except Exception as e:
             return {"error": _("Something went wrong: %s") % str(e)}

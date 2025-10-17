@@ -187,13 +187,14 @@ class Advertisement(http.Controller):
             if isinstance(current_user, dict):
                 return current_user
 
-            website = request.env["website"].get_current_website()
+            company = current_user.company_id
+
             social_media_links = [
                 {
-                    "social_facebook": website.social_facebook,
-                    "social_linkedin": website.social_linkedin,
-                    "social_twitter": website.social_twitter,
-                    "social_instagram": website.social_instagram,
+                    "social_facebook": company.social_facebook,
+                    "social_linkedin": company.social_linkedin,
+                    "social_twitter": company.social_twitter,
+                    "social_instagram": company.social_instagram,
                 }
             ]
             return social_media_links
@@ -242,8 +243,6 @@ class Advertisement(http.Controller):
 
         except Exception as e:
             return {"error": _("Something went wrong: %s") % str(e)}
-
-
 
     @http.route(
         ["/go/api/pause/notification"],
@@ -294,3 +293,4 @@ class Advertisement(http.Controller):
 
         except Exception as e:
             return {"error": _("Something went wrong: %s") % str(e)}
+

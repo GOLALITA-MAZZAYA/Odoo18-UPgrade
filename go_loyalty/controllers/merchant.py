@@ -3,7 +3,11 @@ from odoo.http import request
 from werkzeug.urls import url_join
 from datetime import timedelta,datetime
 from odoo.tools.misc import DEFAULT_SERVER_DATE_FORMAT
+from dateutil.relativedelta import relativedelta
+import logging
 import json
+_logger = logging.getLogger(__name__)
+
 
 class Merchant(http.Controller):
 
@@ -164,6 +168,73 @@ class Merchant(http.Controller):
             "product_name": data.get("product_name") or None,
             "product_price": data.get("product_price") or None,
         }
+
+    # def _get_notification_info(self, merchant_id, user_partner_id):
+    #     Notification = request.env["loyalty.notification"].sudo()
+    #     notification = Notification.search([("merchant_id", "=", merchant_id)], limit=1)
+    #     if not notification:
+    #         return {}
+    #
+    #     return {
+    #         "notification_id": notification.id,
+    #         "is_subscribed": getattr(notification, "_is_subscribed", lambda x: False)(
+    #             user_partner_id
+    #         ),
+    #         "title": notification.name or "",
+    #         "message": notification.message or "",
+    #         "create_date": notification.create_date,
+    #     }
+
+    # def _prepare_merchant_data(self, partner, web_base_url, current_user):
+    #     notif_data = self._get_notification_info(
+    #         merchant_id=partner.id, user_partner_id=current_user.partner_id.id
+    #     )
+    #
+    #     return {
+    #         "create_date": partner.create_date,
+    #         "x_for_employee_type": partner.x_for_employee_type,
+    #         "merchant_name": partner.name,
+    #         "x_have_branch": partner.x_have_branch,
+    #         "x_have_offers": partner.x_have_offers,
+    #         "is_business_hotel": partner.is_hotel_type,
+    #         "x_moi_show": partner.x_moi_show,
+    #         "x_kts": partner.x_kts,
+    #         "merchant_id": partner.id,
+    #         "accept_go_loyalty_point": partner.x_go_loyalty_point,
+    #         "x_online_store": partner.x_online_store,
+    #         "x_sequence": partner.x_sequence,
+    #         "barcode": partner.barcode,
+    #         "partner_latitude": partner.partner_latitude,
+    #         "partner_longitude": partner.partner_longitude,
+    #         "ribbon_text": partner.ribbon_text,
+    #         "ribbon_color": partner.ribbon_color,
+    #         "ribbon_position": partner.ribbon_position,
+    #         "rating": partner.merchant_rating,
+    #         "map_banner": url_join(
+    #             web_base_url, f"/go/api/image/{partner.id}/map_banner/res.partner"
+    #         ),
+    #         "merchant_logo": url_join(
+    #             web_base_url, f"/go/api/image/{partner.id}/image_512/res.partner"
+    #         ),
+    #         "category": partner.partner_category_id.name,
+    #         "category_id": partner.partner_category_id.id,
+    #         "country_id": partner.country_id.id,
+    #         "country_code": partner.country_id.code,
+    #         "country_name": partner.country_id.name,
+    #         "category_logo": url_join(
+    #             web_base_url,
+    #             f"/go/api/image/{partner.partner_category_id.id}/image_icon/partner.category",
+    #         ),
+    #         "banners": self._get_banners(partner, web_base_url),
+    #         "pdf_attached": partner.x_pdf_attached,
+    #         "company_contract_url": url_join(
+    #             web_base_url, f"/web/binary/contract_download_pdf/{partner.id}"
+    #         ),
+    #         "company_registartion_url": url_join(
+    #             web_base_url, f"/web/binary/registration_download_pdf/{partner.id}"
+    #         ),
+    #         "notification": notif_data,
+    #     }
 
     @http.route(
         ["/go/api/merchant/my/transaction"],
@@ -753,3 +824,736 @@ class Merchant(http.Controller):
                 "error": _("Something went wrong while submitting enquiry: %s") % str(e)
             }
 
+    @http.route(
+        ["/go/api/count/merchant/v2"],
+        auth="public",
+        website=True,
+        methods=["POST"],
+        csrf=False,
+        type="json",
+    )
+    def get_merchant_count(self, **post):
+        try:
+            data = post or self._get_json_request()
+            if "error" in data:
+                return data
+
+            current_user = self._validate_token(data)
+            if isinstance(current_user, dict):
+                return current_user
+
+            merchant_id = data.get("merchant_id")
+            if not merchant_id:
+                return {"error": _("Merchant ID Not Provided")}
+
+            return True
+
+        except Exception as e:
+            return {"error": _("Something went wrong: %s") % str(e)}
+
+    @http.route(
+        ["/go/api/create/otp/password"],
+        auth="public",
+        website=True,
+        methods=["POST"],
+        csrf=False,
+        type="json",
+    )
+    def go_api_create_otp_password(self, **post):
+        try:
+            try:
+                data = post or json.loads(request.httprequest.data.decode("utf-8"))
+                if not isinstance(data, dict):
+                    return {"error": "Invalid JSON format", "status_code": "01"}
+            except Exception:
+                return {"error": "Malformed JSON payload", "status_code": "01"}
+
+            token = data.get("token")
+            if not token:
+                return {"error": "Token is missing", "status_code": "01"}
+
+            user = (
+                request.env["res.users"].sudo().search([("token", "=", token)], limit=1)
+            )
+            if not user:
+                return {"error": "Invalid User Token", "status_code": "01"}
+
+            new_password = data.get("new_password")
+            if not new_password:
+                return {"error": "Password missing", "status_code": "01"}
+
+            user.sudo().write({"password": new_password})
+            return {"message": "Successfully changed password", "status_code": "00"}
+
+        except Exception as e:
+            return {"error": "Something went wrong: %s" % str(e), "status_code": "01"}
+
+    @http.route(
+        ["/go/api/merchant/track/v2"],
+        auth="public",
+        website=True,
+        methods=["POST"],
+        csrf=False,
+        type="json",
+    )
+    def track_merchant_v2(self, **post):
+        try:
+            data = post or self._get_json_request()
+            if "error" in data:
+                return data
+
+            current_user = self._validate_token(data)
+            if isinstance(current_user, dict):
+                return current_user
+
+            required_fields = {
+                "customer_name": _("Customer Information Missing"),
+                "customer_id": _("Customer ID Missing"),
+                "customer_email": _("Email Missing"),
+                "customer_phone": _("Phone No. Missing"),
+                "track_type": _("Tracking Type Missing"),
+                "track_value": _("Track Value Missing"),
+                "track_date_time": _("Date Time Missing"),
+                "product_id": _("Product ID Missing"),
+            }
+
+            for field, message in required_fields.items():
+                if not data.get(field):
+                    return {"error": message}
+
+            def parse_date(date_str):
+                possible_formats = [
+                    "%Y-%m-%d %H:%M:%S",
+                    "%Y-%m-%d %H:%M",
+                    "%d-%m-%Y %I:%M %p",
+                    "%Y-%m-%d",
+                    "%d-%m-%Y",
+                ]
+                for fmt in possible_formats:
+                    try:
+                        return datetime.strptime(date_str, fmt)
+                    except Exception:
+                        continue
+                return None
+
+            track_date = parse_date(data["track_date_time"])
+            if not track_date:
+                return {"error": _("Invalid date format for track_date_time")}
+
+            partner = request.env["res.partner"].sudo().browse(int(data["customer_id"]))
+            if not partner.exists():
+                return {"error": _("Customer not found in the system")}
+
+            # tracking = (
+            #     request.env["advertisement.tracking"]
+            #     .sudo()
+            #     .create(
+            #         {
+            #             "partner_id": partner.id,
+            #             "customer_name": data["customer_name"],
+            #             "email": data["customer_email"],
+            #             "phone": data["customer_phone"],
+            #             "tracking_code": data["track_value"],
+            #             "date": track_date,
+            #         }
+            #     )
+            # )
+
+            return {
+                "success": _("Tracking updated successfully !!"),
+                "tracking_id": partner.id,
+            }
+
+        except Exception as e:
+            return {"error": _("Something went wrong: %s") % str(e)}
+
+    @http.route(
+        ["/go/api/save/merchant/as/favourite"],
+        auth="public",
+        website=True,
+        methods=["POST"],
+        csrf=False,
+        type="json",
+    )
+    def set_merchant_as_favourite(self, **post):
+        try:
+            data = post or self._get_json_request()
+            if "error" in data:
+                return data
+
+            current_user = self._validate_token(data)
+            if isinstance(current_user, dict):
+                return current_user
+
+            required_fields = {
+                "customer_id": "Customer ID is missing",
+                "merchant_id": "Merchant ID is missing",
+            }
+            for field, message in required_fields.items():
+                if not data.get(field):
+                    return {"error": _(message)}
+
+            # Fetch customer and merchant once
+            customer = (
+                request.env["res.partner"].sudo().browse(int(data["customer_id"]))
+            )
+            if not customer.exists():
+                return {"error": _("Customer not found")}
+
+            merchant = (
+                request.env["res.partner"].sudo().browse(int(data["merchant_id"]))
+            )
+            if not merchant.exists():
+                return {"error": _("Merchant not found")}
+
+            vals = {
+                "partner_id": customer.id,
+                "fav_merchant_id": merchant.id,
+            }
+
+            favourite_record = (
+                request.env["favourite.product"]
+                .sudo()
+                .search(
+                    [
+                        ("partner_id", "=", customer.id),
+                        ("fav_merchant_id", "=", merchant.id),
+                    ],
+                    limit=1,
+                )
+            )
+
+            if favourite_record:
+                favourite_record.sudo().write(vals)
+            else:
+                request.env["favourite.product"].sudo().create(vals)
+
+            return {"success": _("Merchant successfully added to favourite list")}
+
+        except Exception as e:
+            return {"error": _("Something went wrong: %s") % str(e)}
+
+    @http.route(
+        ["/ago/api/get/favourite/merchants"],
+        auth="public",
+        website=True,
+        methods=["POST"],
+        csrf=False,
+        type="json",
+    )
+    def get_favourite_merchants_v2(self, **post):
+        try:
+            data = post or self._get_json_request()
+            if "error" in data:
+                return data
+
+            current_user = self._validate_token(data)
+            if isinstance(current_user, dict):
+                return current_user
+
+            customer_id = data.get("customer_id")
+            if not customer_id:
+                return {"error": _("Customer ID is missing")}
+
+            customer = request.env["res.partner"].sudo().browse(int(customer_id))
+            if not customer.exists():
+                return {"error": _("Customer not found")}
+
+            favourite_records = (
+                request.env["favourite.product"]
+                .sudo()
+                .search(
+                    [("partner_id", "=", customer.id), ("fav_merchant_id", "!=", False)]
+                )
+            )
+
+            merchant_ids = favourite_records.mapped("fav_merchant_id").ids
+
+            return {"merchant_ids": merchant_ids}
+
+        except Exception as e:
+            return {"error": _("Something went wrong: %s") % str(e)}
+
+    @http.route(
+        ["/ago/api/remove/favourite/merchant"],
+        auth="public",
+        website=True,
+        methods=["POST"],
+        csrf=False,
+        type="json",
+    )
+    def remove_favourite_merchant_v2(self, **post):
+        try:
+            data = post or self._get_json_request()
+            if "error" in data:
+                return data
+
+            current_user = self._validate_token(data)
+            if isinstance(current_user, dict):
+                return current_user
+
+            required_fields = {
+                "customer_id": _("Customer ID is missing"),
+                "merchant_id": _("Merchant ID is missing"),
+            }
+            for field, message in required_fields.items():
+                if not data.get(field):
+                    return {"error": message}
+
+            customer = (
+                request.env["res.partner"].sudo().browse(int(data["customer_id"]))
+            )
+            if not customer.exists():
+                return {"error": _("Customer not found")}
+
+            favourite_record = (
+                request.env["favourite.product"]
+                .sudo()
+                .search(
+                    [
+                        ("partner_id", "=", customer.id),
+                        ("fav_merchant_id", "=", int(data["merchant_id"])),
+                    ],
+                    limit=1,
+                )
+            )
+            if not favourite_record:
+                return {"error": _("Favourite merchant record not found")}
+
+            favourite_record.sudo().unlink()
+
+            updated_favourite_records = (
+                request.env["favourite.product"]
+                .sudo()
+                .search([("partner_id", "=", customer.id)])
+            )
+            updated_merchant_ids = updated_favourite_records.mapped(
+                "fav_merchant_id"
+            ).ids
+
+            return {
+                "success": _("Favourite merchant successfully removed"),
+                "merchant_ids": updated_merchant_ids,
+            }
+
+        except Exception as e:
+            return {"error": _("Something went wrong: %s") % str(e)}
+
+    # @http.route(
+    #     ["/go/api/user/merchant/lists"],
+    #     auth="public",
+    #     website=True,
+    #     methods=["POST"],
+    #     csrf=False,
+    #     type="json",
+    #     cors="*",
+    # )
+    # def get_user_merchant_list_v3(self, **post):
+    #     try:
+    #         # Parse request data
+    #         data = post or self._get_json_request()
+    #         if "error" in data:
+    #             return data
+    #
+    #         # Validate token
+    #         current_user = self._validate_token(data)
+    #         if isinstance(current_user, dict):
+    #             return current_user
+    #
+    #         # Base domain
+    #         app = (
+    #             request.env["notin.app"]
+    #             .sudo()
+    #             .search([("parent_id", "=", current_user.parent_id.id)], limit=1)
+    #         )
+    #         app_id = [app.id] if app else []
+    #         domain = [
+    #             ("entity_type", "=", "merchant"),
+    #             ("active", "=", True),
+    #             ("not_linked_ids", "not in", app_id),
+    #         ]
+    #
+    #         # --- Simplified filter logic ---
+    #         field_map = {
+    #             "category_id": ("partner_category_id", "child_of"),
+    #             "country_id": ("country_id", "="),
+    #             "merchant_name": ("name", "="),
+    #             "merchant_type": ("merchant_type", "="),
+    #             "merchant_id": ("id", "="),
+    #             "x_org_linked": ("x_org_linked", "="),
+    #         }
+    #
+    #         domain += [
+    #             (field, operator, data[key])
+    #             for key, (field, operator) in field_map.items()
+    #             if data.get(key)
+    #         ]
+    #
+    #         # Pagination
+    #         offset = int(data.get("offset", 0))
+    #         limit = int(data["limit"]) if data.get("limit") else None
+    #
+    #         # Search merchants
+    #         merchants = (
+    #             request.env["res.partner"]
+    #             .sudo()
+    #             .search(
+    #                 domain, order="create_date, x_sequence", offset=offset, limit=limit
+    #             )
+    #         )
+    #
+    #         # Base URL
+    #         web_base_url = (
+    #             request.env["ir.config_parameter"].sudo().get_param("web.base.url")
+    #         )
+    #
+    #         # Prepare merchant data (using helper)
+    #         result = [
+    #             self._prepare_merchant_data(partner, web_base_url, current_user)
+    #             for partner in merchants
+    #         ]
+    #
+    #         return result
+    #
+    #     except Exception as e:
+    #         return {"error": _("Something went wrong: %s") % str(e)}
+
+    # Todo check again with all domain
+    @http.route(
+        ["/go/api/gulfexc/offers/v2"],
+        auth="public",
+        website=True,
+        methods=["POST"],
+        csrf=False,
+        type="json",
+        cors="*",
+    )
+    def get_gulfexc_offer_list(self, **post):
+        try:
+            data = post or self._get_json_request()
+            if "error" in data:
+                return data
+
+            current_user = self._validate_token(data)
+            if isinstance(current_user, dict):
+                return current_user
+
+            domain = [
+                ("merchant_id", "!=", False),
+                ("merchant_id.active", "!=", False),
+                ("is_in_offer", "=", True),
+            ]
+
+            if data.get("merchant_id"):
+                domain.append(("merchant_id", "=", data["merchant_id"]))
+
+            if data.get("merchant_category_id"):
+                merchants = (
+                    request.env["res.partner"]
+                    .sudo()
+                    .search(
+                        [("partner_category_id", "=", data["merchant_category_id"])]
+                    )
+                )
+                domain.append(("merchant_id", "in", merchants.ids))
+
+            if data.get("x_offer_type"):
+                domain.append(("offer_type", "=", data["x_offer_type"]))
+
+            if data.get("x_for_employee_type"):
+                domain += [
+                    "|",
+                    ("employee_type", "=", data["x_for_employee_type"]),
+                    ("employee_type", "=", "both"),
+                ]
+
+            if data.get("subscribed_merchant_offer"):
+                lines = (
+                    request.env["loyalty.notification.line"]
+                    .sudo()
+                    .search(
+                        [
+                            ("partner_id", "=", current_user.partner_id.id),
+                            ("is_subscribe", "=", True),
+                        ]
+                    )
+                )
+                merchant_ids = lines.mapped("notification_id.merchant_id").ids
+                if merchant_ids:
+                    domain.append(("merchant_id", "in", merchant_ids))
+
+            products = (
+                request.env["product.template"]
+                .sudo()
+                .search_read(
+                    domain,
+                    [
+                        "employee_type",
+                        "name",
+                        "offer_type",
+                        "image_url",
+                        "list_price",
+                        "default_code",
+                        "point",
+                        "online_store",
+                        "max_quantity",
+                        "offer_type_discount",
+                        "offer_type_promo_code",
+                        "merchant_online_store",
+                        "buy_link",
+                        "barcode",
+                        "description",
+                        "description_sale",
+                        "description_arabic",
+                        "offer_label",
+                        "merchant_id",
+                        "categ_id",
+                        "create_date",
+                        "start_date",
+                        "end_date",
+                        "min_quantity",
+                        "discount",
+                    ],
+                    limit=int(data.get("limit") or 100),
+                    offset=int(data.get("offset") or 0),
+                    order="create_date desc",
+                )
+            )
+
+            return self._prepare_offer_product_data(products)
+
+        except Exception as e:
+            return {"error": _("Something went wrong. Please try again later.")}
+
+    def _prepare_offer_product_data(self, products):
+        datas = []
+        web_base_url = (
+            request.env["ir.config_parameter"].sudo().get_param("web.base.url") or ""
+        )
+        base_url = web_base_url.rstrip("/") if web_base_url else ""
+
+        for product in products:
+            try:
+                product_template = (
+                    request.env["product.template"].sudo().browse(product["id"])
+                )
+
+                merchant = product.get("merchant_id") or [False, ""]
+                merchant_id, merchant_name = merchant[0], merchant[1]
+
+                category = product.get("categ_id") or [False, ""]
+                category_id, category_name = category[0], category[1]
+
+                product_data = dict(product)
+                product_data.update(
+                    {
+                        "ribbon": "15% Discount",
+                        "merchant_name": merchant_name,
+                        "merchant_id": merchant_id,
+                        "merchant_rating": 4,
+                        "category_id": category_id,
+                        "category_name": category_name,
+                        "disc_ribbon": product.get("offer_label"),
+                        "point": product.get("point"),
+                        "product_merchant_is_business_hotel": merchant_id,
+                        "merchant_logo": (
+                            url_join(
+                                base_url,
+                                f"/go/api/image/{merchant_id}/image_1920/res.partner",
+                            )
+                            if base_url and merchant_id
+                            else False
+                        ),
+                    }
+                )
+
+                datas.append(product_data)
+            except Exception as e:
+                _logger.warning(f"Error formatting product {product.get('id')}: {e}")
+                continue
+
+        return datas
+
+    # Todo check again with all domain
+    @http.route(
+        ["/go/api/user/offers/v2"],
+        auth="public",
+        website=True,
+        methods=["POST"],
+        csrf=False,
+        type="json",
+        cors="*",
+    )
+    def get_users_offer_list(self, **post):
+        try:
+            data = post or self._get_json_request()
+            if "error" in data:
+                return data
+
+            current_user = self._validate_token(data)
+            if isinstance(current_user, dict):
+                return current_user
+
+            domain = [
+                ("merchant_id", "!=", False),
+                ("merchant_id.active", "!=", False),
+                ("is_in_offer", "=", True),
+            ]
+
+            if data.get("merchant_id"):
+                domain.append(("merchant_id", "=", data["merchant_id"]))
+
+            if data.get("merchant_category_id"):
+                merchants = (
+                    request.env["res.partner"]
+                    .sudo()
+                    .search(
+                        [("partner_category_id", "=", data["merchant_category_id"])]
+                    )
+                )
+                domain.append(("merchant_id", "in", merchants.ids or [0]))
+
+            if data.get("x_offer_type"):
+                domain.append(("x_offer_type", "=", data["x_offer_type"]))
+
+            # Exclude products already linked to user's app records
+            app_records = (
+                request.env["notin.app"]
+                .sudo()
+                .search([("parent_id", "=", current_user.partner_id.id)])
+            )
+            if app_records:
+                domain.append(("not_linked_ids", "not in", app_records.ids))
+
+            products = (
+                request.env["product.template"]
+                .sudo()
+                .search_read(
+                    domain,
+                    [
+                        "x_for_employee_type",
+                        "name",
+                        "x_arabic_name",
+                        "x_offer_type",
+                        "image_url",
+                        "lst_price",
+                        "default_code",
+                        "x_point",
+                        "x_online_store",
+                        "max_quantity",
+                        "x_offer_type_discount",
+                        "x_offer_type_promo_code",
+                        "x_merchant_online_store",
+                        "x_buy_link",
+                        "barcode",
+                        "description",
+                        "description_sale",
+                        "x_description_arabic",
+                        "offer_label",
+                        "merchant_id",
+                        "categ_id",
+                        "create_date",
+                        "start_date",
+                        "end_date",
+                        "min_quantity",
+                        "discount",
+                    ],
+                    limit=int(data.get("limit") or 3000),
+                    offset=int(data.get("offset") or 0),
+                    order="create_date desc",
+                )
+            )
+
+            return self._prepare_offer_product_data(products)
+
+        except Exception as e:
+            _logger.exception("Error in get_users_offer_list")
+            return {"error": _("Something went wrong. Please try again later.")}
+
+    @http.route(
+        ["/go/api/merchant/redeem/v2"],
+        auth="public",
+        website=True,
+        methods=["POST"],
+        csrf=False,
+        type="json",
+    )
+    def get_merchant_redeem(self, **post):
+        try:
+            data = post or self._get_json_request()
+            if "error" in data:
+                return data
+
+            current_user = self._validate_token(data)
+            if isinstance(current_user, dict):
+                return current_user
+
+            partner = current_user.partner_id
+            organisation = partner.parent_id or partner
+
+            track_value = data.get("track_value")
+            if not track_value:
+                return {"error": _("Merchant PIN Missing")}
+
+            product_id = data.get("product_id")
+            if not product_id:
+                return {"error": _("Wrong Product ID")}
+            product = (
+                request.env["product.template"]
+                .sudo()
+                .search([("id", "=", int(product_id))], limit=1)
+            )
+            if not product:
+                return {"error": _("Invalid Product ID")}
+
+            if product.merchant_id.merchant_pin_new != track_value:
+                return {"error": _("Wrong Merchant PIN")}
+
+            limit_records = product.offer_limit_ids.filtered(
+                lambda l: l.partner_id.id == organisation.id
+            )
+            if limit_records:
+                now = fields.Datetime.now()
+                frequency_map = {
+                    "weekly": lambda: now - timedelta(days=7),
+                    "monthly": lambda: now - relativedelta(months=1),
+                    "yearly": lambda: now - relativedelta(years=1),
+                }
+
+                for limit in limit_records:
+                    start_date_func = frequency_map.get(limit.frequency)
+                    if not start_date_func:
+                        continue
+
+                    start_date = start_date_func()
+                    usage_count = (
+                        request.env["offer.usages.history"]
+                        .sudo()
+                        .search_count(
+                            [
+                                ("partner_id", "=", partner.id),
+                                ("product_id", "=", product.id),
+                                ("used_on", ">=", start_date),
+                            ]
+                        )
+                    )
+                    if usage_count >= limit.number_of_usages:
+                        return {
+                            "error": _(
+                                "You have already consumed your offer limit for this product."
+                            )
+                        }
+
+            request.env["offer.usages.history"].sudo().create(
+                {
+                    "partner_id": partner.id,
+                    "organisation_id": organisation.id,
+                    "product_id": product.id,
+                    "usage_count": 1,
+                }
+            )
+
+            return {"success": True}
+
+        except Exception as e:
+            return {"error": _("Something went wrong. Please try again later.")}

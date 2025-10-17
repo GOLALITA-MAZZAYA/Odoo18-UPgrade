@@ -120,7 +120,7 @@ class AuthOTP(models.Model):
         )
         _logger.info("Generated OTP: %s for %s", otp.otp_code, login)
         try:
-            return otp._send_otp(phone, otp_type)
+            return otp._send_otp(phone)
         except Exception as e:
             _logger.error("Failed to send OTP via SMS: %s", e)
             return False
@@ -139,7 +139,7 @@ class AuthOTP(models.Model):
         )
         _logger.info("Generated OTP (Email): %s for %s", otp.otp_code, login)
         try:
-            return otp._send_otp_email(email, otp_type)
+            return otp._send_otp_email(email)
         except Exception as e:
             _logger.error("Failed to send OTP via Email: %s", e)
             return False

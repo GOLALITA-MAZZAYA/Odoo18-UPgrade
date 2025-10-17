@@ -99,7 +99,6 @@ class LoyaltyRestaurantOrder(models.Model):
         "product.pricelist",
         string="Pricelist",
         check_company=True,
-        required=True,
         domain="['|', ('company_id', '=', False), ('company_id', '=', company_id)]",
         tracking=1,
         help="Pricelist used to calculate product prices for this order.",

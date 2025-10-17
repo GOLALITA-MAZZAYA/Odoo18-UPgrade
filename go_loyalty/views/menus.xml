@@ -261,6 +261,23 @@
             sequence="26"
     />
 
+    <menuitem
+            id="menu_offer_usages_history"
+            name="Offer Usages History"
+            parent="menu_loyalty_configuration"
+            action="action_offer_usages_history"
+            sequence="30"/>
+
+    <menuitem
+            id="menu_merchant_matrix"
+            name="Merchant Matrix"
+            parent="menu_loyalty_configuration"
+            action="action_merchant_matrix"
+            sequence="32"
+    />
+
+
+
 
 
 </odoo>

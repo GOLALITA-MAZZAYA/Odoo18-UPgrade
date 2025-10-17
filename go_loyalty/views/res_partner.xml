@@ -17,6 +17,10 @@
                 <field name="merchant_type" />
                 <field name="partner_category_id" />
                 <field name="is_published" />
+                <field name="contract_copy" filename="contract_filename"/>
+                <field name="contract_filename" invisible="1"/>
+                <field name="company_registartion" filename="company_registartion_filename"/>
+                <field name="company_registartion_filename" invisible="1"/>
             </xpath>
 
         </field>

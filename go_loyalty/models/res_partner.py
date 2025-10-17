@@ -198,7 +198,26 @@ class ResPartner(models.Model):
     )
 
     pause_notification = fields.Boolean()
+    merchant_pin_new = fields.Char(oldname="x_merchant_pin_new")
 
+    contract_copy = fields.Binary(string="Contract Copy", oldname="x_contract_copy", attachment=True)
+    contract_filename = fields.Char(string="Contract Filename")
+
+    company_registartion = fields.Binary(string="Company Registration", oldname="x_company_registration", attachment=True)
+    company_registartion_filename = fields.Char(string="Company Registration Filename")
+
+    active = fields.Boolean(default=True)
+    is_premium_merchant = fields.Boolean(string="Is Premium Merchant", oldname="x_is_premium_merchant")
+
+    not_linked_ids = fields.Many2many(
+        "notin.app",
+        "partner_not_linked_rel",
+        "partner_id",
+        "not_linked_id",
+        string="Not Linked APP",
+    )
+
+    not_in_list = fields.Boolean(string="Not in List", oldname="x_not_in_list")
 
     def _is_registred(self, code):
         return code in self.code_ids.filtered(lambda l: l.assign_id).mapped("code")

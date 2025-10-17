@@ -8,7 +8,7 @@ class PartnerCategory(models.Model):
     name = fields.Char()
     parent_id = fields.Many2one('partner.category', string='Parent Category', index=True, ondelete='cascade')
     parent_path = fields.Char(index=True)
-    category_id = fields.Many2one('product.public.category')
+    # category_id = fields.Many2one('product.public.category')
     image_icon = fields.Image("Image", max_width=128, max_height=128)
     image_url = fields.Char(compute='_compute_urls')
     image_url_2 = fields.Char(compute='_compute_urls')

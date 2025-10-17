@@ -13,11 +13,11 @@
         "mail",
         "uom",
         "auth_signup",
-        "website",
-        "website_sale"
+        "go_sms"
     ],
     "data": [
         "data/data.xml",
+        "data/mail_template.xml",
         "security/ir.model.access.csv",
         "views/res_partner.xml",
         "views/loyalty_restaurant_order.xml",
@@ -42,6 +42,8 @@
         "views/partner_category.xml",
         "views/res_company.xml",
         "views/org_registration_code.xml",
+        "views/offer_usages_history.xml",
+        "views/merchant_matrix.xml",
         "views/menus.xml"
     ],
     "installable": True,

@@ -32,6 +32,11 @@ from . import partner_category
 from . import advertisement_banner
 from . import advertisement_tracking
 from . import org_registration_code
+from . import favourite_product
+from . import offer_limits
+from . import offer_usages_history
+from . import merchant_matrix
+
 
 
 

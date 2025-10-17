@@ -30,6 +30,7 @@ class ContractMatrix(models.Model):
         store=True,
         help="Upload or attach the signed contract document here.",
     )
+
     contract_filename = fields.Char(string="Contract File Name")
 
     contract_file_url = fields.Char(
