@@ -1,5 +1,8 @@
 from odoo import models, fields
 from .sms_request import SMSApi
+import logging
+_logger = logging.getLogger(__name__)
+
 
 SMS_STATUS = {
     "S": "Success",
@@ -82,6 +85,7 @@ class SMSMessage(models.Model):
 
             sms_api = SMSApi(sms.msg_config)
             response = sms_api.make_api_request(params=data)
+            _logger.info("SMS API Response for SMS ID %s: %s", sms.id, response)
             sms._process_sms_response(response)
 
     def _process_sms_response(self, response):
