@@ -149,89 +149,62 @@ class User(http.Controller):
     #     except Exception as e:
     #         return {"error": _("Failed to fetch merchant profile: %s") % str(e)}
     #
-    # def _get_banners(self, partner, web_base_url):
-    #     try:
-    #         banners = (
-    #             request.env["merchant.banner"]
-    #             .sudo()
-    #             .search_read(
-    #                 [("partner_id", "=", partner.id)],
-    #                 ["name", "merchant_rating", "x_sequence"],
-    #             )
-    #         )
-    #         for banner in banners:
-    #             banner["banner_image"] = url_join(
-    #                 web_base_url,
-    #                 f'/go/api/image/{banner["id"]}/image_1920/merchant.banner',
-    #             )
-    #         return banners
-    #     except Exception as e:
-    #         return []
-    #
-    # def _get_products(self, partner):
-    #     try:
-    #         return (
-    #             request.env["product.template"]
-    #             .sudo()
-    #             .search_read(
-    #                 [("merchant_id", "=", partner.id), ("is_in_offer", "=", False)],
-    #                 [
-    #                     "name",
-    #                     "image_url",
-    #                     "lst_price",
-    #                     "list_price",
-    #                     "x_arabic_name",
-    #                     "discount",
-    #                     "x_point",
-    #                     "offer_label",
-    #                     "default_code",
-    #                     "barcode",
-    #                     "description",
-    #                     "description_sale",
-    #                 ],
-    #             )
-    #         )
-    #     except Exception as e:
-    #         return []
-    #
-    # def _get_offer_products(self, partner):
-    #     try:
-    #         return (
-    #             request.env["product.template"]
-    #             .sudo()
-    #             .search_read(
-    #                 [("merchant_id", "=", partner.id), ("is_in_offer", "=", True)],
-    #                 [
-    #                     "name",
-    #                     "image_url",
-    #                     "lst_price",
-    #                     "list_price",
-    #                     "x_arabic_name",
-    #                     "discount",
-    #                     "x_point",
-    #                     "offer_label",
-    #                     "default_code",
-    #                     "barcode",
-    #                     "description",
-    #                     "description_sale",
-    #                     "start_date",
-    #                     "end_date",
-    #                     "min_quantity",
-    #                     "max_quantity",
-    #                     "x_offer_type",
-    #                     "x_offer_type_discount",
-    #                     "x_offer_type_promo_code",
-    #                     "x_merchant_online_store",
-    #                     "x_buy_link",
-    #                 ],
-    #             )
-    #         )
-    #     except Exception as e:
-    #         return []
+
+    def _get_banners(self, partner, web_base_url):
+        try:
+            banners = (
+                request.env["merchant.banner"]
+                .sudo()
+                .search_read(
+                    [("partner_id", "=", partner.id)],
+                    ["name", "merchant_rating", "sequence"],
+                )
+            )
+            for banner in banners:
+                banner["banner_image"] = url_join(
+                    web_base_url,
+                    f'/go/api/image/{banner["id"]}/image_1920/merchant.banner',
+                )
+            return banners
+        except Exception as e:
+            return []
+
+    def _get_offer_products(self, partner):
+        fields = [
+            "name",
+            "image_url",
+            "list_price",
+            "arabic_name",
+            "discount",
+            "point",
+            "offer_label",
+            "default_code",
+            "barcode",
+            "description",
+            "description_sale",
+            "start_date",
+            "end_date",
+            "min_quantity",
+            "max_quantity",
+            "offer_type",
+            "offer_type_discount",
+            "offer_type_promo_code",
+            "merchant_online_store",
+            "buy_link",
+        ]
+
+        return (
+            request.env["product.template"]
+            .sudo()
+            .search_read(
+                [("merchant_id", "=", partner.id), ("is_in_offer", "=", True)], fields
+            )
+        )
 
     @http.route(
         [
-            "/go/api/user/archive","/go/api/user/account/delete",
+            "/go/api/user/archive",
+            "/go/api/user/account/delete",
         ],
         auth="public",
         website=True,
@@ -673,7 +646,6 @@ class User(http.Controller):
             domain = [
                 ("entity_type", "=", "organisation"),
                 ("reg_hide", "=", False),
-
             ]
             if data.get("category_id"):
                 domain.append(("partner_category_id", "=", data["category_id"]))
@@ -1252,6 +1224,649 @@ class User(http.Controller):
                         "x_discount_tag_arabic": matrix.discount_tag_arabic,
                         "ribbon_color": matrix.offer_details,
                         "organisation_id": [org.id for org in matrix.organisation_id],
+                    }
+                )
+
+            return res
+
+        except Exception as e:
+            return {"error": _("Something went wrong: %s") % str(e)}
+
+    @http.route(
+        "/go/api/user/verify/email",
+        type="json",
+        auth="public",
+        website=True,
+        methods=["POST"],
+        csrf=False,
+    )
+    def go_user_verify_email(self, **post):
+        try:
+            data = post or self._get_json_request()
+            if "error" in data:
+                return data
+
+            current_user = self._validate_token(data)
+            if isinstance(current_user, dict):
+                return current_user
+
+            partner = current_user.partner_id
+            if not partner:
+                return {"error": _("No Partner Found for User")}
+
+            partner.sudo().write({"email_verified": True})
+            return {"success": _("Email Verified Successfully")}
+
+        except Exception as e:
+            return {"error": _("Something went wrong: %s") % str(e)}
+
+    @http.route(
+        "/go/api/user/dashboard/data",
+        type="json",
+        auth="public",
+        website=True,
+        methods=["POST"],
+        csrf=False,
+    )
+    def go_user_dashboard(self, **post):
+        try:
+            data = post or self._get_json_request()
+            if "error" in data:
+                return data
+
+            current_user = self._validate_token(data)
+            if isinstance(current_user, dict):
+                return current_user
+
+            partner = current_user.partner_id
+            main_member = not bool(partner.family_head_member_id)
+            web_base_url = (
+                request.env["ir.config_parameter"].sudo().get_param("web.base.url")
+            )
+
+            limit = int(data.get("limit") or 100)
+            offset = int(data.get("offset") or 0)
+            banners = (
+                request.env["merchant.banner"]
+                .sudo()
+                .search_read(
+                    [
+                        ("partner_id.merchant_type", "=", "premium"),
+                        ("partner_id.entity_type", "=", "merchant"),
+                    ],
+                    ["partner_id", "sequence", "merchant_rating"],
+                    limit=limit,
+                    offset=offset,
+                )
+            )
+
+            partner_env = request.env["res.partner"].sudo()
+            for banner in banners:
+                partner_id = banner["partner_id"][0]
+                partner_rec = partner_env.browse(partner_id)
+                banner.update(
+                    {
+                        "merchant_logo": url_join(
+                            web_base_url,
+                            f"/go/api/image/{partner_id}/image_1920/res.partner",
+                        ),
+                        "banner_image": url_join(
+                            web_base_url,
+                            f"/go/api/image/{banner['id']}/image_1920/merchant.banner",
+                        ),
+                        "ribbon_text": partner_rec.ribbon_text or "",
+                        "ribbon_position": partner_rec.ribbon_position or "",
+                        "ribbon_color": partner_rec.ribbon_color or "",
+                    }
+                )
+
+            res = {
+                "x_user_expiry": current_user.user_expiry,
+                "x_moi_last_name": current_user.moi_last_name,
+                "x_first_name_arbic": current_user.first_name_arbic,
+                "x_last_name_arbic": current_user.last_name_arbic,
+                "main_member": main_member,
+                "profile": self._get_partner_profile(partner, web_base_url),
+                "premium_merchants": self._get_premium_merchant(web_base_url),
+                "standard_merchant": self._get_standard_merchant(web_base_url),
+                "merchant_category": self._get_partner_category(web_base_url),
+                "members": self._get_family_members(partner),
+                "banners": banners,
+            }
+
+            return res
+
+        except Exception as e:
+            return {"error": _("Something went wrong: %s") % str(e)}
+
+    def _get_partner_profile(self, partner, web_base_url):
+        return {
+            "name": partner.name,
+            "create_date": partner.create_date,
+            "phone": partner.phone,
+            "partner_id": partner.id,
+            "email": partner.email,
+            "barcode": partner.barcode,
+            "address": partner.contact_address,
+            "employee_type": partner.employee_type,
+            "organisation": partner.parent_id.name,
+            "organisation_logo": (
+                url_join(
+                    web_base_url,
+                    f"/go/api/image/{partner.parent_id.id}/image_512/res.partner",
+                )
+                if partner.parent_id
+                else None
+            ),
+            "photo": url_join(
+                web_base_url,
+                f"/go/api/image/{partner.id}/image_512/res.partner",
+            ),
+            "available_points": partner.points,
+            "total_points_earn": partner.points_earn,
+            "total_points_used": partner.points_used,
+            "total_saving": partner.points_values,
+            "whatsapp_enabled": partner.enable_whatsapp,
+            "whatsapp_title": partner.whatsapp_title,
+            "whatsapp_number": partner.whatsapp_number,
+            "phoneVerified": partner.phone_verified,
+            "emailVerified": partner.email_verified,
+            "whatsapp_prefill_message": partner.whatsapp_prefill_message,
+        }
+
+    def _get_premium_merchant(self, web_base_url):
+        merchants = (
+            request.env["res.partner"]
+            .sudo()
+            .search_read(
+                [
+                    ("merchant_type", "=", "premium"),
+                    ("premium_client", "=", True),
+                    ("active", "=", True),
+                ],
+                [
+                    "id",
+                    "name",
+                    "email",
+                    "phone",
+                    "partner_latitude",
+                    "partner_longitude",
+                    "merchant_rating",
+                    "partner_category_id",
+                ],
+            )
+        )
+        for merchant in merchants:
+            merchant["image_512"] = url_join(
+                web_base_url,
+                f"/go/api/image/{merchant['id']}/image_512/res.partner",
+            )
+        return merchants
+
+    def _get_standard_merchant(self, web_base_url):
+        merchants = (
+            request.env["res.partner"]
+            .sudo()
+            .search_read(
+                [
+                    ("entity_type", "=", "merchant"),
+                    ("merchant_type", "=", "standard"),
+                    ("active", "=", True),
+                ],
+                [
+                    "id",
+                    "name",
+                    "email",
+                    "phone",
+                    "partner_latitude",
+                    "partner_longitude",
+                    "merchant_rating",
+                    "partner_category_id",
+                ],
+            )
+        )
+        for merchant in merchants:
+            merchant["image_512"] = url_join(
+                web_base_url,
+                f"/go/api/image/{merchant['id']}/image_512/res.partner",
+            )
+        return merchants
+
+    def _get_partner_category(self, web_base_url):
+        categories = (
+            request.env["partner.category"]
+            .sudo()
+            .search_read([], ["id", "name", "name_arabic"])
+        )
+        for category in categories:
+            category["image_icon"] = url_join(
+                web_base_url,
+                f"/go/api/image/{category['id']}/image_icon/partner.category",
+            )
+        return categories
+
+    def _get_family_members(self, partner):
+        return [
+            {"name": member.name, "phone": member.phone}
+            for member in partner.family_member_ids
+        ]
+
+    @http.route(
+        "/go/api/user/dashboard/banner",
+        auth="public",
+        website=True,
+        methods=["POST"],
+        csrf=False,
+        type="json",
+    )
+    def go_user_dashboard_banner(self, **post):
+        try:
+            data = post or self._get_json_request()
+            if "error" in data:
+                return data
+
+            current_user = self._validate_token(data)
+            if isinstance(current_user, dict):
+                return current_user
+
+            web_base_url = (
+                request.env["ir.config_parameter"].sudo().get_param("web.base.url")
+            )
+            banners = (
+                request.env["merchant.banner"]
+                .sudo()
+                .search_read(
+                    [
+                        ("partner_id.merchant_type", "=", "premium"),
+                        ("partner_id.entity_type", "=", "merchant"),
+                    ],
+                    ["partner_id", "sequence", "merchant_rating"],
+                    limit=data.get("limit") or 100,
+                    offset=data.get("offset") or 0,
+                )
+            )
+
+            Partner = request.env["res.partner"].sudo()
+            for banner in banners:
+                partner = Partner.browse(banner["partner_id"][0])
+                banner["merchant_logo"] = url_join(
+                    web_base_url, f"/go/api/image/{partner.id}/image_1920/res.partner"
+                )
+                banner["banner_image"] = url_join(
+                    web_base_url,
+                    f"/go/api/image/{banner['id']}/image_1920/merchant.banner",
+                )
+                banner["ribbon_text"] = partner.ribbon_text
+                banner["ribbon_position"] = partner.ribbon_position
+                banner["ribbon_color"] = partner.ribbon_color
+
+            return banners
+
+        except Exception as e:
+            return {"error": str(e)}
+
+    @http.route(
+        "/go/api/user/merchant/banner",
+        auth="public",
+        type="json",
+        methods=["POST"],
+        csrf=False,
+        cors="*",
+    )
+    def go_user_dashboard_banner(self, **post):
+        try:
+            data = post or self._get_json_request()
+            if "error" in data:
+                return data
+
+            merchant_id = data.get("merchant_id")
+            if not merchant_id:
+                return {"error": _("Provide Merchant ID")}
+
+            web_base_url = (
+                request.env["ir.config_parameter"].sudo().get_param("web.base.url")
+            )
+
+            banners = (
+                request.env["merchant.banner"]
+                .sudo()
+                .search_read(
+                    [
+                        ("partner_id.merchant_type", "=", "premium"),
+                        ("partner_id.entity_type", "=", "merchant"),
+                        ("partner_id.id", "=", int(merchant_id)),
+                    ],
+                    ["id", "partner_id", "sequence", "merchant_rating"],
+                    limit=int(data.get("limit") or 100),
+                    offset=int(data.get("offset") or 0),
+                )
+            )
+
+            for banner in banners:
+                partner_id = banner["partner_id"][0]
+                partner = request.env["res.partner"].sudo().browse(partner_id)
+
+                banner.update(
+                    {
+                        "merchant_logo": url_join(
+                            web_base_url,
+                            f"/go/api/image/{partner_id}/image_1920/res.partner",
+                        ),
+                        "banner_image": url_join(
+                            web_base_url,
+                            f'/go/api/image/{banner["id"]}/image_1920/merchant.banner',
+                        ),
+                        "ribbon_text": partner.ribbon_text or "",
+                        "ribbon_position": partner.ribbon_position or "",
+                        "ribbon_color": partner.ribbon_color or "",
+                    }
+                )
+
+            return banners
+
+        except Exception as e:
+            return {"error": _("Something went wrong: %s") % str(e)}
+
+    @http.route(
+        "/go/api/user/sales/transaction/data",
+        auth="public",
+        website=True,
+        methods=["POST"],
+        csrf=False,
+        type="json",
+        cors="*",
+    )
+    def go_user_sales_transaction_data(self, **post):
+        try:
+            data = post or self._get_json_request()
+            if "error" in data:
+                return data
+
+            current_user = self._validate_token(data)
+            if isinstance(current_user, dict):
+                return current_user
+
+            partner = current_user.partner_id
+
+            transactions = (
+                request.env["loyalty.sale"]
+                .sudo()
+                .search([("partner_id", "=", partner.id)])
+            )
+            transaction_lines = transactions.mapped("transaction_ids").filtered(
+                lambda l: l.partner_id.id == partner.id
+            )
+
+            sales_by_category = (
+                request.env["loyalty.sale"]
+                .sudo()
+                .read_group(
+                    [("partner_id", "=", partner.id)],
+                    ["merchant_category_id", "discount", "amount", "points"],
+                    ["merchant_category_id"],
+                )
+            )
+
+            sales_by_merchant = (
+                request.env["loyalty.sale"]
+                .sudo()
+                .read_group(
+                    [("partner_id", "=", partner.id)],
+                    ["merchant_id", "discount", "amount", "points"],
+                    ["merchant_id"],
+                )
+            )
+
+            Category = request.env["partner.category"].sudo()
+            Partner = request.env["res.partner"].sudo()
+
+            transactions_by_category = [
+                {
+                    "category": Category.browse(data["merchant_category_id"][0]).name,
+                    "merchant_category_id": data["merchant_category_id"][0],
+                    "merchant_category_logo": Category.browse(
+                        data["merchant_category_id"][0]
+                    ).image_icon,
+                    "discount": data["discount"],
+                    "sales": data["amount"],
+                    "points": data["points"],
+                }
+                for data in sales_by_category
+            ]
+
+            transactions_by_merchant = [
+                {
+                    "merchant_name": Partner.browse(data["merchant_id"][0]).name,
+                    "merchant_id": data["merchant_id"][0],
+                    "merchant_logo": Partner.browse(data["merchant_id"][0]).image_1920,
+                    "category_id": Partner.browse(
+                        data["merchant_id"][0]
+                    ).partner_category_id.id,
+                    "discount": data["discount"],
+                    "sales": data["amount"],
+                    "points": data["points"],
+                }
+                for data in sales_by_merchant
+            ]
+
+            result = {
+                "available_points": partner.points,
+                "total_saving": sum(transactions.mapped("discount")),
+                "points_used": sum(transaction_lines.mapped("debit")),
+                "points_earned": sum(transaction_lines.mapped("credit")),
+                "transactions_by_category": transactions_by_category,
+                "transactions_by_merchant": transactions_by_merchant,
+            }
+
+            return result
+
+        except Exception as e:
+            return {"error": _("Something went wrong: %s") % str(e)}
+
+    @http.route(
+        ["/go/api/user/merchant/moi/details"],
+        auth="public",
+        website=True,
+        methods=["POST"],
+        csrf=False,
+        type="json",
+        cors="*",
+    )
+    def get_user_merchant_moi_details(self, **post):
+        try:
+            data = post or self._get_json_request()
+            if "error" in data:
+                return data
+
+            current_user = self._validate_token(data)
+            if isinstance(current_user, dict):
+                return current_user
+
+            merchant_id = data.get("merchant_id")
+            if not merchant_id:
+                return {"error": _("Merchant ID Missing")}
+
+            merchant = request.env["res.partner"].sudo().browse(int(merchant_id))
+            if merchant.entity_type != "merchant":
+                return {"error": _("Provided merchant is not registered with us")}
+
+            web_base_url = (
+                request.env["ir.config_parameter"].sudo().get_param("web.base.url")
+            )
+            return self._get_user_merchant_moi_profile(merchant, web_base_url)
+
+        except Exception as e:
+            return {"error": _("Something went wrong: %s") % str(e)}
+
+    def _get_user_merchant_moi_profile(self, partner, web_base_url):
+        products = self._get_products(partner)
+        category = partner.partner_category_id
+
+        return {
+            "merchant_name": partner.name,
+            "x_for_employee_type": partner.employee_type,
+            "x_arabic_name": partner.arabic_name,
+            "phone": partner.phone,
+            "email": partner.email,
+            "website": partner.website,
+            "merchant_code": partner.barcode,
+            "open_from": partner.open_from,
+            "open_till": partner.open_till,
+            "address": partner.contact_address,
+            "partner_latitude": partner.partner_latitude,
+            "partner_longitude": partner.partner_longitude,
+            "ribbon_text": partner.ribbon_text,
+            "ribbon_color": partner.ribbon_color,
+            "ribbon_position": partner.ribbon_position,
+            "description": partner.merchant_details_moi_en,
+            "description_arabic": partner.merchant_details_moi_ar,
+            "x_online_store": partner.online_store,
+            "rating": partner.merchant_rating,
+            "notes": partner.comment,
+            "map_banner": url_join(
+                web_base_url, f"/go/api/image/{partner.id}/map_banner/res.partner"
+            ),
+            "merchant_logo": url_join(
+                web_base_url, f"/go/api/image/{partner.id}/image_512/res.partner"
+            ),
+            "category": category.name,
+            "category_logo": url_join(
+                web_base_url, f"/go/api/image/{category.id}/image_icon/partner.category"
+            ),
+            "banners": self._get_banners(partner, web_base_url),
+            "products": products,
+            "is_hotel": partner.is_hotel_type,
+            "x_kts": partner.kts,
+            "offer_products": self._get_offer_products(partner),
+            "whatsapp_enabled": partner.enable_whatsapp,
+            "whatsapp_title": partner.whatsapp_title,
+            "whatsapp_number": partner.whatsapp_number,
+            "whatsappx_prefill_message": partner.whatsapp_prefill_message,
+            "pdf_attached": partner.pdf_attached,
+            "company_contract_url": url_join(
+                web_base_url, f"/web/binary/contract_download_pdf/{partner.id}"
+            ),
+            "company_registartion_url": url_join(
+                web_base_url, f"/web/binary/registration_download_pdf/{partner.id}"
+            ),
+            "x_terms_condition": partner.terms_condition,
+            "x_terms_condition_arabic": partner.terms_condition_arabic,
+            "x_terms_condition_new": partner.terms_conditions_en,
+            "x_terms_condition_arabic_new": partner.terms_conditions_ar,
+            "x_moi_show": partner.show_in_moi,
+            "x_contact_number_ar": partner.ar_contact_number,
+            "x_email_ar": partner.ar_email,
+            "x_street_ar": partner.ar_street,
+            "x_city_ar": partner.ar_city,
+            "x_country_ar": partner.ar_country,
+            "x_time_from_ar": partner.ar_time_from,
+            "x_time_to_ar": partner.ar_time_to,
+        }
+
+    def _get_products(self, partner):
+        return (
+            request.env["product.template"]
+            .sudo()
+            .search_read(
+                [("merchant_id", "=", partner.id), ("is_in_offer", "=", False)],
+                [
+                    "name",
+                    "image_url",
+                    "list_price",
+                    "arabic_name",
+                    "discount",
+                    "point",
+                    "offer_label",
+                    "default_code",
+                    "barcode",
+                    "description",
+                    "description_sale",
+                ],
+            )
+        )
+
+    @http.route(
+        ["/go/api/user/merchant/child/lists"],
+        auth="public",
+        website=True,
+        methods=["POST"],
+        csrf=False,
+        type="json",
+        cors="*",
+    )
+    def get_user_merchant_child_list(self, **post):
+        try:
+            data = post or self._get_json_request()
+            if "error" in data:
+                return data
+
+            domain = [("entity_type", "=", "merchant"), ("active", "=", True)]
+            if data.get("parent_id"):
+                domain.append(("parent_id", "=", int(data["parent_id"])))
+
+            limit = int(data.get("limit", 0)) if data.get("limit") else 0
+            offset = int(data.get("offset", 0))
+            merchants_env = request.env["res.partner"].sudo()
+
+            if limit:
+                merchants = merchants_env.search(
+                    domain, order="sequence", offset=offset, limit=limit
+                )
+            else:
+                merchants = merchants_env.search(domain, order="sequence")
+
+            web_base_url = (
+                request.env["ir.config_parameter"].sudo().get_param("web.base.url")
+            )
+            Notification = request.env["loyalty.notification"].sudo()
+            res = []
+
+            for partner in merchants:
+                notification = Notification.search(
+                    [("merchant_id", "=", partner.id)], limit=1
+                )
+                res.append(
+                    {
+                        "merchant_name": partner.name,
+                        "x_for_employee_type": partner.employee_type,
+                        "is_business_hotel": partner.is_hotel_type,
+                        "x_kts": partner.kts,
+                        "merchant_id": partner.id,
+                        "x_online_store": partner.online_store,
+                        "x_sequence": partner.sequence,
+                        "barcode": partner.barcode,
+                        "partner_latitude": partner.partner_latitude,
+                        "partner_longitude": partner.partner_longitude,
+                        "ribbon_text": partner.ribbon_text,
+                        "ribbon_color": partner.ribbon_color,
+                        "ribbon_position": partner.ribbon_position,
+                        "rating": partner.merchant_rating,
+                        "map_banner": url_join(
+                            web_base_url,
+                            f"/go/api/image/{partner.id}/map_banner/res.partner",
+                        ),
+                        "merchant_logo": url_join(
+                            web_base_url,
+                            f"/go/api/image/{partner.id}/image_512/res.partner",
+                        ),
+                        "category": partner.partner_category_id.name,
+                        "category_id": partner.partner_category_id.id,
+                        "category_logo": url_join(
+                            web_base_url,
+                            f"/go/api/image/{partner.partner_category_id.id}/image_icon/partner.category",
+                        ),
+                        "country_id": partner.country_id.id,
+                        "country_name": partner.country_id.name,
+                        "banners": self._get_banners(partner, web_base_url),
+                        "pdf_attached": partner.pdf_attached,
+                        "company_contract_url": url_join(
+                            web_base_url,
+                            f"/web/binary/contract_download_pdf/{partner.id}",
+                        ),
+                        "company_registartion_url": url_join(
+                            web_base_url,
+                            f"/web/binary/registration_download_pdf/{partner.id}",
+                        ),
                     }
                 )
 

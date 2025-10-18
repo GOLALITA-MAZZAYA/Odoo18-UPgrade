@@ -276,6 +276,12 @@
             sequence="32"
     />
 
+    <menuitem id="menu_merchant_banner_main"
+              name="Merchant Banners"
+              parent="menu_loyalty_configuration"
+              action="action_merchant_banner"
+              sequence="33"/>
+
 
 
 

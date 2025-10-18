@@ -142,7 +142,7 @@ class LoyaltyPointTransfer(models.Model):
     @api.constrains("points")
     def _check_points(self):
         for record in self:
-            if record.points and record.available_points_from < record.points:
+            if record.available_points_from < record.points:
                 raise UserError(
                     _(f"You can only transfer {record.available_points_from} points.")
                 )

@@ -1,0 +1,52 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+
+    <record id="view_merchant_banner_form" model="ir.ui.view">
+        <field name="name">merchant.banner.form</field>
+        <field name="model">merchant.banner</field>
+        <field name="arch" type="xml">
+            <form string="Merchant Banner">
+                <sheet>
+                    <group>
+                        <group>
+                            <field name="name"/>
+                            <field name="partner_id"/>
+                        </group>
+                        <group>
+                            <field name="merchant_rating" readonly="1"/>
+                            <field name="sequence"/>
+                        </group>
+                    </group>
+                </sheet>
+            </form>
+        </field>
+    </record>
+
+    <record id="view_merchant_banner_tree" model="ir.ui.view">
+        <field name="name">merchant.banner.tree</field>
+        <field name="model">merchant.banner</field>
+        <field name="arch" type="xml">
+            <list string="Merchant Banners" default_order="sequence asc">
+                <field name="name"/>
+                <field name="partner_id"/>
+                <field name="merchant_rating"/>
+                <field name="sequence"/>
+                <field name="create_date"/>
+            </list>
+        </field>
+    </record>
+
+
+    <record id="action_merchant_banner" model="ir.actions.act_window">
+        <field name="name">Merchant Banners</field>
+        <field name="res_model">merchant.banner</field>
+        <field name="view_mode">list,form</field>
+        <field name="help" type="html">
+            <p class="o_view_nocontent_smiling_face">
+                Create your first Merchant Banner
+            </p>
+        </field>
+    </record>
+
+
+</odoo>

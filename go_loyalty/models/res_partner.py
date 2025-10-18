@@ -39,6 +39,7 @@ class ResPartner(models.Model):
     )
 
     phone_verified = fields.Boolean()
+    premium_client = fields.Boolean(string="Premium Client")
 
     moi_last_name = fields.Char(oldname="x_moi_last_name")
     family_head_member_id = fields.Many2one("res.partner")
@@ -132,6 +133,9 @@ class ResPartner(models.Model):
 
     image_url = fields.Char()
 
+    terms_condition = fields.Text(oldname="x_terms_condition")
+    terms_condition_arabic = fields.Text(oldname="x_terms_condition_arabic")
+
     terms_conditions_en = fields.Html(
         string="Terms & Conditions (EN)", oldname="x_terms_condition_new"
     )
@@ -155,7 +159,7 @@ class ResPartner(models.Model):
     ar_country = fields.Char(string="Arabic Country", oldname="x_country_ar")
     ar_time_from = fields.Char(string="Arabic Time From", oldname="x_time_from_ar")
     ar_time_to = fields.Char(string="Arabic Time To", oldname="x_time_to_ar")
-    sequence = fields.Integer()
+    sequence = fields.Integer(oldname="x_sequence")
 
     online_store = fields.Boolean(string="Online Store", oldname="x_online_store")
 
@@ -183,6 +187,11 @@ class ResPartner(models.Model):
     whatsapp_number = fields.Char(string="WhatsApp Number")
     email_verified = fields.Boolean(string="Email Verified")
     whatsapp_prefill_message = fields.Text(string="WhatsApp Prefill Message")
+
+    family_member_ids = fields.One2many('res.partner', 'family_head_member_id')
+    pdf_attached = fields.Boolean(string="PDF Attached", oldname="x_pdf_attached")
+    is_hotel_type = fields.Boolean(string="Is Hotel Type")
+    kts = fields.Char(string="KTS", oldname="x_kts", help="	If Hostel belongs to KTS?")
 
     comment = fields.Text()
     is_published = fields.Boolean(string="Is Published", default=False)

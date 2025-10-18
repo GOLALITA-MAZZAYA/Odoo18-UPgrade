@@ -44,6 +44,7 @@
         "views/org_registration_code.xml",
         "views/offer_usages_history.xml",
         "views/merchant_matrix.xml",
+        "views/merchant_banner.xml",
         "views/menus.xml"
     ],
     "installable": True,

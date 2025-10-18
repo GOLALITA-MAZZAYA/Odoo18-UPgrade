@@ -53,6 +53,7 @@ class ProductTemplate(models.Model):
     end_date = fields.Datetime()
     discount = fields.Float(string="Flat Discount")
     offer_limit_ids = fields.One2many('offer.limits', 'product_id', string='Offer Limits')
+    arabic_name = fields.Char(string="Arabic Name", oldname="x_arabic_name")
 
     offer_copy = fields.Binary(string='Offer Copy',oldname="x_offer_copy", attachment=True)
     offer_copy_name = fields.Char(string='Offer Copy Name',oldname="x_offer_copy_name")

@@ -7,6 +7,10 @@ class ResUsers(models.Model):
     _inherit = "res.users"
 
     token = fields.Char()
+    user_expiry = fields.Date(string="User Expiry", oldname="x_user_expiry")
+    moi_last_name = fields.Char(string="MOI Last Name",oldname="x_moi_last_name")
+    first_name_arbic = fields.Char(string="First Name Arabic",oldname="x_first_name_arbic")
+    last_name_arbic = fields.Char(string="Last Name Arabic",oldname="x_last_name_arbic")
 
     def get_user_access_token(self):
         self.ensure_one()

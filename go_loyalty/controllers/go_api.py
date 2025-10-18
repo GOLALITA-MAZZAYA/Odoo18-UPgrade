@@ -239,3 +239,158 @@ class GoApi(http.Controller):
 
         except Exception as e:
             return {"error": _("Something went wrong: %s") % str(e)}
+
+    @http.route(
+        "/go/api/user/transfer/points",
+        auth="public",
+        website=True,
+        methods=["POST"],
+        csrf=False,
+        type="json",
+        cors="*",
+    )
+    def go_transfer_points(self, **post):
+        try:
+            data = post or self._get_json_request()
+            if "error" in data:
+                return data
+
+            current_user = self._validate_token(data)
+            if isinstance(current_user, dict):
+                return current_user
+
+            phone = data.get("phone")
+            points = data.get("points")
+
+            if not phone or not points:
+                return {"error": _("Mobile Number and Points are required")}
+
+            partner_from = current_user.partner_id
+            partner_to = (
+                request.env["res.partner"]
+                .sudo()
+                .search([("phone", "=", phone)], limit=1)
+            )
+
+            if not partner_to:
+                return {
+                    "error": _(
+                        "Destination user not found. Please enter a valid mobile number."
+                    )
+                }
+
+            transfer = (
+                request.env["loyalty.point.transfer"]
+                .sudo()
+                .create(
+                    {
+                        "from_id": partner_from.id,
+                        "to_id": partner_to.id,
+                        "points": points,
+                    }
+                )
+            )
+            transfer.action_transfer()
+
+            return {"success": _("Points have been successfully transferred.")}
+
+        except Exception as e:
+            return {"error": _("Something went wrong: %s") % str(e)}
+
+    @http.route(
+        "/go/api/otp/verify/new_user",
+        auth="public",
+        website=True,
+        methods=["POST"],
+        csrf=False,
+        type="json",
+        cors="*",
+    )
+    def go_otp_verify_new_user(self, **post):
+        try:
+            data = post or self._get_json_request()
+            if "error" in data:
+                return data
+
+            phone = data.get("phone")
+            otp = data.get("otp")
+
+            if not phone:
+                return {"error": _("Phone number is missing")}
+            if not otp:
+                return {"error": _("OTP is required")}
+
+            current_user = (
+                request.env["res.users"]
+                .sudo()
+                .search([("partner_id.phone", "=", phone)], limit=1)
+            )
+
+            if not current_user:
+                return {"error": _("Your phone number is not registered with us.")}
+
+            verify = (
+                request.env["user.otp"].sudo().is_valid_otp(current_user.login, otp)
+            )
+
+            if not verify:
+                return {"error": _("Invalid OTP")}
+
+            token = request.env["res.users"].sudo().get_user_access_token()
+            current_user.sudo().write({"token": token})
+
+            return {"success": _("OTP verified successfully"), "token": token}
+
+        except Exception as e:
+            return {"error": _("Something went wrong: %s") % str(e)}
+
+    @http.route(
+        ["/go/api/otp/verify"],
+        auth="public",
+        website=True,
+        methods=["POST"],
+        csrf=False,
+        type="json",
+    )
+    def go_otp_verify(self, **post):
+        try:
+            data = post or self._get_json_request()
+            current_user = False
+
+            if data.get("email"):
+                current_user = (
+                    request.env["res.users"]
+                    .sudo()
+                    .search([("partner_id.email", "=", data.get("email"))], limit=1)
+                )
+            if data.get("phone"):
+                current_user = (
+                    request.env["res.users"]
+                    .sudo()
+                    .search([("partner_id.phone", "=", data.get("phone"))], limit=1)
+                )
+
+            if not current_user:
+                return {
+                    "error": _("Your email/phone number is not registered with us.")
+                }
+
+            if not data.get("otp"):
+                return {"error": _("otp is required")}
+
+            verify = (
+                request.env["user.otp"]
+                .sudo()
+                .is_valid_otp(current_user.login, data.get("otp"))
+            )
+
+            if not verify:
+                return {"error": _("Invalid OTP")}
+
+            token = request.env["res.users"].get_user_access_token()
+            current_user.token = token
+            return {"success": "Otp Verify Successfully", "token": token}
+
+        except Exception as e:
+            return {"error": _("Something went wrong: %s") % str(e)}
+

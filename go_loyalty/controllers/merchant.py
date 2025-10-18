@@ -1557,3 +1557,182 @@ class Merchant(http.Controller):
 
         except Exception as e:
             return {"error": _("Something went wrong. Please try again later.")}
+
+    @http.route(
+        ["/go/api/merchant/dashboard/data"],
+        auth="public",
+        website=True,
+        methods=["POST"],
+        csrf=False,
+        type="json",
+    )
+    def get_merchant_details(self, **post):
+        try:
+            data = post or self._get_json_request()
+            if "error" in data:
+                return data
+
+            current_user = self._validate_token(data)
+            if isinstance(current_user, dict):
+                return current_user
+
+            partner = current_user.partner_id
+            if partner.entity_type != "merchant":
+                return {"error": _("You are not allowed to access this API")}
+
+            web_base_url = (
+                request.env["ir.config_parameter"].sudo().get_param("web.base.url")
+            )
+            return self._get_merchant_profile(partner, web_base_url)
+
+        except Exception as e:
+            return {"error": _("Something went wrong: %s") % str(e)}
+
+    def _get_merchant_profile(self, partner, web_base_url):
+        products = self._get_products(partner)
+        category = partner.partner_category_id
+
+        return {
+            "id": partner.id,
+            "merchant_name": partner.name,
+            "phone": partner.phone,
+            "email": partner.email or "",
+            "address": partner.contact_address,
+            "partner_latitude": partner.partner_latitude,
+            "partner_longitude": partner.partner_longitude,
+            "description": partner.merchant_details_en,
+            "rating": partner.merchant_rating,
+            "notes": partner.comment,
+            "map_banner": url_join(
+                web_base_url, f"/go/api/image/{partner.id}/map_banner/res.partner"
+            ),
+            "merchant_logo": url_join(
+                web_base_url, f"/go/api/image/{partner.id}/image_512/res.partner"
+            ),
+            "category": category.name,
+            "category_logo": url_join(
+                web_base_url, f"/go/api/image/{category.id}/image_icon/partner.category"
+            ),
+            "available_points": partner.points,
+            "points_used": partner.points_used,
+            "points_earn": partner.points_earn,
+            "banners": self._get_banners(partner, web_base_url),
+            "total_products": len(products),
+            "products": products,
+            "offer_products": self._get_offer_products(partner),
+            "transactions": self._get_transactions(partner),
+            "total_sales": self._get_total_sales(partner),
+            "top_5_customers": self._get_top_5_customers(partner, web_base_url),
+        }
+
+    def _get_products(self, partner):
+        return (
+            request.env["product.template"]
+            .sudo()
+            .search_read(
+                [("merchant_id", "=", partner.id), ("is_in_offer", "=", False)],
+                [
+                    "name",
+                    "image_url",
+                    "list_price",
+                    "arabic_name",
+                    "discount",
+                    "point",
+                    "offer_label",
+                    "default_code",
+                    "barcode",
+                    "description",
+                    "description_sale",
+                ],
+            )
+        )
+
+    def _get_top_5_customers(self, partner, web_base_url):
+        datas = (
+            request.env["loyalty.sale"]
+            .sudo()
+            .read_group(
+                [("merchant_id", "=", partner.id)],
+                ["partner_id", "amount"],
+                ["partner_id", "amount"],
+                limit=5,
+                orderby="amount desc",
+            )
+        )
+        Partner = request.env["res.partner"].sudo()
+        res = []
+        for d in datas:
+            partner = Partner.browse(d["partner_id"][0])
+            res.append(
+                {
+                    "sales": d["amount"],
+                    "customer": partner.name,
+                    "phone": partner.phone,
+                    "email": partner.email,
+                    "logo": partner.image_url,
+                }
+            )
+        return res
+
+    def _get_banners(self, partner, web_base_url):
+        banners = (
+            request.env["merchant.banner"]
+            .sudo()
+            .search_read(
+                [("partner_id", "=", partner.id)],
+                ["name", "merchant_rating", "sequence"],
+            )
+        )
+        for banner in banners:
+            banner["banner_image"] = url_join(
+                web_base_url, f"/go/api/image/{banner['id']}/image_1920/merchant.banner"
+            )
+        return banners
+
+    def _get_offer_products(self, partner):
+        fields = [
+            "name",
+            "image_url",
+            "list_price",
+            "arabic_name",
+            "discount",
+            "point",
+            "offer_label",
+            "default_code",
+            "barcode",
+            "description",
+            "description_sale",
+            "start_date",
+            "end_date",
+            "min_quantity",
+            "max_quantity",
+            "offer_type",
+            "offer_type_discount",
+            "offer_type_promo_code",
+            "merchant_online_store",
+            "buy_link",
+        ]
+
+        return (
+            request.env["product.template"]
+            .sudo()
+            .search_read(
+                [("merchant_id", "=", partner.id), ("is_in_offer", "=", True)], fields
+            )
+        )
+
+    def _get_transactions(self, partner):
+        fields = ["name", "amount", "date", "partner_id"]
+        return (
+            request.env["loyalty.sale"]
+            .sudo()
+            .search_read([("merchant_id", "=", partner.id)], fields, limit=20)
+        )
+
+    def _get_total_sales(self, partner):
+        return sum(
+            request.env["loyalty.sale"]
+            .sudo()
+            .search([("merchant_id", "=", partner.id)])
+            .mapped("amount")
+        )

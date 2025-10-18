@@ -36,6 +36,7 @@ from . import favourite_product
 from . import offer_limits
 from . import offer_usages_history
 from . import merchant_matrix
+from . import merchant_banner
 
 
 

@@ -32,5 +32,7 @@ access_favourite_product,access.favourite.product,model_favourite_product,base.g
 access_offer_limits,access.offer.limits,model_offer_limits,base.group_user,1,1,1,1
 access_offer_usages_history,access.offer.usages.history,model_offer_usages_history,base.group_user,1,1,1,1
 access_merchant_matrix,access.merchant.matrix,model_merchant_matrix,base.group_user,1,1,1,1
+access_merchant_banner,access.merchant.banner,model_merchant_banner,base.group_user,1,1,1,1
+
 
 
