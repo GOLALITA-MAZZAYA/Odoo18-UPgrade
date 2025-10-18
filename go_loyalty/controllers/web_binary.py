@@ -1,6 +1,8 @@
-from odoo import http
-from odoo.http import request, Response
 import base64
+
+from odoo.http import request, Response
+
+from odoo import http
 
 
 class ContractDownloadController(http.Controller):
@@ -85,4 +87,3 @@ class ContractDownloadController(http.Controller):
             return response
         except Exception:
             return request.not_found()
-

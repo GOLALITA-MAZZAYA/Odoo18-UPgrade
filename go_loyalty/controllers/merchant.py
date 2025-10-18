@@ -1,11 +1,14 @@
-from odoo import http, fields, _
-from odoo.http import request
-from werkzeug.urls import url_join
-from datetime import timedelta,datetime
-from odoo.tools.misc import DEFAULT_SERVER_DATE_FORMAT
-from dateutil.relativedelta import relativedelta
-import logging
 import json
+import logging
+from datetime import timedelta, datetime
+
+from dateutil.relativedelta import relativedelta
+from odoo.http import request
+from odoo.tools.misc import DEFAULT_SERVER_DATE_FORMAT
+from werkzeug.urls import url_join
+
+from odoo import http, fields, _
+
 _logger = logging.getLogger(__name__)
 
 
@@ -727,7 +730,7 @@ class Merchant(http.Controller):
                 "amount_to_pay": sale.final_amount,
                 "customer_available_points": sale.partner_id.points,
                 "customer_type": sale.partner_id.employee_type,
-                "discount": sale.discount
+                "discount": sale.discount,
             }
 
         except Exception as e:
@@ -806,7 +809,10 @@ class Merchant(http.Controller):
                 request.env["res.partner"]
                 .sudo()
                 .search(
-                    [("id", "=", data["merchant_id"]), ("entity_type", "=", "merchant")],
+                    [
+                        ("id", "=", data["merchant_id"]),
+                        ("entity_type", "=", "merchant"),
+                    ],
                     limit=1,
                 )
             )
@@ -850,43 +856,6 @@ class Merchant(http.Controller):
 
         except Exception as e:
             return {"error": _("Something went wrong: %s") % str(e)}
-
-    @http.route(
-        ["/go/api/create/otp/password"],
-        auth="public",
-        website=True,
-        methods=["POST"],
-        csrf=False,
-        type="json",
-    )
-    def go_api_create_otp_password(self, **post):
-        try:
-            try:
-                data = post or json.loads(request.httprequest.data.decode("utf-8"))
-                if not isinstance(data, dict):
-                    return {"error": "Invalid JSON format", "status_code": "01"}
-            except Exception:
-                return {"error": "Malformed JSON payload", "status_code": "01"}
-
-            token = data.get("token")
-            if not token:
-                return {"error": "Token is missing", "status_code": "01"}
-
-            user = (
-                request.env["res.users"].sudo().search([("token", "=", token)], limit=1)
-            )
-            if not user:
-                return {"error": "Invalid User Token", "status_code": "01"}
-
-            new_password = data.get("new_password")
-            if not new_password:
-                return {"error": "Password missing", "status_code": "01"}
-
-            user.sudo().write({"password": new_password})
-            return {"message": "Successfully changed password", "status_code": "00"}
-
-        except Exception as e:
-            return {"error": "Something went wrong: %s" % str(e), "status_code": "01"}
 
     @http.route(
         ["/go/api/merchant/track/v2"],

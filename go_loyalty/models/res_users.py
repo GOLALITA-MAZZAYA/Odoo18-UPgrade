@@ -1,16 +1,31 @@
 # -*- coding: utf-8 -*-
 import uuid
-from odoo import models, fields,api
+
+from odoo import models, fields, api
 
 
 class ResUsers(models.Model):
     _inherit = "res.users"
 
-    token = fields.Char()
+    token = fields.Char(index=True)
     user_expiry = fields.Date(string="User Expiry", oldname="x_user_expiry")
-    moi_last_name = fields.Char(string="MOI Last Name",oldname="x_moi_last_name")
-    first_name_arbic = fields.Char(string="First Name Arabic",oldname="x_first_name_arbic")
-    last_name_arbic = fields.Char(string="Last Name Arabic",oldname="x_last_name_arbic")
+    moi_last_name = fields.Char(string="MOI Last Name", oldname="x_moi_last_name")
+    first_name_arbic = fields.Char(
+        string="First Name Arabic", oldname="x_first_name_arbic"
+    )
+    last_name_arbic = fields.Char(
+        string="Last Name Arabic", oldname="x_last_name_arbic"
+    )
+
+    @api.constrains("token")
+    def _check_token(self):
+        for record in self:
+            if record.token:
+                existing_user = self.search(
+                    [("token", "=", record.token), ("id", "!=", record.id)], limit=1
+                )
+                if existing_user:
+                    raise ValueError("Token must be unique across users.")
 
     def get_user_access_token(self):
         self.ensure_one()

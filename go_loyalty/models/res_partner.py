@@ -10,12 +10,6 @@ class ResPartner(models.Model):
 
     line_ids = fields.One2many("loyalty.point.transfer.line", "partner_id")
 
-    employee_type = fields.Selection(
-        [("vip", "VIP"), ("standard", "Standard")],
-        string="Employee Type",
-        help="Category for organisation employees.",
-    )
-
     is_token_permanent = fields.Boolean(
         string="Permanent API Token",
         help="If enabled, the user's API token will remain permanent and will not be regenerated automatically.",
@@ -39,10 +33,10 @@ class ResPartner(models.Model):
     )
 
     phone_verified = fields.Boolean()
-    premium_client = fields.Boolean(string="Premium Client")
+    premium_client = fields.Boolean(string="Premium Client", index=True)
 
     moi_last_name = fields.Char(oldname="x_moi_last_name")
-    family_head_member_id = fields.Many2one("res.partner")
+    family_head_member_id = fields.Many2one("res.partner", index=True)
 
     org_type = fields.Selection(
         selection=[
@@ -63,7 +57,8 @@ class ResPartner(models.Model):
         string="Associated Organisation",
         copy=True,
         store=True,
-        oldname="x_org_type"
+        oldname="x_org_type",
+        index=True,
     )
 
     user_expiry = fields.Date(oldname="x_user_expiry")
@@ -79,6 +74,7 @@ class ResPartner(models.Model):
             ("son", "Son"),
         ],
         string="Relation Type",
+        index=True,
     )
 
     employee_type = fields.Selection(
@@ -90,6 +86,7 @@ class ResPartner(models.Model):
         string="Employee Type",
         help="Select whether the employee is VIP, Standard, or Both.",
         oldname="x_for_employee_type",
+        index=True,
     )
 
     arabic_name = fields.Char(string="Arabic Name", oldname="x_arabic_name")
@@ -128,7 +125,7 @@ class ResPartner(models.Model):
     go_loyalty_point = fields.Boolean(
         string="Accept Go Loyalty Point ?",
         help="Select True if this merchant accept Go Loyalty Points",
-        oldname="x_go_loyalty_point"
+        oldname="x_go_loyalty_point",
     )
 
     image_url = fields.Char()
@@ -196,10 +193,12 @@ class ResPartner(models.Model):
     comment = fields.Text()
     is_published = fields.Boolean(string="Is Published", default=False)
     merchant_type = fields.Selection(
-        [("standard", "Standard"), ("premium", "Premium")], default="standard"
+        [("standard", "Standard"), ("premium", "Premium")],
+        default="standard",
+        index=True,
     )
     need_registration_code = fields.Boolean(string="Requires Registration Code")
-    reg_hide = fields.Boolean(string="Hide Registration Code",oldname="x_reg_hide")
+    reg_hide = fields.Boolean(string="Hide Registration Code", oldname="x_reg_hide")
     map_banner = fields.Binary(string="Map Banner")
 
     code_ids = fields.One2many(
@@ -209,14 +208,19 @@ class ResPartner(models.Model):
     pause_notification = fields.Boolean()
     merchant_pin_new = fields.Char(oldname="x_merchant_pin_new")
 
-    contract_copy = fields.Binary(string="Contract Copy", oldname="x_contract_copy", attachment=True)
+    contract_copy = fields.Binary(
+        string="Contract Copy", oldname="x_contract_copy", attachment=True
+    )
     contract_filename = fields.Char(string="Contract Filename")
 
-    company_registartion = fields.Binary(string="Company Registration", oldname="x_company_registration", attachment=True)
+    company_registartion = fields.Binary(
+        string="Company Registration", oldname="x_company_registration", attachment=True
+    )
     company_registartion_filename = fields.Char(string="Company Registration Filename")
 
-    active = fields.Boolean(default=True)
-    is_premium_merchant = fields.Boolean(string="Is Premium Merchant", oldname="x_is_premium_merchant")
+    is_premium_merchant = fields.Boolean(
+        string="Is Premium Merchant", oldname="x_is_premium_merchant"
+    )
 
     not_linked_ids = fields.Many2many(
         "notin.app",

@@ -1,10 +1,30 @@
-from odoo import http, fields, _
+import json
+from datetime import datetime
+
 from odoo.http import request
 from werkzeug.urls import url_join
-from datetime import timedelta,datetime
-import json
+
+from odoo import http, fields, _
+
 
 class Advertisement(http.Controller):
+
+    VALID_ORG_TYPES = {
+        "moi",
+        "barwa",
+        "alzamanexchange",
+        "qlm",
+        "masrif",
+        "sjc",
+        "gulfexchange",
+        "qatarinsurance",
+        "daam",
+        "beema",
+    }
+
+    ORG_FIELD_OVERRIDES = {
+        "moi": {"exclude_keys": {"is_sjc"}},
+    }
 
     def _validate_token(self, data):
         token = data.get("token")
@@ -128,6 +148,11 @@ class Advertisement(http.Controller):
             def parse_date(date_str):
                 if not date_str:
                     return False
+                try:
+                    return fields.Datetime.to_datetime(date_str)
+                except Exception:
+                    pass
+
                 formats = [
                     "%Y-%m-%d %H:%M:%S",
                     "%Y-%m-%d",
@@ -294,3 +319,76 @@ class Advertisement(http.Controller):
         except Exception as e:
             return {"error": _("Something went wrong: %s") % str(e)}
 
+    # -------------------------------------------------------------------------
+    # Unified Route for Organization Banners
+    # -------------------------------------------------------------------------
+    @http.route(
+        ["/go/api/advertisement/banner/<string:org_type>"],
+        auth="public",
+        website=True,
+        methods=["POST"],
+        csrf=False,
+        type="json",
+    )
+    def get_banner_by_org(self, org_type, **kw):
+        """
+        Unified endpoint for all organization banners.
+        Example: POST /go/api/advertisement/banner/moi
+        Body: {"token": "<user_token>"}
+        """
+        data = self._get_json_request()
+        if "error" in data:
+            return data
+
+        user = self._validate_token(data)
+        if isinstance(user, dict) and "error" in user:
+            return user
+
+        if self.VALID_ORG_TYPES and org_type not in self.VALID_ORG_TYPES:
+            return {"error": _("Unknown organization type: %s") % org_type}
+
+        # --- Step 4: Build response
+        company = user.company_id
+        base_url = (
+            request.env["ir.config_parameter"].sudo().get_param("web.base.url") or ""
+        )
+
+        response = {
+            "ad_1": self._serialize_ads(company.ad_1_ids, base_url, org_type),
+            "ad_2": self._serialize_ads(company.ad_2_ids, base_url, org_type),
+            "ad_3": self._serialize_ads(company.ad_3_ids, base_url, org_type),
+        }
+        return response
+
+    def _serialize_ads(self, ad_records, base_url, org_type):
+        ads = ad_records.sudo().filtered(
+            lambda a: (a.org_type or "").lower() == org_type.lower()
+        )
+        ads = ads.sorted(key=lambda a: ((a.seq if a.seq is not None else 10**9), a.id))
+
+        payload = []
+        for ad in ads:
+            item = {
+                "name": ad.name or "",
+                "banner_image": url_join(
+                    base_url, f"/go/api/image/{ad.id}/banner_image/advertisement.banner"
+                ),
+                "banner_url": ad.banner_url or "",
+                "is_sjc": ad.sjc,
+                "x_android": ad.android,
+                "x_ios": ad.ios,
+                "internal": ad.internal,
+                "merchant_id": (
+                    ad.merchant_id.id if getattr(ad, "merchant_id", False) else False
+                ),
+                "sequence": ad.seq or 0,
+                "tracking_code": ad.tracking_code or "",
+            }
+
+            # Apply org-specific overrides
+            overrides = self.ORG_FIELD_OVERRIDES.get(org_type, {})
+            for key in overrides.get("exclude_keys", set()):
+                item.pop(key, None)
+
+            payload.append(item)
+        return payload
