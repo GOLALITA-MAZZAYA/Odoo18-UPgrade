@@ -1705,3 +1705,47 @@ class Merchant(http.Controller):
             .search([("merchant_id", "=", partner.id)])
             .mapped("amount")
         )
+
+    @http.route(
+        ["/go/api/merchant/my/customer"],
+        auth="public",
+        website=True,
+        methods=["POST"],
+        csrf=False,
+        type="json",
+    )
+    def go_merchant_customer(self, **post):
+        try:
+            data = post or self._get_json_request()
+            if "error" in data:
+                return data
+
+            current_user = self._validate_token(data)
+            if isinstance(current_user, dict):
+                return current_user
+
+            partner = current_user.partner_id
+            if partner.entity_type != "merchant":
+                return {"error": _("You are not allowed to access this API")}
+
+            sales = request.env["loyalty.sale"].sudo().search([("merchant_id", "=", partner.id)])
+            partners = sales.mapped("partner_id")
+
+            res = [
+                {
+                    "id": p.id,
+                    "name": p.name,
+                    "employer": p.parent_id.name,
+                    "employer_logo": p.parent_id.image_url,
+                    "customer_logo": p.image_url,
+                    "email": p.email,
+                    "phone": p.phone,
+                    "address": p.contact_address,
+                }
+                for p in partners
+            ]
+
+            return res
+        except Exception as e:
+            return {"error": str(e)}
+

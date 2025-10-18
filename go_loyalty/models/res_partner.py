@@ -190,8 +190,11 @@ class ResPartner(models.Model):
     is_hotel_type = fields.Boolean(string="Is Hotel Type")
     kts = fields.Char(string="KTS", oldname="x_kts", help="	If Hostel belongs to KTS?")
 
+    mobile_version = fields.Char(string="Mobile Version")
+
     comment = fields.Text()
     is_published = fields.Boolean(string="Is Published", default=False)
+    is_restro = fields.Boolean(string="Is Restaurant")
     merchant_type = fields.Selection(
         [("standard", "Standard"), ("premium", "Premium")],
         default="standard",

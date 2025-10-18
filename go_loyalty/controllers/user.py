@@ -1874,3 +1874,87 @@ class User(http.Controller):
 
         except Exception as e:
             return {"error": _("Something went wrong: %s") % str(e)}
+
+    @http.route(
+        ["/go/api/user/restaurant/category/lists"],
+        auth="public",
+        website=True,
+        methods=["POST"],
+        csrf=False,
+        type="json",
+    )
+    def go_api_user_restaurant_category_list(self, **post):
+        try:
+            data = post or self._get_json_request()
+            if "error" in data:
+                return data
+
+            current_user = self._validate_token(data)
+            if isinstance(current_user, dict):
+                return current_user
+
+            web_base_url = (
+                request.env["ir.config_parameter"].sudo().get_param("web.base.url")
+            )
+            categories = self._get_partner_category_restro(web_base_url)
+
+            return {"restro_category": categories}
+
+        except Exception as e:
+            return {"error": str(e)}
+
+    def _get_partner_category_restro(self, web_base_url):
+        categories = (
+            request.env["loyalty.restaurant.category"]
+            .sudo()
+            .search_read([], ["id", "name", "parent_id", "name_arabic"])
+        )
+        return categories
+
+    @http.route(
+        ["/go/api/user/location/list"],
+        auth="public",
+        website=True,
+        methods=["POST"],
+        csrf=False,
+        type="json",
+    )
+    def get_user_location_list(self, **post):
+        try:
+            data = post or self._get_json_request()
+            if "error" in data:
+                return data
+
+            current_user = self._validate_token(data)
+            if isinstance(current_user, dict):
+                return current_user
+
+            domain = []
+            if data.get("customer_id"):
+                domain.append(("customer_id", "=", data["customer_id"]))
+
+            addresses = request.env["user.address"].sudo().search(domain)
+            res = []
+
+            for addr in addresses:
+                res.append(
+                    {
+                        "customer": addr.customer_id.name,
+                        "customer_id": addr.customer_id.id,
+                        "location_id": addr.id,
+                        "street_number": addr.street_number,
+                        "location_name": addr.location_name,
+                        "building_number": addr.building_number,
+                        "zone": addr.zone,
+                        "floor": addr.floor,
+                        "apartment_number": addr.apartment_number,
+                        "latitude": addr.lat,
+                        "longitude": addr.long,
+                    }
+                )
+
+            return res
+
+        except Exception as e:
+            return {"error": f"Something went wrong: {str(e)}"}
+

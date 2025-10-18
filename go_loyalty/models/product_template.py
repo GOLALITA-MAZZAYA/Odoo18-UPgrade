@@ -57,6 +57,11 @@ class ProductTemplate(models.Model):
 
     offer_copy = fields.Binary(string='Offer Copy',oldname="x_offer_copy", attachment=True)
     offer_copy_name = fields.Char(string='Offer Copy Name',oldname="x_offer_copy_name")
+    favourite_partner_ids = fields.One2many(
+        "favourite.product", "product_id", string="Favourite Partners"
+    )
+
+    label_arabic = fields.Char(string="Arabic Label", oldname="x_label_arabic")
 
     @api.depends('image_512')
     def _compute_image_url(self):

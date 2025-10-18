@@ -3,6 +3,7 @@ import json
 from odoo.http import request
 
 from odoo import http, fields, _
+import re
 
 
 class GoOTP(http.Controller):
@@ -298,6 +299,138 @@ class GoOTP(http.Controller):
             request.env["user.otp"]
             .sudo()
             .generate_and_send_otp_email(current_user.login, post.get("email"))
+        )
+        if not is_sent:
+            return {"error": _("Could not send otp! either email is invalid")}
+
+        return {
+            "success": "Otp has been successfully sent and will be valid for 5 minutes."
+        }
+
+    @http.route(
+        ["/go/api/send/merchant/forget/email/otp", "/go/api/send/otp/email",],
+        auth="public",
+        website=True,
+        methods=["POST"],
+        csrf=False,
+        type="json",
+    )
+    def go_forget_send_otp_email_string(self, **post):
+        try:
+            data = post or self._get_json_request()
+            if not isinstance(data, dict):
+                return {"error": "Invalid JSON format", "status_code": "01"}
+        except Exception:
+            return {"error": "Malformed JSON payload", "status_code": "01"}
+
+        email = data.get("email")
+        if not email:
+            return {"error": _("Email is missing")}
+        domain = [
+            ("login", "=", email),
+        ]
+        current_user = request.env["res.users"].sudo().search(domain, limit=1)
+
+        if not current_user:
+            return {"error": _("Your email number is not registered with us.")}
+
+        is_sent = (
+            request.env["user.otp"]
+            .sudo()
+            .generate_and_send_otp_email(current_user.login, email)
+        )
+        if not is_sent:
+            return {"error": _("Could not send otp! either email is invalid")}
+
+        return {
+            "success": "Otp has been successfully sent and will be valid for 5 minutes."
+        }
+
+    @http.route(
+        [
+            "/go/api/send/merchant/forget/phone/otp",
+        ],
+        auth="public",
+        website=True,
+        methods=["POST"],
+        csrf=False,
+        type="json",
+    )
+    def go_forget_send_otp_phone_string(self, **post):
+        try:
+            data = post or self._get_json_request()
+            if not isinstance(data, dict):
+                return {"error": "Invalid JSON format", "status_code": "01"}
+        except Exception:
+            return {"error": "Malformed JSON payload", "status_code": "01"}
+
+        phone = data.get("phone")
+        otp_by = data.get("otp_by")
+        if not phone:
+            return {"error": _("Email is missing")}
+        domain = [
+            ("partner_id.phone", "=", phone),
+        ]
+        current_user = request.env["res.users"].sudo().search(domain, limit=1)
+
+        if not current_user:
+            return {"error": _("Your email number is not registered with us.")}
+
+        is_sent = (
+            request.env["user.otp"]
+            .sudo()
+            .generate_and_send_otp(current_user.login, phone)
+        )
+        if not is_sent:
+            return {"error": _("Could not send otp! either email is invalid")}
+
+        return {
+            "success": "Otp has been successfully sent and will be valid for 5 minutes."
+        }
+
+    @http.route(
+        [
+            "/go/api/send/otp/<string:org_type>",
+        ],
+        auth="public",
+        website=True,
+        methods=["POST"],
+        csrf=False,
+        type="json",
+    )
+    def go_send_otp_email_or_phone_string(self, org_type, **post):
+        try:
+            data = post or self._get_json_request()
+            if not isinstance(data, dict):
+                return {"error": "Invalid JSON format", "status_code": "01"}
+        except Exception:
+            return {"error": "Malformed JSON payload", "status_code": "01"}
+
+        email = data.get("email")
+        phone = data.get("phone")
+        otp_by = data.get("otp_by")
+        if not email and otp_by == "email":
+            return {"error": _("email is missing")}
+        if not phone and otp_by == "phone":
+            return {"error": _("phone number is missing")}
+        domain = [
+            ("partner_id.org_type", "=", org_type),
+        ]
+        if otp_by == "email":
+            domain.append(("partner_id.email", "=", email))
+        if otp_by == "phone":
+            domain.append(("partner_id.phone", "=", phone))
+        current_user = request.env["res.users"].sudo().search(domain, limit=1)
+
+        if not current_user:
+            return {"error": _("Your email number is not registered with us.")}
+
+        phone = re.sub(r"^\+?", "", phone) if phone else False
+
+        is_sent = (
+            request.env["user.otp"]
+            .sudo()
+            .generate_and_send_otp(current_user.login, phone)
         )
         if not is_sent:
             return {"error": _("Could not send otp! either email is invalid")}

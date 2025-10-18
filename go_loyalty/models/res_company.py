@@ -22,3 +22,5 @@ class ResCompany(models.Model):
     ad_3_ids = fields.One2many(
         "advertisement.banner", "company_id", domain=[("advertisement", "=", "ad_3")]
     )
+
+

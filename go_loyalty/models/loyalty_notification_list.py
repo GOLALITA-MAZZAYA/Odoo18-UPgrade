@@ -43,7 +43,7 @@ class LoyaltyNotificationList(models.Model):
 
     url = fields.Char(string="Notification URL" ,oldname="x_url")
     product_id = fields.Many2one("product.template", string="Product", oldname="x_product_id")
-    offer_image = fields.Binary(string="Offer Image")
+    offer_image = fields.Binary(string="Offer Image", oldname="x_offer_image")
     imp_notification = fields.Boolean(string="Important Notification", default=False, oldname="x_imp_notification")
 
     @api.depends("notification_type", "partner_id", "date")

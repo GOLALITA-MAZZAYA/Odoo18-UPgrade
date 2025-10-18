@@ -9,7 +9,7 @@ class PartnerCategory(models.Model):
     parent_id = fields.Many2one('partner.category', string='Parent Category', index=True, ondelete='cascade')
     name_arabic = fields.Char(string='Name Arabic')
     parent_path = fields.Char(index=True)
-    image_icon = fields.Binary("Image Icon")
+    gif_image = fields.Binary("GIF Image" , oldname="x_gif_image")
     # category_id = fields.Many2one('product.public.category')
     image_icon = fields.Image("Image", max_width=128, max_height=128)
     image_url = fields.Char(compute='_compute_urls')
