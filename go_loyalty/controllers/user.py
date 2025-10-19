@@ -4,6 +4,8 @@ import json
 import ast
 from werkzeug.urls import url_join
 BEARER_TOKEN = "l3UIiRwXb0oZPfAeQqY2Hk3l"
+import logging
+_logger = logging.getLogger(__name__)
 
 
 class User(http.Controller):

@@ -174,7 +174,6 @@ class ResPartner(models.Model):
     )
 
     partner_category_id = fields.Many2one("partner.category")
-    arabic_name = fields.Char(string="Arabic Name", oldname="x_arabic_name")
 
     points_earn = fields.Integer()
     points_used = fields.Integer()
@@ -226,7 +225,6 @@ class ResPartner(models.Model):
     )
 
     cc_emails_outlet = fields.Char(string="CC To Management", oldname="x_cc_emails_outlet")
-    go_loyalty_point = fields.Boolean(oldname="x_go_loyalty_point")
     location_id = fields.Many2one("custom.location")
 
     not_linked_ids = fields.Many2many(
@@ -238,6 +236,19 @@ class ResPartner(models.Model):
     )
 
     not_in_list = fields.Boolean(string="Not in List", oldname="x_not_in_list")
+    ufile = fields.Binary()
+
+    qid = fields.Char(string="QID", oldname="x_qid")
+
+    def _is_code_exist(self, code):
+        return code in self.code_ids.mapped('code')
+
+    def _is_vip(self, code):
+        record = self.code_ids.filtered(lambda rec: rec.code == code)
+        if record:
+            return record.x_vip
+        else:
+            return False
 
     def _is_registred(self, code):
         return code in self.code_ids.filtered(lambda l: l.assign_id).mapped("code")
