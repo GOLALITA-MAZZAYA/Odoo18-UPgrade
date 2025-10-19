@@ -1655,3 +1655,246 @@ class GoApi(http.Controller):
 
         except Exception as e:
             return {"error": str(e)}
+
+    @http.route(
+        ["/go/api/get/favourite/merchants"],
+        auth="public",
+        website=True,
+        methods=["POST"],
+        csrf=False,
+        type="json",
+        cors="*",
+    )
+    def get_favourite_merchants(self, **post):
+        try:
+            data = post or self._get_json_request()
+            if "error" in data:
+                return data
+
+            current_user = self._validate_token(data)
+            if isinstance(current_user, dict):
+                return current_user
+
+            if not data.get("customer_id"):
+                return {"error": _("Customer ID is missing")}
+
+            customer = (
+                request.env["res.partner"]
+                .sudo()
+                .search([("id", "=", data["customer_id"])], limit=1)
+            )
+            if not customer:
+                return {"error": _("Customer not found")}
+
+            favourite_records = (
+                request.env["favourite.product"]
+                .sudo()
+                .search(
+                    [("partner_id", "=", customer.id), ("fav_merchant_id", "!=", False)]
+                )
+            )
+
+            merchant_ids = favourite_records.mapped("fav_merchant_id").ids
+            if not merchant_ids:
+                return {"merchants": []}
+
+            merchants = (
+                request.env["res.partner"].sudo().search([("id", "in", merchant_ids)])
+            )
+            web_base_url = (
+                request.env["ir.config_parameter"]
+                .sudo()
+                .get_param("web.base.url", default="https://www.golalita.com")
+            )
+
+            res = []
+            for partner in merchants:
+                res.append(
+                    {
+                        "merchant_name": partner.name,
+                        "x_arabic_name": partner.arabic_name,
+                        "merchant_id": partner.id,
+                        "x_for_employee_type": partner.employee_type,
+                        "is_business_hotel": partner.is_hotel_type,
+                        "x_moi_show": partner.show_in_moi,
+                        "x_have_branch": partner.has_branches,
+                        "x_have_offers": partner.has_offers,
+                        "accept_go_loyalty_point": partner.go_loyalty_point,
+                        "open_from": partner.open_from,
+                        "open_till": partner.open_till,
+                        "x_kts": partner.kts,
+                        "x_org_linked": partner.org_type,
+                        "x_online_store": partner.online_store,
+                        "x_sequence": partner.sequence,
+                        "barcode": partner.barcode,
+                        "partner_latitude": partner.partner_latitude,
+                        "partner_longitude": partner.partner_longitude,
+                        "ribbon_text": partner.ribbon_text,
+                        "ribbon_color": partner.ribbon_color,
+                        "ribbon_position": partner.ribbon_position,
+                        "rating": partner.merchant_rating,
+                        "map_banner": url_join(
+                            web_base_url,
+                            f"/go/api/image/{partner.id}/map_banner/res.partner",
+                        ),
+                        "merchant_logo": url_join(
+                            web_base_url,
+                            f"/go/api/image/{partner.id}/image_512/res.partner",
+                        ),
+                        "category": partner.partner_category_id.name,
+                        "category_id": partner.partner_category_id.id,
+                        "country_id": partner.country_id.id,
+                        "country_name": partner.country_id.name,
+                        "category_logo": url_join(
+                            web_base_url,
+                            f"/go/api/image/{partner.partner_category_id.id}/image_icon/partner.category",
+                        ),
+                        "banners": self._get_banners(partner, web_base_url),
+                        "pdf_attached": partner.pdf_attached,
+                        "company_contract_url": url_join(
+                            web_base_url,
+                            f"/web/binary/contract_download_pdf/{partner.id}",
+                        ),
+                        "company_registration_url": url_join(
+                            web_base_url,
+                            f"/web/binary/registration_download_pdf/{partner.id}",
+                        ),
+                    }
+                )
+
+            return {"merchants": res}
+
+        except Exception as e:
+            return {"error": f"Error occurred: {str(e)}"}
+
+    @http.route(
+        ["/go/api/remove/favourite/merchant"],
+        auth="public",
+        website=True,
+        methods=["POST"],
+        csrf=False,
+        type="json",
+        cors="*",
+    )
+    def remove_favourite_merchant(self, **post):
+        try:
+            data = post or self._get_json_request()
+            if "error" in data:
+                return data
+
+            current_user = self._validate_token(data)
+            if isinstance(current_user, dict):
+                return current_user
+
+            for field in ["customer_id", "merchant_id"]:
+                if not data.get(field):
+                    return {
+                        "error": _(f'{field.replace("_", " ").capitalize()} is missing')
+                    }
+
+            customer = (
+                request.env["res.partner"]
+                .sudo()
+                .search([("id", "=", data["customer_id"])], limit=1)
+            )
+            if not customer:
+                return {"error": _("Customer not found")}
+
+            favourite_record = (
+                request.env["favourite.product"]
+                .sudo()
+                .search(
+                    [
+                        ("partner_id", "=", customer.id),
+                        ("fav_merchant_id", "=", data["merchant_id"]),
+                    ],
+                    limit=1,
+                )
+            )
+
+            if not favourite_record:
+                return {"error": _("Favourite merchant record not found")}
+
+            favourite_record.sudo().unlink()
+
+            updated_ids = (
+                request.env["favourite.product"]
+                .sudo()
+                .search([("partner_id", "=", customer.id)])
+                .mapped("fav_merchant_id")
+                .ids
+            )
+
+            if not updated_ids:
+                return {"merchants": []}
+
+            merchants = (
+                request.env["res.partner"].sudo().search([("id", "in", updated_ids)])
+            )
+            web_base_url = (
+                request.env["ir.config_parameter"]
+                .sudo()
+                .get_param("web.base.url")
+            )
+            res = []
+
+            for partner in merchants:
+                res.append(
+                    {
+                        "merchant_name": partner.name,
+                        "merchant_id": partner.id,
+                        "x_for_employee_type": partner.employee_type,
+                        "is_business_hotel": partner.is_hotel_type,
+                        "x_moi_show": partner.show_in_moi,
+                        "x_have_branch": partner.has_branches,
+                        "x_have_offers": partner.has_offers,
+                        "accept_go_loyalty_point": partner.go_loyalty_point,
+                        "open_from": partner.open_from,
+                        "open_till": partner.open_till,
+                        "x_kts": partner.kts,
+                        "x_org_linked": partner.org_type,
+                        "x_online_store": partner.online_store,
+                        "x_sequence": partner.sequence,
+                        "barcode": partner.barcode,
+                        "partner_latitude": partner.partner_latitude,
+                        "partner_longitude": partner.partner_longitude,
+                        "ribbon_text": partner.ribbon_text,
+                        "ribbon_color": partner.ribbon_color,
+                        "ribbon_position": partner.ribbon_position,
+                        "rating": partner.merchant_rating,
+                        "map_banner": url_join(
+                            web_base_url,
+                            f"/go/api/image/{partner.id}/map_banner/res.partner",
+                        ),
+                        "merchant_logo": url_join(
+                            web_base_url,
+                            f"/go/api/image/{partner.id}/image_512/res.partner",
+                        ),
+                        "category": partner.partner_category_id.name,
+                        "category_id": partner.partner_category_id.id,
+                        "country_id": partner.country_id.id,
+                        "country_name": partner.country_id.name,
+                        "category_logo": url_join(
+                            web_base_url,
+                            f"/go/api/image/{partner.partner_category_id.id}/image_icon/partner.category",
+                        ),
+                        "banners": self._get_banners(partner, web_base_url),
+                        "pdf_attached": partner.pdf_attached,
+                        "company_contract_url": url_join(
+                            web_base_url,
+                            f"/web/binary/contract_download_pdf/{partner.id}",
+                        ),
+                        "company_registration_url": url_join(
+                            web_base_url,
+                            f"/web/binary/registration_download_pdf/{partner.id}",
+                        ),
+                    }
+                )
+
+            return {
+                "success": _("Favourite merchant successfully removed"),
+                "merchants": res,
+            }
+
+        except Exception as e:
+            return {"error": f"Error occurred: {str(e)}"}

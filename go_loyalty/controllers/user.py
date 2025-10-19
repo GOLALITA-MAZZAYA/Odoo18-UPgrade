@@ -3409,7 +3409,7 @@ class User(http.Controller):
 
         return values
         
-        @http.route(
+    @http.route(
         ["/go/api/user/transaction/data"],
         auth="public",
         website=True,
