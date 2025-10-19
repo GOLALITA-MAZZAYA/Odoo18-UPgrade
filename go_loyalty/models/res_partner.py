@@ -225,7 +225,9 @@ class ResPartner(models.Model):
     )
 
     cc_emails_management = fields.Char(string="CC To Management", oldname="x_cc_emails_outlet")
-    location_id = fields.Many2one("custom.location")
+    location_id = fields.Many2one("custom.location", oldname="x_location_id")
+    has_branches = fields.Boolean(string="Has Branches", oldname="x_have_branch")
+    has_offers = fields.Boolean(string="Has Offers", oldname="x_have_offers")
     time_for_order_prepration = fields.Char(string="Time Needed for Order Prepration", oldname="x_time_for_order_prepration")
     delivery_cost = fields.Float(string="Delivery Cost", oldname="x_delivery_cost")
 

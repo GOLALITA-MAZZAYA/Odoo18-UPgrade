@@ -16,6 +16,11 @@ class ResUsers(models.Model):
     last_name_arbic = fields.Char(
         string="Last Name Arabic", oldname="x_last_name_arbic"
     )
+    # entity_type = fields.Selection(
+    #     related="partner_id.entity_type"
+    # )
+    #
+
 
     @api.constrains("token")
     def _check_token(self):

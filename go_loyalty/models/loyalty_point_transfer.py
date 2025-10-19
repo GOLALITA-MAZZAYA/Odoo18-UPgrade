@@ -117,7 +117,7 @@ class LoyaltyPointTransfer(models.Model):
     #             record.amount = 0
     #             continue
     #
-    #         if record.to_id.go_entity == "merchant":
+    #         if record.to_id.entity_type == "merchant":
     #             rule = record.rule_id.merchant_rule_ids.filtered(
     #                 lambda m: m.merchant_id == record.to_id
     #             )

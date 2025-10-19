@@ -43,6 +43,7 @@
                 <field name="global_local_global"/>
                 <field name="country_ids_m2m" widget="many2many_tags"/>
                 <field name="organisation_ids" widget="many2many_tags"/>
+
 <!--                <field name="category_id"/>-->
             </list>
         </field>

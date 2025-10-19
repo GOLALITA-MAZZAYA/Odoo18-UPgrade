@@ -1,11 +1,14 @@
 import json
 from datetime import datetime
-
+import requests
 from odoo.http import request
 from datetime import timedelta
 from werkzeug.urls import url_join
 from odoo import http, fields, _
 import logging
+
+from odoo.odoo.exceptions import AccessError, AccessDenied
+
 _logger = logging.getLogger(__name__)
 
 
@@ -31,39 +34,88 @@ class GoApi(http.Controller):
         except json.JSONDecodeError:
             return {"error": _("Malformed JSON payload")}
 
-    # @http.route(
-    #     [
-    #         "/go/api/update/password",
-    #     ],
-    #     auth="public",
-    #     website=True,
-    #     methods=["POST"],
-    #     csrf=False,
-    #     type="json",
-    # )
-    # def go_api_update_password(self, **post):
-    #     try:
-    #         data = post or self._get_json_request()
-    #         if "error" in data:
-    #             return data
-    #
-    #         login = data.get("login")
-    #         old_password = data.get("old_password")
-    #         new_password = data.get("new_password")
-    #
-    #         if not all([login, old_password, new_password]):
-    #             return {"error": "Missing required parameters"}
-    #
-    #         uid = request.session.authenticate(request.session.db, login, old_password)
-    #         if not uid:
-    #             return {"error": "Old password is incorrect!", "status_code": "01"}
-    #
-    #         user = request.env["res.users"].sudo().browse(uid)
-    #         user.password = new_password
-    #         return {"success": "Password updated successfully", "status_code": "00"}
-    #
-    #     except Exception as e:
-    #         return {"error": f"Something went wrong: {str(e)}"}
+    @http.route(
+        [
+            "/go/api/update/password",
+        ],
+        auth="public",
+        website=True,
+        methods=["POST"],
+        csrf=False,
+        type="json",
+    )
+    def go_api_update_password(self, **post):
+        try:
+            data = post or self._get_json_request()
+            if "error" in data:
+                return data
+
+            login = data.get("login")
+            old_password = data.get("old_password")
+            new_password = data.get("new_password")
+
+            if not all([login, old_password, new_password]):
+                return {"error": "Missing required parameters"}
+            credential = {'login': login, 'password': old_password, 'type': 'password'}
+            uid = request.session.authenticate(request.db, credential)
+            if not uid:
+                return {"error": "Old password is incorrect!", "status_code": "01"}
+
+            user = request.env["res.users"].sudo().browse(uid.get('uid'))
+            user.password = new_password
+            request.session.logout()
+            return {"success": "Password updated successfully", "status_code": "00"}
+
+        except Exception as e:
+            return {"error": f"Something went wrong: {str(e)}"}
+
+    @http.route(
+        [
+            "/ago/api/user/pass/update/v2",
+        ],
+        auth="public",
+        website=True,
+        methods=["POST"],
+        csrf=False,
+        type="json",
+    )
+    def ago_api_update_password_v2(self, **post):
+        res = {}
+        try:
+            data = post or self._get_json_request()
+            if "error" in data:
+                return data
+
+            login = data.get("login")
+            old_password = data.get("password")
+            new_password = data.get("new_password")
+
+            if not all([login, old_password, new_password]):
+                return {"error": "Missing required parameters"}
+            credential = {'login': login, 'password': old_password, 'type': 'password'}
+            uid = request.session.authenticate(request.db, credential)
+            if not uid:
+                res['error'] = "Wrong password"
+                return res
+
+            user = request.env["res.users"].sudo().browse(uid.get('uid'))
+            token = user.get_user_access_token()
+            user.token = token
+            user.password = data.get("new_password")
+            res.update(
+                password=data.get("new_password"),
+                id=user.id,
+                name=user.partner_id.name,
+            )
+            request.session.logout()
+            return {"success": "Password updated successfully", "status_code": "00"}
+
+        except AccessDenied:
+            res['error'] = "Wrong password"
+            return res
+        except Exception as e:
+            res['error'] = "Something Went Wrong! Kindly check current password  %s" % e
+            return res
 
     @http.route(
         ["/go/api/user/email/check"],
@@ -1312,3 +1364,294 @@ class GoApi(http.Controller):
             return {"success": _("Password changed successfully.")}
         except Exception as e:
             return {"error": _("Failed to change password: %s") % str(e)}
+
+    @http.route(
+        [
+            "/go/api/golalta/passcard/v3",
+            "/go/api/golalta/passcard/v2",
+        ],
+        auth="public",
+        website=True,
+        methods=["POST"],
+        csrf=False,
+        type="json",
+        cors="*",
+    )
+    def get_api_passcard_api_v3(self, **post):
+        try:
+            data = post or self._get_json_request()
+            if "error" in data:
+                return data
+
+            current_user = self._validate_token(data)
+            if isinstance(current_user, dict):
+                return current_user
+
+            IrConfigParam = request.env["ir.config_parameter"].sudo()
+            username = (
+                IrConfigParam.get_param("golalta_passcard_username") or "golalita"
+            )
+            password = (
+                IrConfigParam.get_param("golalta_passcard_password")
+                or "B_I9XNXsPGhYf5wNOPlL7w"
+            )
+            url = (
+                IrConfigParam.get_param("golalta_passcard_url")
+                or "https://api.passworks.io/v2/coupons/da60dcfb-69cb-494b-a8c8-8cf30e2f0806/passes"
+            )
+
+            label1 = data.get("key_label1")
+            label2 = data.get("key_label2")
+            barcode = data.get("barcode")
+
+            headers = {"Content-Type": "application/json"}
+            payload = {
+                "pass": {
+                    "secondary_fields": [
+                        {"key": "5e8328", "label": "Name", "value": label1},
+                        {"key": "5b3ec0", "label": "Date Exp", "value": label2},
+                    ],
+                    "barcodes": [
+                        {"format": "ean128", "message": barcode, "alt_text": barcode}
+                    ],
+                }
+            }
+
+            response = requests.post(
+                url, json=payload, headers=headers, auth=(username, password)
+            )
+            api_data = response.json()
+
+            res = [
+                {
+                    "page_url": api_data.get("page_url"),
+                    "pkpass_url": api_data.get("pkpass_url"),
+                    "page_short_url": api_data.get("page_short_url"),
+                    "pkpass_short_url": api_data.get("pkpass_short_url"),
+                }
+            ]
+            return res
+
+        except Exception as e:
+            return {"error": str(e)}
+
+    # Todo x_local_global fields is not defined in partner.category model in odoo 14.
+    # @http.route(
+    #     ["/go/api/child/category/v2/v3"],
+    #     auth="public",
+    #     website=True,
+    #     methods=["POST"],
+    #     csrf=False,
+    #     type="json",
+    # )
+    # def get_api_parent_child_category_v3(self, **post):
+    #     try:
+    #         data = post or self._get_json_request()
+    #         if "error" in data:
+    #             return data
+    #
+    #         current_user = self._validate_token(data)
+    #         if isinstance(current_user, dict):
+    #             return current_user
+    #
+    #         parent_id = data.get("parent_id")
+    #         domain = [("parent_id", "=", parent_id)]
+    #
+    #         type_filter = data.get("type")
+    #         if type_filter == "local":
+    #             domain.append(("x_local_global", "=", True))
+    #         elif type_filter == "global":
+    #             domain.append(("x_local_global", "=", False))
+    #
+    #         country_code = data.get("country")
+    #         if country_code:
+    #             country = (
+    #                 request.env["res.country"]
+    #                 .sudo()
+    #                 .search([("code", "=", country_code)], limit=1)
+    #             )
+    #             if country:
+    #                 domain.append(("x_country_ids_m2m", "in", country.id))
+    #
+    #         categories = (
+    #             request.env["partner.category"]
+    #             .sudo()
+    #             .search_read(
+    #                 domain, ["name", "image_icon", "x_name_arabic", "parent_id"]
+    #             )
+    #         )
+    #
+    #         web_base_url = (
+    #             request.env["ir.config_parameter"]
+    #             .sudo()
+    #             .get_param("web.base.url", default="https://www.golalita.com")
+    #         )
+    #
+    #         for cat in categories:
+    #             for img_field in ["image_icon", "x_image2", "x_image3", "x_image4"]:
+    #                 cat[img_field] = url_join(
+    #                     web_base_url,
+    #                     f"/go/api/image/{cat['id']}/{img_field}/partner.category",
+    #                 )
+    #
+    #         return categories
+    #
+    #     except Exception as e:
+    #         return {"error": str(e)}
+
+    @http.route(
+        ["/go/api/child/category/v2"],
+        auth="public",
+        website=True,
+        methods=["POST"],
+        csrf=False,
+        type="json",
+    )
+    def get_api_parent_child_category_v2(self, **post):
+        try:
+            data = post or self._get_json_request()
+            if "error" in data:
+                return data
+
+            current_user = self._validate_token(data)
+            if isinstance(current_user, dict):
+                return current_user
+
+            parent_id = data.get("parent_id")
+            domain = [("parent_id", "=", parent_id)]
+
+            if data.get("type") == "local":
+                domain.append(("global_local", "=", True))
+            elif data.get("type") == "global":
+                domain.append(("global_local_global", "=", True))
+
+            if data.get("country"):
+                country = (
+                    request.env["res.country"]
+                    .sudo()
+                    .search([("code", "=", data.get("country"))], limit=1)
+                )
+                if country:
+                    domain.append(("country_ids_m2m", "in", [country.id]))
+
+            if data.get("org_id"):
+                parent = (
+                    request.env["res.partner"]
+                    .sudo()
+                    .search([("id", "=", data.get("org_id"))], limit=1)
+                )
+                if parent:
+                    domain.append(("organisation_ids", "in", [parent.id]))
+
+            categories = (
+                request.env["partner.category"]
+                .sudo()
+                .search_read(domain, ["name", "image_icon", "name_arabic", "parent_id"])
+            )
+
+            web_base_url = (
+                request.env["ir.config_parameter"]
+                .sudo()
+                .get_param("web.base.url", default="https://www.golalita.com")
+            )
+
+            for cat in categories:
+                cat["image_icon"] = url_join(
+                    web_base_url,
+                    f"/go/api/image/{cat['id']}/image_icon/partner.category",
+                )
+                cat["image2"] = url_join(
+                    web_base_url,
+                    f"/go/api/image/{cat['id']}/image2/partner.category",
+                )
+                cat["image3"] = url_join(
+                    web_base_url,
+                    f"/go/api/image/{cat['id']}/image3/partner.category",
+                )
+                cat["image4"] = url_join(
+                    web_base_url,
+                    f"/go/api/image/{cat['id']}/image4/partner.category",
+                )
+
+            return categories
+
+        except Exception as e:
+            return {"error": str(e)}
+
+    @http.route(
+        ["/go/api/parent/category/v2"],
+        auth="public",
+        website=True,
+        methods=["POST"],
+        csrf=False,
+        type="json",
+    )
+    def get_api_parent_category_v2(self, **post):
+        try:
+            data = post or self._get_json_request()
+            if "error" in data:
+                return data
+
+            current_user = self._validate_token(data)
+            if isinstance(current_user, dict):
+                return current_user
+
+            domain = [('parent_id', '=', False)]
+
+            if data.get("type") == "local":
+                domain.append(("global_local", "=", True))
+            elif data.get("type") == "global":
+                domain.append(("global_local_global", "=", True))
+
+            if data.get("country"):
+                country = (
+                    request.env["res.country"]
+                    .sudo()
+                    .search([("code", "=", data.get("country"))], limit=1)
+                )
+                if country:
+                    domain.append(("country_ids_m2m", "in", [country.id]))
+
+            if data.get("org_id"):
+                parent = (
+                    request.env["res.partner"]
+                    .sudo()
+                    .search([("id", "=", data.get("org_id"))], limit=1)
+                )
+                if parent:
+                    domain.append(("organisation_ids", "in", [parent.id]))
+
+            categories = (
+                request.env["partner.category"]
+                .sudo()
+                .search_read(domain, ["name", "image_icon", "name_arabic", "parent_id"])
+            )
+
+            web_base_url = (
+                request.env["ir.config_parameter"]
+                .sudo()
+                .get_param("web.base.url", default="https://www.golalita.com")
+            )
+
+            for cat in categories:
+                cat["image_icon"] = url_join(
+                    web_base_url,
+                    f"/go/api/image/{cat['id']}/image_icon/partner.category",
+                )
+                cat["image2"] = url_join(
+                    web_base_url,
+                    f"/go/api/image/{cat['id']}/image2/partner.category",
+                )
+                cat["image3"] = url_join(
+                    web_base_url,
+                    f"/go/api/image/{cat['id']}/image3/partner.category",
+                )
+                cat["image4"] = url_join(
+                    web_base_url,
+                    f"/go/api/image/{cat['id']}/image4/partner.category",
+                )
+
+            return categories
+
+        except Exception as e:
+            return {"error": str(e)}

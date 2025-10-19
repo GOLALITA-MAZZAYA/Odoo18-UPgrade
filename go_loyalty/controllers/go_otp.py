@@ -242,12 +242,9 @@ class GoOTP(http.Controller):
     )
     def go_api_create_otp_password(self, **post):
         try:
-            try:
-                data = post or self._get_json_request()
-                if not isinstance(data, dict):
-                    return {"error": "Invalid JSON format", "status_code": "01"}
-            except Exception:
-                return {"error": "Malformed JSON payload", "status_code": "01"}
+            data = post or self._get_json_request()
+            if "error" in data:
+                return data
 
             current_user = self._validate_token(data)
             if isinstance(current_user, dict):
@@ -308,7 +305,10 @@ class GoOTP(http.Controller):
         }
 
     @http.route(
-        ["/go/api/send/merchant/forget/email/otp", "/go/api/send/otp/email",],
+        [
+            "/go/api/send/merchant/forget/email/otp",
+            "/go/api/send/otp/email",
+        ],
         auth="public",
         website=True,
         methods=["POST"],
@@ -438,3 +438,48 @@ class GoOTP(http.Controller):
         return {
             "success": "Otp has been successfully sent and will be valid for 5 minutes."
         }
+
+    @http.route(
+        [
+            "/go/api/send/otp/new_user",
+        ],
+        auth="public",
+        website=True,
+        methods=["POST"],
+        csrf=False,
+        type="json",
+    )
+    def go_send_otp_new_user(self, **post):
+        try:
+            data = post or self._get_json_request()
+            if "error" in data:
+                return data
+
+            current_user = (
+                request.env["res.users"]
+                .sudo()
+                .search(
+                    [("partner_id.phone", "=", post.get("+97466203915123"))], limit=1
+                )
+            )
+            if not current_user:
+                return {"error": _("Your phone number is not registered with us.")}
+            if not post.get("phone"):
+                return {"error": _("phone number is missing")}
+
+            is_sent = (
+                request.env["user.otp"]
+                .sudo()
+                .generate_and_send_otp(current_user.login, post.get("phone"))
+            )
+            if not is_sent:
+                return {
+                    "error": _("Could not send otp! either phone number is invalid")
+                }
+            return {
+                "success": "Otp has been successfully sent and will valid for 5 minute."
+            }
+
+        except Exception as e:
+            return {"error": "Something went wrong: %s" % str(e), "status_code": "01"}
+

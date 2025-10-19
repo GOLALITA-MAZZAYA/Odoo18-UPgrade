@@ -76,6 +76,81 @@ class User(http.Controller):
             ),
         }
 
+    def _prepare_transaction_record(self, record, base_url):
+        record_data = record.copy()
+        details = {
+            "merchant_name": False,
+            "merchant_logo": False,
+            "merchant_id": False,
+            "category_id": False,
+            "category_name": False,
+            "category_image": False,
+            "transfer_from": False,
+            "transfer_to": False,
+            "transfer_from_logo": False,
+            "transfer_to_logo": False,
+            "type": "transfer",
+            "sale_amount": 0.0,
+            "discount": 0.0,
+        }
+
+        if record.get("sale_id"):
+            sale = request.env["loyalty.sale"].sudo().browse(record["sale_id"][0])
+            if sale.exists():
+                merchant = sale.merchant_id
+                category = merchant.partner_category_id
+                details.update(
+                    {
+                        "type": "sale",
+                        "sale_amount": sale.amount or 0.0,
+                        "discount": sale.discount or 0.0,
+                        "merchant_id": merchant.id,
+                        "merchant_name": merchant.name or "",
+                        "merchant_logo": url_join(
+                            base_url,
+                            f"/go/api/image/{merchant.id}/image_512/res.partner",
+                        ),
+                        "category_id": category.id if category else False,
+                        "category_name": category.name if category else "",
+                        "category_image": url_join(
+                            base_url,
+                            f"/go/api/image/{merchant.id}/image_icon/partner.category",
+                        )
+                        if category
+                        else False,
+                    }
+                )
+
+        if record.get("transfer_id"):
+            transfer = (
+                request.env["loyalty.point.transfer"]
+                .sudo()
+                .browse(record["transfer_id"][0])
+            )
+            if transfer.exists():
+                details.update(
+                    {
+                        "transfer_from": transfer.from_id.name or "",
+                        "transfer_to": transfer.to_id.name or "",
+                        "transfer_from_logo": url_join(
+                            base_url,
+                            f"/go/api/image/{transfer.from_id.id}/image_512/res.partner",
+                        )
+                        if transfer.from_id
+                        else False,
+                        "transfer_to_logo": url_join(
+                            base_url,
+                            f"/go/api/image/{transfer.to_id.id}/image_512/res.partner",
+                        )
+                        if transfer.to_id
+                        else False,
+                    }
+                )
+
+        record_data.update(details)
+        return record_data
+
+
     # def _get_user_merchant_profile(self, partner, web_base_url):
     #     try:
     #         products = self._get_products(partner)
@@ -3251,3 +3326,131 @@ class User(http.Controller):
 
         except Exception as e:
             return {"error": str(e)}
+
+    @http.route(
+        ["/go/api/user/vendor/registration"],
+        type="json",
+        auth="public",
+        website=True,
+        methods=["POST"],
+    )
+    def vendor_signup(self, **post):
+        values = {"success": True}
+
+        try:
+
+            data = post or self._get_json_request()
+            if "error" in data:
+                return data
+
+            required_fields = [
+                "email",
+                "password",
+                "business_name",
+                "owner_name",
+                "phone",
+            ]
+            missing_fields = [field for field in required_fields if not data.get(field)]
+            if missing_fields:
+                return {
+                    "error": f'Missing required fields: {", ".join(missing_fields)}'
+                }
+
+            try:
+                vendor_vals = {
+                    "name": data["business_name"],
+                    "login": data["email"],
+                    "email": data["email"],
+                    "password": data["password"],
+                    "phone": data["phone"],
+                    "entity_type": "merchant",
+                    "is_company": True,
+                    "company_type": "company",
+                }
+
+
+                request.env["res.users"].sudo().signup(vendor_vals, False)
+
+
+                vendor = (
+                    request.env["res.partner"]
+                    .sudo()
+                    .search(
+                        [("email", "=", data["email"]), ("entity_type", "=", "merchant")],
+                        limit=1,
+                    )
+                )
+
+                if vendor:
+                    request.env["res.partner"].sudo().create(
+                        {
+                            "name": data["owner_name"],
+                            "phone": data["phone"],
+                            "parent_id": vendor.id,
+                            "entity_type": "employee",
+                            "type": "contact",
+                        }
+                    )
+
+                values.update(
+                    {
+                        "partner_id": vendor.id,
+                        "partner_name": vendor.name,
+                    }
+                )
+
+            except Exception as e:
+                return {
+                    "error": f"Something went wrong during vendor creation: {str(e)}"
+                }
+
+        except Exception as e:
+            return {"error": f"Invalid request data: {str(e)}"}
+
+        return values
+        
+        @http.route(
+        ["/go/api/user/transaction/data"],
+        auth="public",
+        website=True,
+        methods=["POST"],
+        csrf=False,
+        type="json",
+    )
+    def go_user_transaction_data(self, **kwargs):
+        try:
+            data = self._get_json_request()
+            if isinstance(data, dict) and data.get("error"):
+                return data
+
+            user = self._validate_token(data)
+            if isinstance(user, dict) and user.get("error"):
+                return user
+
+            partner = user.partner_id
+            web_base_url = (
+                request.env["ir.config_parameter"].sudo().get_param("web.base.url") or ""
+            )
+
+            transaction_lines = (
+                request.env["loyalty.point.transfer.line"]
+                .sudo()
+                .search_read(
+                    [("partner_id", "=", partner.id)],
+                    ["name", "credit", "debit", "date", "sale_id", "transfer_id"],
+                )
+            )
+
+            result = []
+            for record in transaction_lines:
+                record_data = self._prepare_transaction_record(record, web_base_url)
+                result.append(record_data)
+
+            return {"status": "success", "data": result}
+
+        except Exception as e:
+            _logger.exception("Error fetching transaction data: %s", e)
+            return {"error": _("Something went wrong. Please try again later.")}
+
+
+
