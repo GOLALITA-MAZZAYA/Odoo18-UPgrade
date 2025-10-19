@@ -1183,3 +1183,95 @@ class GoApi(http.Controller):
         except Exception as e:
             # Rollback and log internally; don’t leak stack details to client
             _logger.warning("Failed to send redemption email: %s", e)
+
+    @http.route(
+        "/go/api/send_redemption_email",
+        type="json",
+        auth="public",
+        methods=["POST"],
+        csrf=False,
+    )
+    def send_redemption_email(self, **post):
+        try:
+            data = post or self._get_json_request()
+            if "error" in data:
+                return data
+
+            current_user = self._validate_token(data)
+            if isinstance(current_user, dict):
+                return current_user
+
+            required_fields = [
+                "merchant_name",
+                "merchant_email",
+                "offer_type",
+                "product_name",
+                "date",
+                "time",
+                "location_name",
+                "confirmation_number",
+            ]
+            missing = [f for f in required_fields if not data.get(f)]
+            if missing:
+                return {
+                    "status": "error",
+                    "message": _("Missing fields: %s") % ", ".join(missing),
+                }
+
+            merchant_name = data.get("merchant_name")
+            merchant_email = data.get("merchant_email")
+            offer_type = data.get("offer_type")
+            product_name = data.get("product_name")
+            redemption_date = data.get("date")
+            redemption_time = data.get("time")
+            location_name = data.get("location_name")
+            confirmation_number = data.get("confirmation_number")
+
+            email_cc = "info@golalita.com"
+            partner = (
+                request.env["res.partner"]
+                .sudo()
+                .search([("email", "=", merchant_email)], limit=1)
+            )
+            if partner and partner.cc_emails_outlet:
+                email_cc = f"{partner.cc_emails_outlet},info@golalita.com"
+
+            email_subject = "Offer Redemption Notification"
+            email_body = f"""
+                            <html>
+                            <body>
+                                <p>Dear {merchant_name},</p>
+                                <p>This is to notify you that a customer has redeemed an offer at your location:</p>
+                                <div style="background:#f8f8f8;padding:15px;border-radius:6px;">
+                                    <p><strong>Location:</strong> {location_name}</p>
+                                    <p><strong>Offer Type:</strong> {offer_type}</p>
+                                    <p><strong>Product Name:</strong> {product_name}</p>
+                                    <p><strong>Date:</strong> {redemption_date}</p>
+                                    <p><strong>Time:</strong> {redemption_time}</p>
+                                </div>
+                                <p style="font-size:18px;font-weight:bold;color:#d9534f;text-align:center;">
+                                    Confirmation Number: {confirmation_number}
+                                </p>
+                                <p>If you have any questions, please feel free to contact us.</p>
+                                <p>Best regards,<br><strong>Golalita</strong></p>
+                            </body>
+                            </html>
+                        """
+
+            vals = {
+                "subject": email_subject,
+                "body_html": email_body,
+                "email_to": merchant_email,
+                "email_cc": email_cc,
+                "auto_delete": False,
+                "email_from": "support@golalita.com",
+            }
+
+            mail = request.env["mail.mail"].sudo().create(vals)
+            mail.sudo().send()
+            return {"status": "success", "message": _("Email sent successfully.")}
+        except Exception as e:
+            return {
+                "status": "error",
+                "message": _("An unexpected error occurred: %s") % str(e),
+            }

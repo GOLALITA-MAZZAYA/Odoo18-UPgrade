@@ -3,6 +3,7 @@ from odoo.http import request
 import json
 import ast
 from werkzeug.urls import url_join
+BEARER_TOKEN = "l3UIiRwXb0oZPfAeQqY2Hk3l"
 
 
 class User(http.Controller):
@@ -1958,3 +1959,579 @@ class User(http.Controller):
         except Exception as e:
             return {"error": f"Something went wrong: {str(e)}"}
 
+    @http.route(
+        "/go/api/user/validate",
+        type="json",
+        auth="public",
+        methods=["POST"],
+        csrf=False,
+    )
+    def validate_user(self, **post):
+        try:
+            data = post or self._get_json_request()
+            if "error" in data:
+                return data
+
+            email = data.get("email")
+            phone = data.get("phone")
+            validate_code = data.get("validate_code")
+            method = data.get("method")
+
+            if not validate_code or not method:
+                return {
+                    "status": "error",
+                    "message": _("The fields validate_code and method are mandatory."),
+                }
+
+            if not email and not phone:
+                return {
+                    "status": "error",
+                    "message": _("Either email or phone is required."),
+                }
+
+            if method == "email":
+                if not email:
+                    return {
+                        "status": "error",
+                        "message": _("Email is required for the email method."),
+                    }
+
+                email_body = f"""
+                        <html>
+                        <body>
+                            <p>Dear User,</p>
+                            <p>Thanks for using our Application!</p>
+                            <p>Kindly use the below confirmation code to validate your email:</p>
+                            <p style="font-size:18px;font-weight:bold;color:#2b7dfa;">{validate_code}</p>
+                            <p>Best Regards,<br>Support Team</p>
+                        </body>
+                        </html>
+                    """
+
+                vals = {
+                    "subject": "Thanks for using Golalita",
+                    "body_html": email_body,
+                    "email_to": email,
+                    "auto_delete": False,
+                    "email_from": "support@golalita.com",
+                }
+
+                request.env["mail.mail"].sudo().create(vals).sudo().send()
+            elif method == "phone":
+                if not phone:
+                    return {
+                        "status": "error",
+                        "message": _("Phone is required for the phone method."),
+                    }
+            else:
+                return {
+                    "status": "error",
+                    "message": _("Invalid method. Accepted values are email or phone."),
+                }
+
+            return {"status": "success", "message": _("Validation successful.")}
+
+        except Exception as e:
+            return {
+                "status": "error",
+                "message": _("An unexpected error occurred: %s") % str(e),
+            }
+
+    # Todo
+    @http.route(
+        ["/go/api/user/moi/remove/v2"],
+        auth="public",
+        website=True,
+        methods=["POST"],
+        csrf=False,
+        type="json",
+    )
+    def send_moi_mail_v2(self, **post):
+        try:
+            data = post or self._get_json_request()
+            if "error" in data:
+                return data
+
+            auth_header = request.httprequest.headers.get("Authorization")
+            if not auth_header or not auth_header.startswith("Bearer "):
+                return {"error": _("Unauthorized: Bearer token missing or invalid")}
+
+            token = auth_header.split(" ")[1]
+            if token != BEARER_TOKEN:
+                return {"error": _("Unauthorized: Invalid Bearer token")}
+
+            customer_name = data.get("customer_name")
+            customer_email = data.get("customer_email")
+            customer_phone = data.get("customer_phone")
+
+            if not customer_email and not customer_phone:
+                return {"error": _("Email or Phone No. Missing")}
+
+            domain = []
+            if customer_email and customer_phone:
+                domain = [
+                    "|",
+                    ("email", "=", customer_email),
+                    ("phone", "=", customer_phone),
+                ]
+            elif customer_email:
+                domain = [("email", "=", customer_email)]
+            elif customer_phone:
+                domain = [("phone", "=", customer_phone)]
+
+            partner = request.env["res.partner"].sudo().search(domain, limit=1)
+
+            is_registered = bool(partner)
+            org_type = (
+                dict(partner._fields["org_type"].selection).get(partner.org_type)
+                if partner
+                else "Not Registered"
+            )
+
+            email_body = f"""
+                    <p>Dear Support Team,</p>
+                    <p>The customer has requested data deletion via MOI:</p>
+                    <ul>
+                        <li><strong>Name:</strong> {customer_name or 'Not Provided'}</li>
+                        <li><strong>Email:</strong> {customer_email or 'Not Provided'}</li>
+                        <li><strong>Phone:</strong> {customer_phone or 'Not Provided'}</li>
+                    </ul>
+                    <p>Regards,</p>
+                    <p><strong>Golalita API</strong></p>
+                    """
+
+            vals = {
+                "subject": "Customer Information Delete Request - MOI - Golalita",
+                "body_html": email_body,
+                "email_to": "abhishek.ricky88@gmail.com",
+                "email_cc": "info@golalita.com",
+                "auto_delete": False,
+                "email_from": "support@golalita.com",
+            }
+
+            mail = request.env["mail.mail"].sudo().create(vals)
+            mail.sudo().send()
+
+            return {
+                "success": _(
+                    "Delete request submitted successfully. Expect confirmation within 3 hours."
+                ),
+                "is_registered": is_registered,
+                "org_type": org_type,
+            }
+
+        except Exception as e:
+            return {"error": _("Unexpected error: %s") % str(e)}
+
+    @http.route(
+        ["/go/api/user/offers/golalita/v3"],
+        auth="public",
+        website=True,
+        methods=["POST"],
+        csrf=False,
+        type="json",
+        cors="*",
+    )
+    def get_users_offer_list_golalita_v3(self, **post):
+        try:
+            data = post or self._get_json_request()
+            if "error" in data:
+                return data
+
+            current_user = self._validate_token(data)
+            if isinstance(current_user, dict):
+                return current_user
+
+            domain = [
+                ("merchant_id", "!=", False),
+                ("is_in_offer", "=", True),
+                ("home_offer", "=", True),
+                ("offer_type", "!=", "b1g1"),
+            ]
+
+            if data.get("merchant_id"):
+                domain.append(("merchant_id", "=", data.get("merchant_id")))
+
+            if data.get("merchant_category_id"):
+                merchants = (
+                    request.env["res.partner"]
+                    .sudo()
+                    .search(
+                        [("partner_category_id", "=", data.get("merchant_category_id"))]
+                    )
+                )
+                domain.append(("merchant_id", "in", merchants.ids))
+
+            if data.get("x_offer_type"):
+                domain.append(("offer_type", "=", data.get("x_offer_type")))
+
+            if data.get("subscribed_merchant_offer"):
+                lines = (
+                    request.env["loyalty.notification.line"]
+                    .sudo()
+                    .search(
+                        [
+                            ("partner_id", "=", current_user.partner_id.id),
+                            ("is_subscribe", "=", True),
+                        ]
+                    )
+                )
+                merchant_ids = lines.mapped("notification_id.merchant_id").ids
+                if merchant_ids:
+                    domain.append(("merchant_id", "in", merchant_ids))
+
+            fields = [
+                "name",
+                "arabic_name",
+                "image_url",
+                "list_price",
+                "default_code",
+                "point",
+                "online_store",
+                "max_quantity",
+                "offer_type",
+                "offer_type_discount",
+                "offer_type_promo_code",
+                "merchant_online_store",
+                "buy_link",
+                "barcode",
+                "description",
+                "description_sale",
+                "description_arabic",
+                "offer_label",
+                "label_arabic",
+                "merchant_id",
+                "categ_id",
+                "create_date",
+                "start_date",
+                "end_date",
+                "min_quantity",
+                "discount",
+            ]
+
+            products = (
+                request.env["product.template"]
+                .sudo()
+                .search_read(
+                    domain,
+                    fields,
+                    limit=data.get("limit", 100000),
+                    offset=data.get("offset", 0),
+                )
+            )
+
+            web_base_url = (
+                request.env["ir.config_parameter"].sudo().get_param("web.base.url")
+            )
+            datas = []
+
+            for product in products:
+                product_template = (
+                    request.env["product.template"].sudo().browse(product["id"])
+                )
+                merchant = product_template.merchant_id
+
+                product["ribbon"] = ""
+                product["merchant_name"] = merchant.name
+                product["merchant_id"] = merchant.id
+                product["merchant_name_arabic"] = merchant.arabic_name
+                product["phone_number"] = merchant.phone
+                product["mobile_number"] = merchant.mobile
+                product["merchant_email"] = merchant.email
+                product["merchant_rating"] = 4
+                product["category_id"] = (
+                    product["categ_id"][0] if product["categ_id"] else False
+                )
+                product["category_name"] = (
+                    product["categ_id"][1] if product["categ_id"] else ""
+                )
+                product["disc_ribbon"] = product["offer_label"]
+                product["point"] = product["point"]
+                product["product_merchant_is_business_hotel"] = merchant.id
+                product["merchant_logo"] = url_join(
+                    web_base_url, f"/go/api/image/{merchant.id}/image_1920/res.partner"
+                )
+
+                datas.append(product)
+
+            return datas
+
+        except Exception as e:
+            return {"error": f"Something went wrong: {str(e)}"}
+
+    @http.route(
+        ["/go/api/user/merchant/lists/premium"],
+        auth="public",
+        website=True,
+        methods=["POST"],
+        csrf=False,
+        type="json",
+        cors="*",
+    )
+    def get_user_category_merchant_premium_list(self, **post):
+
+        data = post or self._get_json_request()
+        if "error" in data:
+            return data
+
+        current_user = self._validate_token(data)
+        if isinstance(current_user, dict):
+            return current_user
+
+        app_ids = (
+            request.env["notin.app"]
+            .sudo()
+            .search_read([("parent_id", "=", current_user.parent_id.id)], ["id"])
+        )
+        app_id_list = [a["id"] for a in app_ids]
+
+        domain = [
+            ("entity_type", "=", "merchant"),
+            ("is_premium_merchant", "=", True),
+            ("not_linked_ids", "not in", app_id_list),
+            ("not_in_list", "=", False),
+        ]
+
+        field_mapping = {
+            "category_id": ("partner_category_id", "child_of"),
+            "gpoint": ("go_loyalty_point", "="),
+            "country_id": ("country_id", "="),
+            "x_online_store": ("online_store", "="),
+            "merchant_type": ("merchant_type", "="),
+            "merchant_id": ("id", "="),
+            "location_id": ("location_id", "="),
+        }
+        for field, (name, op) in field_mapping.items():
+            if data.get(field):
+                domain.append((name, op, data[field]))
+
+        # Special filters
+        if data.get("x_for_employee_type"):
+            emp_type = data["x_for_employee_type"]
+            domain += [
+                "|",
+                ("employee_type", "=", emp_type),
+                ("employee_type", "=", "both"),
+            ]
+
+        if data.get("x_org_linked"):
+            org = data["x_org_linked"]
+            domain += ["|", ("org_type", "=", org), ("org_type", "=", None)]
+
+        if data.get("merchant_name"):
+            name = data["merchant_name"]
+            domain += ["|", ("name", "ilike", name), ("arabic_name", "ilike", name)]
+
+        # Fetch merchants
+        offset = int(data.get("offset", 0))
+        limit = int(data.get("limit")) if data.get("limit") else None
+        merchants = (
+            request.env["res.partner"]
+            .sudo()
+            .search(domain, order="sequence", offset=offset, limit=limit)
+        )
+
+        web_base_url = (
+            request.env["ir.config_parameter"].sudo().get_param("web.base.url")
+        )
+        Notification = request.env["loyalty.notification"].sudo()
+
+        res = []
+        for partner in merchants:
+            notification = Notification.search(
+                [("merchant_id", "=", partner.id)], limit=1
+            )
+
+            res.append(
+                {
+                    "merchant_id": partner.id,
+                    "merchant_name": partner.name,
+                    "x_arabic_name": partner.arabic_name,
+                    "x_for_employee_type": partner.employee_type,
+                    "is_business_hotel": partner.is_hotel_type,
+                    "x_moi_show": partner.x_moi_show,
+                    "x_have_branch": partner.x_have_branch,
+                    "x_have_offers": partner.x_have_offers,
+                    "accept_go_loyalty_point": partner.go_loyalty_point,
+                    "gpoint": partner.go_loyalty_point,
+                    "open_from": partner.open_from,
+                    "open_till": partner.open_till,
+                    "x_kts": partner.kts,
+                    "x_org_linked": partner.org_type,
+                    "x_online_store": partner.online_store,
+                    "x_sequence": partner.sequence,
+                    "barcode": partner.barcode,
+                    "email": partner.email,
+                    "partner_latitude": partner.partner_latitude,
+                    "partner_longitude": partner.partner_longitude,
+                    "ribbon_text": partner.ribbon_text,
+                    "x_ribbon_text_arabic": partner.ribbon_text_ar,
+                    "ribbon_color": partner.ribbon_color,
+                    "ribbon_position": partner.ribbon_position,
+                    "rating": partner.merchant_rating,
+                    "map_banner": url_join(
+                        web_base_url,
+                        f"/go/api/image/{partner.id}/map_banner/res.partner",
+                    ),
+                    "merchant_logo": url_join(
+                        web_base_url,
+                        f"/go/api/image/{partner.id}/image_512/res.partner",
+                    ),
+                    "category": partner.partner_category_id.name,
+                    "category_id": partner.partner_category_id.id,
+                    "country_id": partner.country_id.id,
+                    "country_code": partner.country_id.code,
+                    "country_name": partner.country_id.name,
+                    "category_logo": url_join(
+                        web_base_url,
+                        f"/go/api/image/{partner.partner_category_id.id}/image_icon/partner.category",
+                    ),
+                    "banners": self._get_banners(partner, web_base_url),
+                    "pdf_attached": partner.pdf_attached,
+                    "company_contract_url": url_join(
+                        web_base_url, f"/web/binary/contract_download_pdf/{partner.id}"
+                    ),
+                    "company_registration_url": url_join(
+                        web_base_url,
+                        f"/web/binary/registration_download_pdf/{partner.id}",
+                    ),
+                }
+            )
+
+        return res
+
+    @http.route(
+        ["/go/api/user/offer/details"],
+        auth="public",
+        website=True,
+        methods=["POST"],
+        csrf=False,
+        type="json",
+        cors="*",
+    )
+    def get_user_offer_details(self, **post):
+        try:
+            data = post or self._get_json_request()
+            if "error" in data:
+                return data
+
+            current_user = (
+                request.env["res.users"]
+                .sudo()
+                .search([("token", "=", data.get("token"))])
+            )
+            if not current_user:
+                return {"error": _("Invalid User Token")}
+
+            product_id = data.get("product_id")
+            if not product_id:
+                return {"error": _("Product ID is required")}
+
+            product = (
+                request.env["product.template"]
+                .sudo()
+                .search([("id", "=", product_id)], limit=1)
+            )
+            if not product:
+                return {"error": _("Product not found")}
+
+            web_base_url = (
+                request.env["ir.config_parameter"].sudo().get_param("web.base.url")
+            )
+
+            merchant_contract_url = (
+                url_join(
+                    web_base_url,
+                    f"/web/binary/contract_download_pdf/{product.merchant_id.id}",
+                )
+                if product.merchant_id and product.merchant_id.contract_copy
+                else False
+            )
+            offer_detail_url = (
+                url_join(web_base_url, f"/web/binary/offer_download_pdf/{product.id}")
+                if product.offer_copy
+                else False
+            )
+
+            product_branches = (
+                [
+                    {
+                        "merchant_id": branch.id,
+                        "merchant_name": branch.name,
+                        "merchant_name_ar": branch.arabic_name,
+                        "merchant_logo": (
+                            url_join(
+                                web_base_url,
+                                f"/go/api/image/{branch.id}/image_1920/res.partner",
+                            )
+                            if branch
+                            else False
+                        ),
+                        "location_name": (
+                            branch.location_id.name if branch.location_id else False
+                        ),
+                    }
+                    for branch in product.branch_ids.sudo()
+                ]
+                if product.branch_ids
+                else []
+            )
+
+            product_details = {
+                "product_id": product.id,
+                "name": product.name,
+                "arabic_name": product.arabic_name,
+                "image_url": product.image_url,
+                "price": product.list_price,
+                "default_code": product.default_code,
+                "points": product.point,
+                "online_store": product.online_store,
+                "max_quantity": product.max_quantity,
+                "offer_type": product.offer_type,
+                "offer_type_discount": product.offer_type_discount,
+                "offer_type_promo_code": product.offer_type_promo_code,
+                "merchant_id": product.merchant_id.id if product.merchant_id else False,
+                "merchant_name": (
+                    product.merchant_id.name if product.merchant_id else False
+                ),
+                "merchant_name_arabic": (
+                    product.merchant_id.arabic_name if product.merchant_id else False
+                ),
+                "merchant_phone": (
+                    product.merchant_id.phone if product.merchant_id else False
+                ),
+                "merchant_mobile": (
+                    product.merchant_id.mobile if product.merchant_id else False
+                ),
+                "merchant_email": (
+                    product.merchant_id.email if product.merchant_id else False
+                ),
+                "category_id": product.categ_id.id if product.categ_id else False,
+                "category_name": product.categ_id.name if product.categ_id else False,
+                "description": product.description,
+                "description_sale": product.description_sale,
+                "description_arabic": product.description_arabic,
+                "offer_label": product.offer_label,
+                "label_arabic": product.label_arabic,
+                "merchant_logo": (
+                    url_join(
+                        web_base_url,
+                        f"/go/api/image/{product.merchant_id.id}/image_1920/res.partner",
+                    )
+                    if product.merchant_id
+                    else False
+                ),
+                "barcode": product.barcode,
+                "start_date": product.start_date,
+                "end_date": product.end_date,
+                "min_quantity": product.min_quantity,
+                "discount": product.discount,
+                "merchant_contract_url": merchant_contract_url,
+                "offer_detail_url": offer_detail_url,
+                "branches": product_branches,
+            }
+
+            return product_details
+
+        except Exception as e:
+            return {"error": _("Unexpected error: %s") % str(e)}

@@ -225,6 +225,10 @@ class ResPartner(models.Model):
         string="Is Premium Merchant", oldname="x_is_premium_merchant"
     )
 
+    cc_emails_outlet = fields.Char(string="CC To Management", oldname="x_cc_emails_outlet")
+    go_loyalty_point = fields.Boolean(oldname="x_go_loyalty_point")
+    location_id = fields.Many2one("custom.location")
+
     not_linked_ids = fields.Many2many(
         "notin.app",
         "partner_not_linked_rel",

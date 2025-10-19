@@ -54,12 +54,16 @@ class ProductTemplate(models.Model):
     discount = fields.Float(string="Flat Discount")
     offer_limit_ids = fields.One2many('offer.limits', 'product_id', string='Offer Limits')
     arabic_name = fields.Char(string="Arabic Name", oldname="x_arabic_name")
+    home_offer = fields.Boolean(string="Home Offer", oldname="x_home_offer")
 
     offer_copy = fields.Binary(string='Offer Copy',oldname="x_offer_copy", attachment=True)
     offer_copy_name = fields.Char(string='Offer Copy Name',oldname="x_offer_copy_name")
     favourite_partner_ids = fields.One2many(
         "favourite.product", "product_id", string="Favourite Partners"
     )
+
+    branch_ids = fields.Many2many('res.partner', 'branch_partner_users_rel', 'product_id', 'branch_id', string='Available Branches')
+
 
     label_arabic = fields.Char(string="Arabic Label", oldname="x_label_arabic")
 
