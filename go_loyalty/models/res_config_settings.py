@@ -22,3 +22,13 @@ class ResConfigSettings(models.TransientModel):
     moi_bearer_token = fields.Char(
         string="MOI Bearer Token", config_parameter="moi.bearer_token"
     )
+    
+    golalta_passcard_username = fields.Char(
+        string="Passcard API Username", config_parameter="golalta_passcard_username"
+    )
+    golalta_passcard_password = fields.Char(
+        string="Passcard API Password", config_parameter="golalta_passcard_password"
+    )
+    golalta_passcard_url = fields.Char(
+        string="Passcard API URL", config_parameter="golalta_passcard_url"
+    )

@@ -28,6 +28,30 @@
                                 </div>
                             </setting>
                         </block>
+                        <block title="Passcard Configuration" name="passcard_settings_block">
+                            <setting id="golalta_passcard_username_setting" string="Passcard API Username">
+                                <field name="golalta_passcard_username"/>
+                                <div class="text-muted">
+                                    Enter the username for the Golalta Passcard API.
+                                </div>
+                            </setting>
+
+                            <setting id="golalta_passcard_password_setting" string="Passcard API Password">
+                                <field name="golalta_passcard_password" password="True"/>
+                                <div class="text-muted">
+                                    Enter the password for the Golalta Passcard API.
+                                </div>
+                            </setting>
+
+                            <setting id="golalta_passcard_url_setting" string="Passcard API URL">
+                                <field name="golalta_passcard_url"/>
+                                <div class="text-muted">
+                                    Enter the API endpoint URL for the Golalta Passcard integration.
+                                </div>
+                            </setting>
+                        </block>
+                        
+                        
                     </app>
                 </xpath>
             </field>

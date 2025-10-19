@@ -16,8 +16,15 @@
                     <group>
                         <group>
                             <field name="parent_id"/>
+                            <field name="global_local"/>
+                            <field name="global_local_global"/>
 <!--                            <field name="category_id"/>-->
                         </group>
+                        <group>
+                            <field name="country_ids_m2m" widget="many2many_tags"/>
+                            <field name="organisation_ids" widget="many2many_tags"/>
+                        </group>
+
                     </group>
 
                 </sheet>
@@ -32,6 +39,10 @@
             <list>
                 <field name="name"/>
                 <field name="parent_id"/>
+                <field name="global_local"/>
+                <field name="global_local_global"/>
+                <field name="country_ids_m2m" widget="many2many_tags"/>
+                <field name="organisation_ids" widget="many2many_tags"/>
 <!--                <field name="category_id"/>-->
             </list>
         </field>
