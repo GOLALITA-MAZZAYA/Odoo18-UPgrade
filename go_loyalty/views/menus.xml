@@ -157,6 +157,15 @@
             sequence="25"
     />
 
+    <menuitem
+        id="loyalty_config_settings_menu"
+        action="loyalty_config_settings_action"
+        parent="menu_loyalty_configuration"
+        name="Settings"
+        sequence="5"
+    />
+
+
     <menuitem id="menu_loyalty_rule"
               name="Loyalty Rules"
               parent="menu_loyalty_configuration"
@@ -281,6 +290,12 @@
               parent="menu_loyalty_configuration"
               action="action_merchant_banner"
               sequence="33"/>
+
+    <menuitem id="menu_custom_location_main"
+              name="Locations"
+              parent="menu_loyalty_configuration"
+              action="action_custom_location"
+              sequence="34"/>
 
 
 

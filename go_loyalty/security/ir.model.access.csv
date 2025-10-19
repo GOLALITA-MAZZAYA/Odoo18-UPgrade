@@ -34,6 +34,7 @@ access_offer_usages_history,access.offer.usages.history,model_offer_usages_histo
 access_merchant_matrix,access.merchant.matrix,model_merchant_matrix,base.group_user,1,1,1,1
 access_merchant_banner,access.merchant.banner,model_merchant_banner,base.group_user,1,1,1,1
 access_custom_location,access.custom.location,model_custom_location,base.group_user,1,1,1,1
+access_custom_location_short_name,access.custom.location.short.name,model_custom_location_short_name,base.group_user,1,1,1,1
 
 
 

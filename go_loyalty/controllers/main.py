@@ -1,4 +1,5 @@
 import base64
+
 from odoo.exceptions import UserError
 from odoo.http import request, route
 

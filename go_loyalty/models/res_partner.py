@@ -224,8 +224,10 @@ class ResPartner(models.Model):
         string="Is Premium Merchant", oldname="x_is_premium_merchant"
     )
 
-    cc_emails_outlet = fields.Char(string="CC To Management", oldname="x_cc_emails_outlet")
+    cc_emails_management = fields.Char(string="CC To Management", oldname="x_cc_emails_outlet")
     location_id = fields.Many2one("custom.location")
+    time_for_order_prepration = fields.Char(string="Time Needed for Order Prepration", oldname="x_time_for_order_prepration")
+    delivery_cost = fields.Float(string="Delivery Cost", oldname="x_delivery_cost")
 
     not_linked_ids = fields.Many2many(
         "notin.app",

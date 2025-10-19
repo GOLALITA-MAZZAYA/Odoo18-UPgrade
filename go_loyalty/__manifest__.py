@@ -13,6 +13,7 @@
         "mail",
         "uom",
         "auth_signup",
+        "base_setup",
         "go_sms"
     ],
     "data": [
@@ -45,6 +46,8 @@
         "views/offer_usages_history.xml",
         "views/merchant_matrix.xml",
         "views/merchant_banner.xml",
+        "views/custom_location.xml",
+        "views/res_config_settings.xml",
         "views/menus.xml"
     ],
     "installable": True,

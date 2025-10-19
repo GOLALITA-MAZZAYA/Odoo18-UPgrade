@@ -10,3 +10,10 @@ class Location(models.Model):
     latitude = fields.Float(string='Latitude')
     longitude = fields.Float(string='Longitude')
 
+    short_name_ids = fields.Many2many(
+        "custom.location.short.name",
+        "location_short_name_rel",
+        "location_id",
+        "short_name_id",
+        string="Short Names",
+    )

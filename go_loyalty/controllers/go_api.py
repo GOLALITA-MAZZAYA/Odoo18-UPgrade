@@ -1233,8 +1233,8 @@ class GoApi(http.Controller):
                 .sudo()
                 .search([("email", "=", merchant_email)], limit=1)
             )
-            if partner and partner.cc_emails_outlet:
-                email_cc = f"{partner.cc_emails_outlet},info@golalita.com"
+            if partner and partner.cc_emails_management:
+                email_cc = f"{partner.cc_emails_management},info@golalita.com"
 
             email_subject = "Offer Redemption Notification"
             email_body = f"""
@@ -1275,3 +1275,40 @@ class GoApi(http.Controller):
                 "status": "error",
                 "message": _("An unexpected error occurred: %s") % str(e),
             }
+
+    @http.route(
+        "/go/api/gulfexc/change_password",
+        auth="public",
+        methods=["POST"],
+        csrf=False,
+        type="json",
+    )
+    def gulf_exc_change_password(self, **post):
+        data = post or self._get_json_request()
+        if "error" in data:
+            return data
+
+        secret_key = (
+            request.env["ir.config_parameter"]
+            .sudo()
+            .get_param("gulfexc.secret_key", default="e9e6b0138afe1c861d7c9d3af96e33d3")
+        )
+        if data.get("secret_key") != secret_key:
+            return {"error": _("Invalid secret key.")}
+
+        login = data.get("login")
+        new_password = data.get("new_password")
+
+        if not login or not new_password:
+            missing = [f for f in ["login", "new_password"] if not data.get(f)]
+            return {"error": _("Missing fields: %s") % ", ".join(missing)}
+
+        user = request.env["res.users"].sudo().search([("login", "=", login)], limit=1)
+        if not user:
+            return {"error": _("User not found.")}
+
+        try:
+            user.sudo().write({"password": new_password})
+            return {"success": _("Password changed successfully.")}
+        except Exception as e:
+            return {"error": _("Failed to change password: %s") % str(e)}

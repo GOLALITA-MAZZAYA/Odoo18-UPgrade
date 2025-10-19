@@ -1749,3 +1749,75 @@ class Merchant(http.Controller):
         except Exception as e:
             return {"error": str(e)}
 
+    # Most fields used in api are not defined in partner model in 14.0
+    # @http.route(
+    #     [
+    #         "/go/api/merchant/terms/get_org_details",
+    #     ],
+    #     auth="public",
+    #     website=True,
+    #     methods=["POST"],
+    #     csrf=False,
+    #     type="json",
+    # )
+    # def go_get_org_details(self, **post):
+    #     data = post or self._get_json_request()
+    #     if "error" in data:
+    #         return data
+    #
+    #     current_user = self._validate_token(data)
+    #     if isinstance(current_user, dict):
+    #         return current_user
+    #
+    #     merchant_id = data.get("merchant_id")
+    #     org_name = data.get("org_name")
+    #
+    #     if not merchant_id or not org_name:
+    #         return {"error": _("Missing merchant_id or org_name")}
+    #
+    #     partner = (
+    #         request.env["res.partner"]
+    #         .sudo()
+    #         .search([("merchant_id", "=", merchant_id)], limit=1)
+    #     )
+    #     if not partner:
+    #         return {"error": _("Merchant not found")}
+    #
+    #     org_fields = {
+    #         "sjc": ("term_english_org_sjc", "term_arabic_org_sjc"),
+    #         "gulfexchange": (
+    #             "term_english_org_gulfexchange",
+    #             "term_arabic_org_gulfexchange",
+    #         ),
+    #         "golalita": ("term_english_org_golalita", "term_arabic_org_golalita"),
+    #         "daam": ("term_english_org_daam", "term_arabic_org_daam"),
+    #         "qatarinsurance": (
+    #             "term_english_org_qatarinsurance",
+    #             "term_arabic_org_qatarinsurance",
+    #         ),
+    #         "masrif": ("term_english_org_masrif", "term_arabic_org_masrif"),
+    #         "barwa": ("term_english_org_barwa", "term_arabic_org_barwa"),
+    #         "alzamanexchange": (
+    #             "term_english_org_alzamanexchange",
+    #             "term_arabic_org_alzamanexchange",
+    #         ),
+    #         "moi": ("term_english_org_moi", "term_arabic_org_moi"),
+    #         "qatar_post": ("term_english_org_qatar_post", "term_arabic_org_qatar_post"),
+    #         "beema": ("term_english_org_beema", "term_arabic_org_beema"),
+    #     }
+    #
+    #     if org_name not in org_fields:
+    #         return {"error": _("Invalid organization name")}
+    #
+    #     english_field, arabic_field = org_fields[org_name]
+    #     term_english_org_name = getattr(partner, english_field, None)
+    #     term_arabic_org_name = getattr(partner, arabic_field, None)
+    #
+    #     if not term_english_org_name or not term_arabic_org_name:
+    #         return {"error": _("Organization details not found")}
+    #
+    #     return {
+    #         "term_english_org_name": term_english_org_name,
+    #         "term_arabic_org_name": term_arabic_org_name,
+    #         "success": _("Organization details retrieved successfully"),
+    #     }

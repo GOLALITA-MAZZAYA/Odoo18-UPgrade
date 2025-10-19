@@ -1,7 +1,8 @@
 import base64
+import mimetypes
+import os
 
 from odoo.http import request, Response
-
 from odoo import http
 
 
@@ -87,3 +88,50 @@ class ContractDownloadController(http.Controller):
             return response
         except Exception:
             return request.not_found()
+
+    @http.route(
+        "/contract_matrix/attachment/<int:contract_matrix_id>",
+        type="http",
+        auth="public",
+        website=True,
+        csrf=False,
+    )
+    def download_attachment(self, contract_matrix_id, **kwargs):
+        try:
+            # Fetch the contract matrix record
+            contract_matrix = (
+                request.env["contract.matrix"].sudo().browse(contract_matrix_id)
+            )
+
+            if not contract_matrix.exists() or not contract_matrix.contract_file:
+                return Response("File not found", status=404)
+
+            # Decode the file if it is base64 encoded
+            file_content = base64.b64decode(contract_matrix.contract_file)
+            file_name = contract_matrix.contract_filename or "contract_file"
+
+            # Get file extension from filename or fallback
+            file_extension = os.path.splitext(file_name)[1].lower()
+            if not file_extension:
+                mime_type, _ = mimetypes.guess_type(file_name)
+                if mime_type:
+                    file_extension = mimetypes.guess_extension(mime_type) or ".bin"
+                    file_name += file_extension
+                else:
+                    file_name += ".bin"
+
+            # Determine MIME type
+            mime_type, _ = mimetypes.guess_type(file_name)
+            if not mime_type:
+                mime_type = "application/octet-stream"
+
+            # Return response
+            return request.make_response(
+                file_content,
+                headers=[
+                    ("Content-Type", mime_type),
+                    ("Content-Disposition", f'attachment; filename="{file_name}"'),
+                ],
+            )
+        except Exception as e:
+            return Response(f"Error: {str(e)}", status=500)
