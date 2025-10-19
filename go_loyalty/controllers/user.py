@@ -2,10 +2,16 @@ from odoo import http, fields, _
 from odoo.http import request
 import json
 import ast
+import requests
 from werkzeug.urls import url_join
 BEARER_TOKEN = "l3UIiRwXb0oZPfAeQqY2Hk3l"
 import logging
 _logger = logging.getLogger(__name__)
+SECRET_KEY = "da6108c364cbab86dc2eaa200588489e1765fd58da78afbbd3c687e8ddf0a763"
+
+import hmac
+import hashlib
+import base64
 
 
 class User(http.Controller):
