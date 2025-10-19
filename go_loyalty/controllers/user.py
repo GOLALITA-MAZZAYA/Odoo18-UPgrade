@@ -4,8 +4,8 @@ import json
 import ast
 import requests
 from werkzeug.urls import url_join
-BEARER_TOKEN = "l3UIiRwXb0oZPfAeQqY2Hk3l"
 import logging
+
 _logger = logging.getLogger(__name__)
 SECRET_KEY = "da6108c364cbab86dc2eaa200588489e1765fd58da78afbbd3c687e8ddf0a763"
 
@@ -2065,6 +2065,12 @@ class User(http.Controller):
                 return {"error": _("Unauthorized: Bearer token missing or invalid")}
 
             token = auth_header.split(" ")[1]
+            BEARER_TOKEN = (
+                request.env["ir.config_parameter"]
+                .sudo()
+                .get_param("moi.bearer_token", default="l3UIiRwXb0oZPfAeQqY2Hk3l")
+            )
+
             if token != BEARER_TOKEN:
                 return {"error": _("Unauthorized: Invalid Bearer token")}
 
@@ -2918,12 +2924,12 @@ class User(http.Controller):
 
     # TODO: Secure this endpoint properly before production use (Dhiren 2025-10-19)
     @http.route(
-        '/go/moi/user/test-verify',
+        "/go/moi/user/test-verify",
         auth="public",
-        methods=['POST'],
+        methods=["POST"],
         csrf=False,
-        type='json',
-        cors='*'
+        type="json",
+        cors="*",
     )
     def verify_moi_user(self, **post):
         """Verifies the user using barcode, branch_id, and amount value with secure HMAC authentication."""
@@ -2933,52 +2939,154 @@ class User(http.Controller):
             if "error" in data:
                 return data
 
-            barcode_number = data.get('barcode_number')
-            branch_id = data.get('branch_id')
-            amount_value = data.get('amount_value')
-            provided_signature = data.get('signature')
+            barcode_number = data.get("barcode_number")
+            branch_id = data.get("branch_id")
+            amount_value = data.get("amount_value")
+            provided_signature = data.get("signature")
 
             # Validate required fields
-            missing_fields = [f for f in ['barcode_number', 'branch_id', 'amount_value', 'signature'] if not data.get(f)]
+            missing_fields = [
+                f
+                for f in ["barcode_number", "branch_id", "amount_value", "signature"]
+                if not data.get(f)
+            ]
             if missing_fields:
-                return {'error': f"Missing required parameters: {', '.join(missing_fields)}"}
+                return {
+                    "error": f"Missing required parameters: {', '.join(missing_fields)}"
+                }
 
             if float(amount_value) <= 0:
-                return {'error': 'Amount value must be greater than zero'}
+                return {"error": "Amount value must be greater than zero"}
 
             # Generate expected signature
-            message = f"{barcode_number}|{branch_id}|{format(float(amount_value), '.2f')}"
+            message = (
+                f"{barcode_number}|{branch_id}|{format(float(amount_value), '.2f')}"
+            )
             expected_signature = hmac.new(
                 SECRET_KEY.encode(), message.encode(), hashlib.sha256
             ).digest()
             expected_signature = base64.b64encode(expected_signature).decode()
 
             if provided_signature != expected_signature:
-                return {'error': 'Unauthorized request: Invalid signature'}
+                return {"error": "Unauthorized request: Invalid signature"}
 
             # Validate branch
-            branch = request.env['res.partner'].sudo().search(
-                [('id', '=', branch_id), ('is_company', '=', True)],
-                limit=1
+            branch = (
+                request.env["res.partner"]
+                .sudo()
+                .search([("id", "=", branch_id), ("is_company", "=", True)], limit=1)
             )
             if not branch:
-                return {'error': 'Invalid Branch ID'}
+                return {"error": "Invalid Branch ID"}
 
             # Validate barcode
-            partner = request.env['res.partner'].sudo().search([('barcode', '=', barcode_number)], limit=1)
+            partner = (
+                request.env["res.partner"]
+                .sudo()
+                .search([("barcode", "=", barcode_number)], limit=1)
+            )
             if not partner:
-                return {'error': 'Invalid Barcode: No matching user found'}
+                return {"error": "Invalid Barcode: No matching user found"}
 
             return {
-                'CustomerFirstName': partner.name,
-                'CustomerLastName': getattr(partner, 'last_name', ''),
-                'OrganisationName': partner.parent_id.name if partner.parent_id else 'N/A',
-                'Status': 'Active' if partner.active else 'Inactive'
+                "CustomerFirstName": partner.name,
+                "CustomerLastName": getattr(partner, "last_name", ""),
+                "OrganisationName": (
+                    partner.parent_id.name if partner.parent_id else "N/A"
+                ),
+                "Status": "Active" if partner.active else "Inactive",
             }
 
         except Exception as e:
             # Return a safe error message without exposing sensitive details
-            return {'error': f"An unexpected error occurred: {str(e)}"}
+            return {"error": f"An unexpected error occurred: {str(e)}"}
+
+    @http.route(
+        "/go/moi/user/verify/details",
+        auth="public",
+        methods=["POST"],
+        csrf=False,
+        type="json",
+        cors="*",
+    )
+    def verify_moi_user(self, **post):
+        """Verifies the user using barcode, branch_id, and amount value with secure HMAC authentication."""
+
+        try:
+            data = post or self._get_json_request()
+            if "error" in data:
+                return data
+
+            barcode_number = data.get("barcode_number")
+            branch_id = data.get("branch_id")
+            amount_value = data.get("amount_value")
+            provided_signature = data.get("signature")
+
+            # Validate required fields
+            missing_fields = [
+                f
+                for f in ["barcode_number", "branch_id", "amount_value", "signature"]
+                if not data.get(f)
+            ]
+            if missing_fields:
+                return {
+                    "error": f"Missing required parameters: {', '.join(missing_fields)}"
+                }
+
+            if float(amount_value) <= 0:
+                return {"error": "Amount value must be greater than zero"}
+
+            # Generate expected signature
+            message = (
+                f"{barcode_number}|{branch_id}|{format(float(amount_value), '.2f')}"
+            )
+            secret_key = (
+                request.env["ir.config_parameter"]
+                .sudo()
+                .get_param(
+                    "moi.secret_key",
+                    default="a92c18c5b2764a05dfe9f7c52b5e0e9c0ac6f4de05d7ec1f2cf1a59e01e7bdb1",
+                )
+            )
+
+            expected_signature = hmac.new(
+                secret_key.encode(), message.encode(), hashlib.sha256
+            ).digest()
+            expected_signature = base64.b64encode(expected_signature).decode()
+
+            if provided_signature != expected_signature:
+                return {"error": "Unauthorized request: Invalid signature"}
+
+            # Validate branch
+            branch = (
+                request.env["res.partner"]
+                .sudo()
+                .search([("id", "=", branch_id), ("is_company", "=", True)], limit=1)
+            )
+            if not branch:
+                return {"error": "Invalid Branch ID"}
+
+            # Validate barcode
+            partner = (
+                request.env["res.partner"]
+                .sudo()
+                .search([("barcode", "=", barcode_number)], limit=1)
+            )
+            if not partner:
+                return {"error": "Invalid Barcode: No matching user found"}
+
+            return {
+                "CustomerFirstName": partner.name,
+                "CustomerLastName": getattr(partner, "last_name", ""),
+                "OrganisationName": (
+                    partner.parent_id.name if partner.parent_id else "N/A"
+                ),
+                "Status": "Active" if partner.active else "Inactive",
+            }
+
+        except Exception as e:
+            # Return a safe error message without exposing sensitive details
+            return {"error": f"An unexpected error occurred: {str(e)}"}
 
     @http.route(
         ["/go/api/user/offers/v3"],

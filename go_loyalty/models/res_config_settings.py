@@ -15,3 +15,10 @@ class ResConfigSettings(models.TransientModel):
     gulfexc_secret_key = fields.Char(
         string="GulfExc Secret Key", config_parameter="gulfexc.secret_key"
     )
+
+    moi_secret_key = fields.Char(
+        string="MOI Secret Key", config_parameter="moi.secret_key"
+    )
+    moi_bearer_token = fields.Char(
+        string="MOI Bearer Token", config_parameter="moi.bearer_token"
+    )

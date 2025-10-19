@@ -1,5 +1,3 @@
-import base64
-
 from odoo.exceptions import UserError
 from odoo.http import request, route
 
@@ -228,8 +226,13 @@ class GoMain(http.Controller):
                 required_fields.append("x_qid")
             if org_name == "moi":
                 required_fields.extend(
-                    ["first_name_arbic", "barcode", "x_last_name_arbic",
-                     "x_moi_last_name", "card_number"]
+                    [
+                        "first_name_arbic",
+                        "barcode",
+                        "x_last_name_arbic",
+                        "x_moi_last_name",
+                        "card_number",
+                    ]
                 )
             missing_fields = [f for f in required_fields if not data.get(f)]
             if missing_fields:
