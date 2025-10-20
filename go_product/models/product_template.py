@@ -130,7 +130,7 @@ class ProductTemplate(models.Model):
     # MISCELLANEOUS
     # ──────────────────────────────
 
-    points = fields.Float(
+    point = fields.Float(
         string="Reward Points",
         help="Points earned for purchasing this product.",
         oldname="x_point",

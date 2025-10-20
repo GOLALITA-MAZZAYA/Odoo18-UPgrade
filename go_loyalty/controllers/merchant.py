@@ -42,7 +42,7 @@ class Merchant(http.Controller):
                 .sudo()
                 .search_count([("merchant_id", "=", partner.id)])
             )
-        except Exception:
+        except Exception as e:
             return 0
 
     def _get_offer_products_count(self, partner):
@@ -145,13 +145,23 @@ class Merchant(http.Controller):
             val = data.get(field_name) or data.get(fallback_field)
             if not val:
                 return False
+            try:
+                return fields.Datetime.to_datetime(date_str)
+            except Exception:
+                pass
 
-            for fmt in ("%m/%d/%Y %I:%M %p", "%Y-%m-%d %H:%M:%S", "%Y-%m-%d"):
+            for fmt in [
+                "%Y-%m-%d %H:%M:%S",
+                "%Y-%m-%d %H:%M",
+                "%d-%m-%Y %I:%M %p",
+                "%Y-%m-%d",
+                "%d-%m-%Y",
+            ]:
                 try:
                     return datetime.strptime(val, fmt).strftime(
                         DEFAULT_SERVER_DATE_FORMAT
                     )
-                except Exception:
+                except Exception as e:
                     continue
             return False
 
@@ -178,8 +188,11 @@ class Merchant(http.Controller):
         lat1, lon1, lat2, lon2 = map(math.radians, [lat1, lon1, lat2, lon2])
         dlat = lat2 - lat1
         dlon = lon2 - lon1
-        a = math.sin(dlat/2)**2 + math.cos(lat1) * math.cos(lat2) * math.sin(dlon/2)**2
-        c = 2 * math.atan2(math.sqrt(a), math.sqrt(1-a))
+        a = (
+            math.sin(dlat / 2) ** 2
+            + math.cos(lat1) * math.cos(lat2) * math.sin(dlon / 2) ** 2
+        )
+        c = 2 * math.atan2(math.sqrt(a), math.sqrt(1 - a))
         return R * c
 
     # def _get_notification_info(self, merchant_id, user_partner_id):
@@ -908,6 +921,11 @@ class Merchant(http.Controller):
                     "%Y-%m-%d",
                     "%d-%m-%Y",
                 ]
+                try:
+                    return fields.Datetime.to_datetime(date_str)
+                except Exception:
+                    pass
+
                 for fmt in possible_formats:
                     try:
                         return datetime.strptime(date_str, fmt)
@@ -1738,7 +1756,11 @@ class Merchant(http.Controller):
             if partner.entity_type != "merchant":
                 return {"error": _("You are not allowed to access this API")}
 
-            sales = request.env["loyalty.sale"].sudo().search([("merchant_id", "=", partner.id)])
+            sales = (
+                request.env["loyalty.sale"]
+                .sudo()
+                .search([("merchant_id", "=", partner.id)])
+            )
             partners = sales.mapped("partner_id")
 
             res = [
@@ -2062,9 +2084,7 @@ class Merchant(http.Controller):
                 domain += [("merchant_type", "=", data["merchant_type"])]
 
             if data.get("x_org_linked"):
-                domain += [
-                    ("org_type", "in", [data["x_org_linked"], None])
-                ]
+                domain += [("org_type", "in", [data["x_org_linked"], None])]
 
             if data.get("merchant_id"):
                 domain += [("id", "=", data["merchant_id"])]
@@ -2154,13 +2174,13 @@ class Merchant(http.Controller):
             return {"error": str(e)}
 
     @http.route(
-        ['/go/api/user/category/merchant/list/nearby'],
+        ["/go/api/user/category/merchant/list/nearby"],
         auth="public",
         website=True,
-        methods=['POST'],
+        methods=["POST"],
         csrf=False,
-        type='json',
-        cors='*'
+        type="json",
+        cors="*",
     )
     def get_nearby_merchants(self, **post):
         try:
@@ -2172,106 +2192,1079 @@ class Merchant(http.Controller):
             if isinstance(current_user, dict):
                 return current_user
 
-            if not data.get('latitude') or not data.get('longitude'):
-                return {'error': _('Latitude and Longitude are required.')}
+            if not data.get("latitude") or not data.get("longitude"):
+                return {"error": _("Latitude and Longitude are required.")}
 
             try:
-                user_lat = float(data['latitude'])
-                user_lon = float(data['longitude'])
+                user_lat = float(data["latitude"])
+                user_lon = float(data["longitude"])
             except ValueError:
-                return {'error': _('Invalid Latitude or Longitude format.')}
+                return {"error": _("Invalid Latitude or Longitude format.")}
 
             RADIUS_KM = 2.0
 
-            app = request.env['notin.app'].sudo().search([('parent_id', '=', current_user.parent_id.id)])
+            app = (
+                request.env["notin.app"]
+                .sudo()
+                .search([("parent_id", "=", current_user.parent_id.id)])
+            )
             app_ids = [app.id] if app else []
 
             domain = [
-                ('entity_type', '=', 'merchant'),
-                ('partner_latitude', '!=', False),
-                ('partner_longitude', '!=', False),
-                ('not_linked_ids', 'not in', app_ids),
-                ('not_in_list', '=', False)
+                ("entity_type", "=", "merchant"),
+                ("partner_latitude", "!=", False),
+                ("partner_longitude", "!=", False),
+                ("not_linked_ids", "not in", app_ids),
+                ("not_in_list", "=", False),
             ]
 
             # Apply filters
-            if data.get('category_id'):
-                domain += [('partner_category_id', 'child_of', data['category_id'])]
-            if data.get('gpoint'):
-                domain += [('go_loyalty_point', '=', data['gpoint'])]
-            if data.get('is_premium_merchant'):
-                domain += [('is_premium_merchant', '=', data['is_premium_merchant'])]
-            if data.get('x_for_employee_type'):
-                domain += ['|', ('employee_type', '=', data['x_for_employee_type']), ('employee_type', '=', 'both')]
-            if data.get('country_id'):
-                domain += [('country_id', '=', data['country_id'])]
-            if data.get('x_online_store'):
-                domain += [('online_store', '=', data['x_online_store'])]
-            if data.get('merchant_name'):
-                domain += ["|", ('name', 'ilike', data['merchant_name']), ('arabic_name', 'ilike', data['merchant_name'])]
-            if data.get('merchant_type'):
-                domain += [('merchant_type', '=', data['merchant_type'])]
-            if data.get('x_org_linked'):
-                domain += ["|", ('org_type', '=', data['x_org_linked']), ('org_type', '=', False)]
-            if data.get('merchant_id'):
-                domain += [('id', '=', data['merchant_id'])]
-            if data.get('location_id'):
-                domain += [('location_id', '=', data['location_id'])]
+            if data.get("category_id"):
+                domain += [("partner_category_id", "child_of", data["category_id"])]
+            if data.get("gpoint"):
+                domain += [("go_loyalty_point", "=", data["gpoint"])]
+            if data.get("is_premium_merchant"):
+                domain += [("is_premium_merchant", "=", data["is_premium_merchant"])]
+            if data.get("x_for_employee_type"):
+                domain += [
+                    "|",
+                    ("employee_type", "=", data["x_for_employee_type"]),
+                    ("employee_type", "=", "both"),
+                ]
+            if data.get("country_id"):
+                domain += [("country_id", "=", data["country_id"])]
+            if data.get("x_online_store"):
+                domain += [("online_store", "=", data["x_online_store"])]
+            if data.get("merchant_name"):
+                domain += [
+                    "|",
+                    ("name", "ilike", data["merchant_name"]),
+                    ("arabic_name", "ilike", data["merchant_name"]),
+                ]
+            if data.get("merchant_type"):
+                domain += [("merchant_type", "=", data["merchant_type"])]
+            if data.get("x_org_linked"):
+                domain += [
+                    "|",
+                    ("org_type", "=", data["x_org_linked"]),
+                    ("org_type", "=", False),
+                ]
+            if data.get("merchant_id"):
+                domain += [("id", "=", data["merchant_id"])]
+            if data.get("location_id"):
+                domain += [("location_id", "=", data["location_id"])]
 
-            merchants = request.env['res.partner'].sudo().search(domain)
-            web_base_url = request.env['ir.config_parameter'].sudo().get_param('web.base.url', default='https://www.golalita.com')
-            Notification = request.env['loyalty.notification'].sudo()
+            merchants = request.env["res.partner"].sudo().search(domain)
+            web_base_url = (
+                request.env["ir.config_parameter"]
+                .sudo()
+                .get_param("web.base.url", default="https://www.golalita.com")
+            )
+            Notification = request.env["loyalty.notification"].sudo()
 
             nearby_merchants = []
             for partner in merchants:
                 partner_lat = partner.partner_latitude
                 partner_lon = partner.partner_longitude
 
-                distance = self._calculate_distance(user_lat, user_lon, partner_lat, partner_lon)
+                distance = self._calculate_distance(
+                    user_lat, user_lon, partner_lat, partner_lon
+                )
                 if distance <= RADIUS_KM:
-                    notification = Notification.search([('merchant_id', '=', partner.id)], limit=1)
+                    notification = Notification.search(
+                        [("merchant_id", "=", partner.id)], limit=1
+                    )
 
-                    nearby_merchants.append({
-                        'merchant_name': partner.name,
-                        'x_for_employee_type': partner.employee_type,
-                        'is_business_hotel': partner.is_hotel_type,
-                        'x_moi_show': partner.show_in_moi,
-                        'x_arabic_name': partner.arabic_name,
-                        'x_have_branch': partner.has_branches,
-                        'x_have_offers': partner.has_offers,
-                        'accept_go_loyalty_point': partner.go_loyalty_point,
-                        'gpoint': partner.go_loyalty_point,
-                        'open_from': partner.open_from,
-                        'open_till': partner.open_till,
-                        'x_kts': partner.kts,
-                        'merchant_id': partner.id,
-                        'x_org_linked': partner.org_type,
-                        'x_online_store': partner.online_store,
-                        'x_sequence': partner.sequence,
-                        'barcode': partner.barcode,
-                        'email': partner.email,
-                        'partner_latitude': partner.partner_latitude,
-                        'partner_longitude': partner.partner_longitude,
-                        'ribbon_text': partner.ribbon_text,
-                        'x_ribbon_text_arabic': partner.ribbon_text_ar,
-                        'ribbon_color': partner.ribbon_color,
-                        'ribbon_position': partner.ribbon_position,
-                        'rating': partner.merchant_rating,
-                        'map_banner': url_join(web_base_url, f'/go/api/image/{partner.id}/map_banner/res.partner'),
-                        'merchant_logo': url_join(web_base_url, f'/go/api/image/{partner.id}/image_512/res.partner'),
-                        'category': partner.partner_category_id.name,
-                        'category_id': partner.partner_category_id.id,
-                        'country_id': partner.country_id.id,
-                        'country_code': partner.country_id.code,
-                        'country_name': partner.country_id.name,
-                        'category_logo': url_join(web_base_url, f'/go/api/image/{partner.partner_category_id.id}/image_icon/partner.category'),
-                        'banners': self._get_banners(partner, web_base_url),
-                        'pdf_attached': partner.pdf_attached,
-                        'company_contract_url': url_join(web_base_url, f'/web/binary/contract_download_pdf/{partner.id}'),
-                        'company_registration_url': url_join(web_base_url, f'/web/binary/registration_download_pdf/{partner.id}'),
-                        'distance_km': round(distance, 2),
-                    })
+                    nearby_merchants.append(
+                        {
+                            "merchant_name": partner.name,
+                            "x_for_employee_type": partner.employee_type,
+                            "is_business_hotel": partner.is_hotel_type,
+                            "x_moi_show": partner.show_in_moi,
+                            "x_arabic_name": partner.arabic_name,
+                            "x_have_branch": partner.has_branches,
+                            "x_have_offers": partner.has_offers,
+                            "accept_go_loyalty_point": partner.go_loyalty_point,
+                            "gpoint": partner.go_loyalty_point,
+                            "open_from": partner.open_from,
+                            "open_till": partner.open_till,
+                            "x_kts": partner.kts,
+                            "merchant_id": partner.id,
+                            "x_org_linked": partner.org_type,
+                            "x_online_store": partner.online_store,
+                            "x_sequence": partner.sequence,
+                            "barcode": partner.barcode,
+                            "email": partner.email,
+                            "partner_latitude": partner.partner_latitude,
+                            "partner_longitude": partner.partner_longitude,
+                            "ribbon_text": partner.ribbon_text,
+                            "x_ribbon_text_arabic": partner.ribbon_text_ar,
+                            "ribbon_color": partner.ribbon_color,
+                            "ribbon_position": partner.ribbon_position,
+                            "rating": partner.merchant_rating,
+                            "map_banner": url_join(
+                                web_base_url,
+                                f"/go/api/image/{partner.id}/map_banner/res.partner",
+                            ),
+                            "merchant_logo": url_join(
+                                web_base_url,
+                                f"/go/api/image/{partner.id}/image_512/res.partner",
+                            ),
+                            "category": partner.partner_category_id.name,
+                            "category_id": partner.partner_category_id.id,
+                            "country_id": partner.country_id.id,
+                            "country_code": partner.country_id.code,
+                            "country_name": partner.country_id.name,
+                            "category_logo": url_join(
+                                web_base_url,
+                                f"/go/api/image/{partner.partner_category_id.id}/image_icon/partner.category",
+                            ),
+                            "banners": self._get_banners(partner, web_base_url),
+                            "pdf_attached": partner.pdf_attached,
+                            "company_contract_url": url_join(
+                                web_base_url,
+                                f"/web/binary/contract_download_pdf/{partner.id}",
+                            ),
+                            "company_registration_url": url_join(
+                                web_base_url,
+                                f"/web/binary/registration_download_pdf/{partner.id}",
+                            ),
+                            "distance_km": round(distance, 2),
+                        }
+                    )
 
-            return {'merchants': nearby_merchants}
+            return {"merchants": nearby_merchants}
         except Exception as e:
-            return {'error': "Error occurred: {}".format(str(e))}
+            return {"error": "Error occurred: {}".format(str(e))}
+
+    @http.route(
+        ["/go/api/category/new/merchant/lists"],
+        auth="public",
+        website=True,
+        methods=["POST"],
+        csrf=False,
+        type="json",
+        cors="*",
+    )
+    def get_new_merchants_list(self, **post):
+        try:
+            data = post or self._get_json_request()
+            if "error" in data:
+                return data
+
+            current_user = self._validate_token(data)
+            if isinstance(current_user, dict):
+                return current_user
+
+            app = (
+                request.env["notin.app"]
+                .sudo()
+                .search([("parent_id", "=", current_user.parent_id.id)])
+            )
+            app_ids = [app.id] if app else []
+
+            domain = [
+                ("entity_type", "=", "merchant"),
+                ("not_linked_ids", "not in", app_ids),
+                ("not_in_list", "=", False),
+            ]
+
+            # Apply filters
+            if data.get("category_id"):
+                domain += [("partner_category_id", "child_of", data["category_id"])]
+            if data.get("x_for_employee_type"):
+                domain += [
+                    "|",
+                    ("employee_type", "=", data["x_for_employee_type"]),
+                    ("employee_type", "=", "both"),
+                ]
+            if data.get("country_id"):
+                domain += [("country_id", "=", data["country_id"])]
+            if data.get("x_online_store"):
+                domain += [("online_store", "=", data["x_online_store"])]
+            if data.get("merchant_name"):
+                domain += [
+                    "|",
+                    ("name", "ilike", data["merchant_name"]),
+                    ("arabic_name", "ilike", data["merchant_name"]),
+                ]
+            if data.get("merchant_type"):
+                domain += [("merchant_type", "=", data["merchant_type"])]
+            if data.get("x_org_linked"):
+                domain += [
+                    "|",
+                    ("org_type", "=", data["x_org_linked"]),
+                    ("org_type", "=", False),
+                ]
+            if data.get("merchant_id"):
+                domain += [("id", "=", data["merchant_id"])]
+
+            merchants = (
+                request.env["res.partner"]
+                .sudo()
+                .search(
+                    domain,
+                    order="create_date desc",
+                    limit=20,
+                    offset=int(data.get("offset", 0)),
+                )
+            )
+            web_base_url = (
+                request.env["ir.config_parameter"]
+                .sudo()
+                .get_param("web.base.url", default="https://www.golalita.com")
+            )
+
+            res = []
+            for partner in merchants:
+
+                res.append(
+                    {
+                        "merchant_name": partner.name,
+                        "x_for_employee_type": partner.employee_type,
+                        "is_business_hotel": partner.is_hotel_type,
+                        "x_moi_show": partner.show_in_moi,
+                        "x_arabic_name": partner.arabic_name,
+                        "x_have_branch": partner.has_branches,
+                        "x_have_offers": partner.has_offers,
+                        "accept_go_loyalty_point": partner.go_loyalty_point,
+                        "open_from": partner.open_from,
+                        "open_till": partner.open_till,
+                        "x_kts": partner.kts,
+                        "merchant_id": partner.id,
+                        "x_org_linked": partner.org_type,
+                        "x_online_store": partner.online_store,
+                        "x_sequence": partner.sequence,
+                        "barcode": partner.barcode,
+                        "partner_latitude": partner.partner_latitude,
+                        "partner_longitude": partner.partner_longitude,
+                        "ribbon_text": partner.ribbon_text,
+                        "x_ribbon_text_arabic": partner.ribbon_text_ar,
+                        "ribbon_color": partner.ribbon_color,
+                        "ribbon_position": partner.ribbon_position,
+                        "rating": partner.merchant_rating,
+                        "map_banner": url_join(
+                            web_base_url,
+                            f"/go/api/image/{partner.id}/map_banner/res.partner",
+                        ),
+                        "merchant_logo": url_join(
+                            web_base_url,
+                            f"/go/api/image/{partner.id}/image_512/res.partner",
+                        ),
+                        "category": partner.partner_category_id.name,
+                        "category_id": partner.partner_category_id.id,
+                        "country_id": partner.country_id.id,
+                        "country_code": partner.country_id.code,
+                        "country_name": partner.country_id.name,
+                        "category_logo": url_join(
+                            web_base_url,
+                            f"/go/api/image/{partner.partner_category_id.id}/image_icon/partner.category",
+                        ),
+                        "banners": self._get_banners(partner, web_base_url),
+                        "pdf_attached": partner.pdf_attached,
+                        "company_contract_url": url_join(
+                            web_base_url,
+                            f"/web/binary/contract_download_pdf/{partner.id}",
+                        ),
+                        "company_registration_url": url_join(
+                            web_base_url,
+                            f"/web/binary/registration_download_pdf/{partner.id}",
+                        ),
+                    }
+                )
+
+            return {"merchants": res}
+        except Exception as e:
+            return {"error": "Error occurred: {}".format(str(e))}
+
+    @http.route(
+        ["/go/api/gulfexc/category/new/merchant/lists"],
+        auth="public",
+        website=True,
+        methods=["POST"],
+        csrf=False,
+        type="json",
+        cors="*",
+    )
+    def get_gulfexc_category_merchants_list(self, **post):
+        try:
+            data = post or self._get_json_request()
+            if "error" in data:
+                return data
+
+            current_user = self._validate_token(data)
+            if isinstance(current_user, dict):
+                return current_user
+
+            app = (
+                request.env["notin.app"]
+                .sudo()
+                .search([("parent_id", "=", current_user.parent_id.id)])
+            )
+            app_ids = [app.id] if app else []
+
+            domain = [
+                ("entity_type", "=", "merchant"),
+                ("not_linked_ids", "not in", app_ids),
+                ("not_in_list", "=", False),
+            ]
+
+            # Apply filters
+            if data.get("category_id"):
+                domain += [("partner_category_id", "child_of", data["category_id"])]
+            if data.get("x_for_employee_type"):
+                domain += [
+                    "|",
+                    ("employee_type", "=", data["x_for_employee_type"]),
+                    ("employee_type", "=", "both"),
+                ]
+            if data.get("country_id"):
+                domain += [("country_id", "=", data["country_id"])]
+            if data.get("x_online_store"):
+                domain += [("online_store", "=", data["x_online_store"])]
+            if data.get("merchant_name"):
+                domain += [
+                    "|",
+                    ("name", "ilike", data["merchant_name"]),
+                    ("arabic_name", "ilike", data["merchant_name"]),
+                ]
+            if data.get("merchant_type"):
+                domain += [("merchant_type", "=", data["merchant_type"])]
+            if data.get("x_org_linked"):
+                domain += [
+                    "|",
+                    ("org_type", "=", data["x_org_linked"]),
+                    ("org_type", "=", False),
+                ]
+            if data.get("merchant_id"):
+                domain += [("id", "=", data["merchant_id"])]
+
+            merchants = (
+                request.env["res.partner"]
+                .sudo()
+                .search(
+                    domain,
+                    order="create_date desc",
+                    limit=20,
+                    offset=int(data.get("offset", 0)),
+                )
+            )
+            web_base_url = (
+                request.env["ir.config_parameter"]
+                .sudo()
+                .get_param("web.base.url", default="https://www.golalita.com")
+            )
+
+            res = []
+            for partner in merchants:
+
+                res.append(
+                    {
+                        "merchant_name": partner.name,
+                        "x_for_employee_type": partner.employee_type,
+                        "is_business_hotel": partner.is_hotel_type,
+                        "x_moi_show": partner.show_in_moi,
+                        "x_arabic_name": partner.arabic_name,
+                        "x_have_branch": partner.has_branches,
+                        "x_have_offers": partner.has_offers,
+                        "accept_go_loyalty_point": partner.go_loyalty_point,
+                        "open_from": partner.open_from,
+                        "open_till": partner.open_till,
+                        "x_kts": partner.kts,
+                        "merchant_id": partner.id,
+                        "x_org_linked": partner.org_type,
+                        "x_online_store": partner.online_store,
+                        "x_sequence": partner.sequence,
+                        "barcode": partner.barcode,
+                        "partner_latitude": partner.partner_latitude,
+                        "partner_longitude": partner.partner_longitude,
+                        "ribbon_text": partner.ribbon_text,
+                        "x_ribbon_text_arabic": partner.ribbon_text_ar,
+                        "ribbon_color": partner.ribbon_color,
+                        "ribbon_position": partner.ribbon_position,
+                        "rating": partner.merchant_rating,
+                        "map_banner": url_join(
+                            web_base_url,
+                            f"/go/api/image/{partner.id}/map_banner/res.partner",
+                        ),
+                        "merchant_logo": url_join(
+                            web_base_url,
+                            f"/go/api/image/{partner.id}/image_512/res.partner",
+                        ),
+                        "category": partner.partner_category_id.name,
+                        "category_id": partner.partner_category_id.id,
+                        "country_id": partner.country_id.id,
+                        "country_code": partner.country_id.code,
+                        "country_name": partner.country_id.name,
+                        "category_logo": url_join(
+                            web_base_url,
+                            f"/go/api/image/{partner.partner_category_id.id}/image_icon/partner.category",
+                        ),
+                        "banners": self._get_banners(partner, web_base_url),
+                        "pdf_attached": partner.pdf_attached,
+                        "company_contract_url": url_join(
+                            web_base_url,
+                            f"/web/binary/contract_download_pdf/{partner.id}",
+                        ),
+                        "company_registration_url": url_join(
+                            web_base_url,
+                            f"/web/binary/registration_download_pdf/{partner.id}",
+                        ),
+                    }
+                )
+
+            return res
+        except Exception as e:
+            return {"error": "Error occurred: {}".format(str(e))}
+
+    @http.route(
+        ["/go/api/user/category/new/merchant/lists"],
+        auth="public",
+        website=True,
+        methods=["POST"],
+        csrf=False,
+        type="json",
+        cors="*",
+    )
+    def get_category_new_merchants_list(self, **post):
+        try:
+            data = post or self._get_json_request()
+            if "error" in data:
+                return data
+
+            current_user = self._validate_token(data)
+            if isinstance(current_user, dict):
+                return current_user
+
+            app = (
+                request.env["notin.app"]
+                .sudo()
+                .search([("parent_id", "=", current_user.parent_id.id)])
+            )
+            app_ids = [app.id] if app else []
+
+            domain = [
+                ("entity_type", "=", "merchant"),
+                ("not_linked_ids", "not in", app_ids),
+                ("not_in_list", "=", False),
+            ]
+
+            # Apply filters
+            if data.get("category_id"):
+                domain += [("partner_category_id", "child_of", data["category_id"])]
+            if data.get("x_for_employee_type"):
+                domain += [
+                    "|",
+                    ("employee_type", "=", data["x_for_employee_type"]),
+                    ("employee_type", "=", "both"),
+                ]
+            if data.get("country_id"):
+                domain += [("country_id", "=", data["country_id"])]
+            if data.get("x_online_store"):
+                domain += [("online_store", "=", data["x_online_store"])]
+            if data.get("merchant_name"):
+                domain += [
+                    "|",
+                    ("name", "ilike", data["merchant_name"]),
+                    ("arabic_name", "ilike", data["merchant_name"]),
+                ]
+            if data.get("merchant_type"):
+                domain += [("merchant_type", "=", data["merchant_type"])]
+            if data.get("x_org_linked"):
+                domain += [
+                    "|",
+                    ("org_type", "=", data["x_org_linked"]),
+                    ("org_type", "=", False),
+                ]
+            if data.get("merchant_id"):
+                domain += [("id", "=", data["merchant_id"])]
+
+            merchants = (
+                request.env["res.partner"]
+                .sudo()
+                .search(
+                    domain,
+                    order="create_date desc",
+                    limit=20,
+                    offset=int(data.get("offset", 0)),
+                )
+            )
+            web_base_url = (
+                request.env["ir.config_parameter"]
+                .sudo()
+                .get_param("web.base.url", default="https://www.golalita.com")
+            )
+
+            res = []
+            for partner in merchants:
+
+                res.append(
+                    {
+                        "merchant_name": partner.name,
+                        "x_for_employee_type": partner.employee_type,
+                        "is_business_hotel": partner.is_hotel_type,
+                        "x_moi_show": partner.show_in_moi,
+                        "x_arabic_name": partner.arabic_name,
+                        "x_have_branch": partner.has_branches,
+                        "x_have_offers": partner.has_offers,
+                        "accept_go_loyalty_point": partner.go_loyalty_point,
+                        "open_from": partner.open_from,
+                        "open_till": partner.open_till,
+                        "x_kts": partner.kts,
+                        "merchant_id": partner.id,
+                        "x_org_linked": partner.org_type,
+                        "x_online_store": partner.online_store,
+                        "x_sequence": partner.sequence,
+                        "barcode": partner.barcode,
+                        "partner_latitude": partner.partner_latitude,
+                        "partner_longitude": partner.partner_longitude,
+                        "ribbon_text": partner.ribbon_text,
+                        "x_ribbon_text_arabic": partner.ribbon_text_ar,
+                        "ribbon_color": partner.ribbon_color,
+                        "ribbon_position": partner.ribbon_position,
+                        "rating": partner.merchant_rating,
+                        "map_banner": url_join(
+                            web_base_url,
+                            f"/go/api/image/{partner.id}/map_banner/res.partner",
+                        ),
+                        "merchant_logo": url_join(
+                            web_base_url,
+                            f"/go/api/image/{partner.id}/image_512/res.partner",
+                        ),
+                        "category": partner.partner_category_id.name,
+                        "category_id": partner.partner_category_id.id,
+                        "country_id": partner.country_id.id,
+                        "country_code": partner.country_id.code,
+                        "country_name": partner.country_id.name,
+                        "category_logo": url_join(
+                            web_base_url,
+                            f"/go/api/image/{partner.partner_category_id.id}/image_icon/partner.category",
+                        ),
+                        "banners": self._get_banners(partner, web_base_url),
+                        "pdf_attached": partner.pdf_attached,
+                        "company_contract_url": url_join(
+                            web_base_url,
+                            f"/web/binary/contract_download_pdf/{partner.id}",
+                        ),
+                        "company_registration_url": url_join(
+                            web_base_url,
+                            f"/web/binary/registration_download_pdf/{partner.id}",
+                        ),
+                    }
+                )
+
+            return res
+        except Exception as e:
+            return {"error": "Error occurred: {}".format(str(e))}
+
+    @http.route(
+        ["/go/api/gulfexc/category/merchant/lists"],
+        auth="public",
+        website=True,
+        methods=["POST"],
+        csrf=False,
+        type="json",
+        cors="*",
+    )
+    def get_category_gulfexc_merchants_list(self, **post):
+        try:
+            data = post or self._get_json_request()
+            if "error" in data:
+                return data
+
+            current_user = self._validate_token(data)
+            if isinstance(current_user, dict):
+                return current_user
+
+            app = (
+                request.env["notin.app"]
+                .sudo()
+                .search([("parent_id", "=", current_user.parent_id.id)])
+            )
+            app_ids = [app.id] if app else []
+
+            domain = [
+                ("entity_type", "=", "merchant"),
+                ("not_linked_ids", "not in", app_ids),
+                ("not_in_list", "=", False),
+            ]
+
+            # Apply filters
+            if data.get("category_id"):
+                domain += [("partner_category_id", "child_of", data["category_id"])]
+            if data.get("x_for_employee_type"):
+                domain += [
+                    "|",
+                    ("employee_type", "=", data["x_for_employee_type"]),
+                    ("employee_type", "=", "both"),
+                ]
+            if data.get("country_id"):
+                domain += [("country_id", "=", data["country_id"])]
+            if data.get("x_online_store"):
+                domain += [("online_store", "=", data["x_online_store"])]
+            if data.get("merchant_name"):
+                domain += [
+                    "|",
+                    ("name", "ilike", data["merchant_name"]),
+                    ("arabic_name", "ilike", data["merchant_name"]),
+                ]
+            if data.get("merchant_type"):
+                domain += [("merchant_type", "=", data["merchant_type"])]
+            if data.get("x_org_linked"):
+                domain += [
+                    "|",
+                    ("org_type", "=", data["x_org_linked"]),
+                    ("org_type", "=", False),
+                ]
+            if data.get("merchant_id"):
+                domain += [("id", "=", data["merchant_id"])]
+
+            merchants = (
+                request.env["res.partner"]
+                .sudo()
+                .search(
+                    domain,
+                    order="create_date desc",
+                    limit=20,
+                    offset=int(data.get("offset", 0)),
+                )
+            )
+            web_base_url = (
+                request.env["ir.config_parameter"]
+                .sudo()
+                .get_param("web.base.url", default="https://www.golalita.com")
+            )
+
+            res = []
+            for partner in merchants:
+
+                res.append(
+                    {
+                        "merchant_name": partner.name,
+                        "x_for_employee_type": partner.employee_type,
+                        "is_business_hotel": partner.is_hotel_type,
+                        "x_moi_show": partner.show_in_moi,
+                        "x_arabic_name": partner.arabic_name,
+                        "x_have_branch": partner.has_branches,
+                        "x_have_offers": partner.has_offers,
+                        "accept_go_loyalty_point": partner.go_loyalty_point,
+                        "open_from": partner.open_from,
+                        "open_till": partner.open_till,
+                        "x_kts": partner.kts,
+                        "merchant_id": partner.id,
+                        "x_org_linked": partner.org_type,
+                        "x_online_store": partner.online_store,
+                        "x_sequence": partner.sequence,
+                        "barcode": partner.barcode,
+                        "partner_latitude": partner.partner_latitude,
+                        "partner_longitude": partner.partner_longitude,
+                        "ribbon_text": partner.ribbon_text,
+                        "x_ribbon_text_arabic": partner.ribbon_text_ar,
+                        "ribbon_color": partner.ribbon_color,
+                        "ribbon_position": partner.ribbon_position,
+                        "rating": partner.merchant_rating,
+                        "map_banner": url_join(
+                            web_base_url,
+                            f"/go/api/image/{partner.id}/map_banner/res.partner",
+                        ),
+                        "merchant_logo": url_join(
+                            web_base_url,
+                            f"/go/api/image/{partner.id}/image_512/res.partner",
+                        ),
+                        "category": partner.partner_category_id.name,
+                        "category_id": partner.partner_category_id.id,
+                        "country_id": partner.country_id.id,
+                        "country_code": partner.country_id.code,
+                        "country_name": partner.country_id.name,
+                        "category_logo": url_join(
+                            web_base_url,
+                            f"/go/api/image/{partner.partner_category_id.id}/image_icon/partner.category",
+                        ),
+                        "banners": self._get_banners(partner, web_base_url),
+                        "pdf_attached": partner.pdf_attached,
+                        "company_contract_url": url_join(
+                            web_base_url,
+                            f"/web/binary/contract_download_pdf/{partner.id}",
+                        ),
+                        "company_registration_url": url_join(
+                            web_base_url,
+                            f"/web/binary/registration_download_pdf/{partner.id}",
+                        ),
+                    }
+                )
+
+            return res
+        except Exception as e:
+            return {"error": "Error occurred: {}".format(str(e))}
+
+    @http.route(
+        ["/go/api/user/restaurant/lists"],
+        auth="public",
+        website=True,
+        methods=["POST"],
+        csrf=False,
+        type="json",
+        cors="*",
+    )
+    def get_user_restaurant_list(self, **post):
+        try:
+            data = post or self._get_json_request()
+            if "error" in data:
+                return data
+
+            current_user = self._validate_token(data)
+            if isinstance(current_user, dict):
+                return current_user
+
+            domain = [
+                ("entity_type", "=", "merchant"),
+                ("is_restro", "=", True),
+                ("accept_delivery", "=", True),
+            ]
+
+            # Apply filters
+            if data.get("category_id"):
+                domain += [("partner_category_id", "child_of", data["category_id"])]
+            if data.get("merchant_type"):
+                domain += [("merchant_type", "=", data["merchant_type"])]
+
+            merchants = (
+                request.env["res.partner"]
+                .sudo()
+                .search(
+                    domain,
+                )
+            )
+            web_base_url = (
+                request.env["ir.config_parameter"]
+                .sudo()
+                .get_param("web.base.url", default="https://www.golalita.com")
+            )
+
+            res = []
+            for partner in merchants:
+
+                res.append(
+                    {
+                        "merchant_name": partner.name,
+                        "is_retro": partner.is_restro,
+                        "accept_delivery": partner.accept_delivery,
+                        "open_from": partner.open_from,
+                        "open_till": partner.open_till,
+                        "time_for_order_prepration": partner.time_for_order_prepration,
+                        "delivery_cost": partner.delivery_cost,
+                        "merchant_id": partner.id,
+                        "x_online_store": partner.online_store,
+                        "x_sequence": partner.sequence,
+                        "barcode": partner.barcode,
+                        "partner_latitude": partner.partner_latitude,
+                        "partner_longitude": partner.partner_longitude,
+                        "ribbon_text": partner.ribbon_text,
+                        "x_ribbon_text_arabic": partner.ribbon_text_ar,
+                        "ribbon_color": partner.ribbon_color,
+                        "ribbon_position": partner.ribbon_position,
+                        "rating": partner.merchant_rating,
+                        "map_banner": url_join(
+                            web_base_url,
+                            f"/go/api/image/{partner.id}/map_banner/res.partner",
+                        ),
+                        "merchant_logo": url_join(
+                            web_base_url,
+                            f"/go/api/image/{partner.id}/image_512/res.partner",
+                        ),
+                        "category": partner.partner_category_id.name,
+                        "category_logo": url_join(
+                            web_base_url,
+                            f"/go/api/image/{partner.partner_category_id.id}/image_icon/partner.category",
+                        ),
+                        "banners": self._get_banners(partner, web_base_url),
+                    }
+                )
+
+            return res
+        except Exception as e:
+            return {"error": "Error occurred: {}".format(str(e))}
+
+    @http.route(
+        ["/go/api/user/restaurant/lists/v2"],
+        auth="public",
+        website=True,
+        methods=["POST"],
+        csrf=False,
+        type="json",
+        cors="*",
+    )
+    def get_user_restaurant_list_v2(self, **post):
+        try:
+            data = post or self._get_json_request()
+            if "error" in data:
+                return data
+
+            current_user = self._validate_token(data)
+            if isinstance(current_user, dict):
+                return current_user
+
+            domain = [
+                ("entity_type", "=", "merchant"),
+                ("is_restro", "=", True),
+                ("accept_delivery", "=", True),
+            ]
+
+            # Apply filters
+            if data.get("restaurant_category_ids"):
+                domain += [
+                    (
+                        "restaurant_category_ids",
+                        "in",
+                        data.get("restaurant_category_ids"),
+                    )
+                ]
+            if data.get("merchant_type"):
+                domain += [("merchant_type", "=", data["merchant_type"])]
+
+            merchants = (
+                request.env["res.partner"]
+                .sudo()
+                .search(
+                    domain,
+                )
+            )
+            web_base_url = (
+                request.env["ir.config_parameter"]
+                .sudo()
+                .get_param("web.base.url", default="https://www.golalita.com")
+            )
+
+            res = []
+            for partner in merchants:
+
+                res.append(
+                    {
+                        "merchant_name": partner.name,
+                        "is_retro": partner.is_restro,
+                        "accept_delivery": partner.accept_delivery,
+                        "description": partner.description,
+                        "phone": partner.phone,
+                        "open_from": partner.open_from,
+                        "open_till": partner.open_till,
+                        "time_for_order_prepration": partner.time_for_order_prepration,
+                        "delivery_cost": partner.delivery_cost,
+                        "merchant_id": partner.id,
+                        "x_online_store": partner.online_store,
+                        "x_sequence": partner.sequence,
+                        "barcode": partner.barcode,
+                        "partner_latitude": partner.partner_latitude,
+                        "partner_longitude": partner.partner_longitude,
+                        "ribbon_text": partner.ribbon_text,
+                        "x_ribbon_text_arabic": partner.ribbon_text_ar,
+                        "ribbon_color": partner.ribbon_color,
+                        "ribbon_position": partner.ribbon_position,
+                        "rating": partner.merchant_rating,
+                        "map_banner": url_join(
+                            web_base_url,
+                            f"/go/api/image/{partner.id}/map_banner/res.partner",
+                        ),
+                        "merchant_logo": url_join(
+                            web_base_url,
+                            f"/go/api/image/{partner.id}/image_512/res.partner",
+                        ),
+                        "category": partner.partner_category_id.name,
+                        "category_logo": url_join(
+                            web_base_url,
+                            f"/go/api/image/{partner.partner_category_id.id}/image_icon/partner.category",
+                        ),
+                        "banners": self._get_banners(partner, web_base_url),
+                    }
+                )
+
+            return res
+        except Exception as e:
+            return {"error": "Error occurred: {}".format(str(e))}
+
+    @http.route(
+        ["/go/api/user/restaurant/product/lists"],
+        auth="public",
+        website=True,
+        methods=["POST"],
+        csrf=False,
+        type="json",
+        cors="*",
+    )
+    def get_merchant_product_list_restro(self, **post):
+        try:
+            data = post or self._get_json_request()
+            if "error" in data:
+                return data
+
+            current_user = self._validate_token(data)
+            if isinstance(current_user, dict):
+                return current_user
+
+            if data.get("merchant_id"):
+                domain = [("merchant_id", "=", data["merchant_id"])]
+            else:
+                domain = [("merchant_id.is_restro", "=", True)]
+
+            products = (
+                request.env["product.template"]
+                .sudo()
+                .search_read(
+                    domain,
+                    [
+                        "name",
+                        "image_url",
+                        "default_code",
+                        "x_point",
+                        "max_quantity",
+                        "barcode",
+                        "description",
+                        "description_sale",
+                        "offer_label",
+                        "merchant_id",
+                        "categ_id",
+                        "start_date",
+                        "end_date",
+                        "min_quantity",
+                        "discount",
+                    ],
+                )
+            )
+
+            web_base_url = (
+                request.env["ir.config_parameter"]
+                .sudo()
+                .get_param("web.base.url", default="https://www.golalita.com")
+            )
+
+            datas = []
+            for product in products:
+                merchant_id, merchant_name = (
+                    product["merchant_id"]
+                    if product.get("merchant_id") and len(product["merchant_id"]) == 2
+                    else (False, "")
+                )
+                category_id, category_name = (
+                    product["categ_id"]
+                    if product.get("categ_id") and len(product["categ_id"]) == 2
+                    else (False, "")
+                )
+
+                datas.append(
+                    {
+                        "product_id": product["id"],
+                        "name": product["name"],
+                        "merchant_id": merchant_id,
+                        "merchant_name": merchant_name,
+                        "category_id": category_id,
+                        "category_name": category_name,
+                        "price": product["list_price"],
+                        "barcode": product["barcode"],
+                        "default_code": product["default_code"],
+                        "max_quantity": product["max_quantity"],
+                        "min_quantity": product["min_quantity"],
+                        "discount": product["discount"],
+                        "offer_label": product["offer_label"],
+                        "disc_ribbon": product["offer_label"],
+                        "point": product["point"],
+                        "start_date": product["start_date"],
+                        "end_date": product["end_date"],
+                        "description": product["description"],
+                        "description_sale": product["description_sale"],
+                        "ribbon": "15% Discount",
+                        "image_url": product["image_url"],
+                        "merchant_logo": url_join(
+                            web_base_url,
+                            f"/go/api/image/{merchant_id}/image_1920/res.partner",
+                        ),
+                    }
+                )
+
+            return {"products": datas}
+
+        except Exception as e:
+            return {"error": f"Error occurred: {str(e)}"}
+
+    @http.route(
+        [
+            "/go/api/user/restaurant/product/lists/new",
+        ],
+        auth="public",
+        website=True,
+        methods=["POST"],
+        csrf=False,
+        type="json",
+    )
+    def get_merchant_product_list_restro_new(self, **post):
+        try:
+            data = post or self._get_json_request()
+            if "error" in data:
+                return data
+
+            current_user = self._validate_token(data)
+            if isinstance(current_user, dict):
+                return current_user
+
+            domain = []
+            if post.get("restaurant_category_ids"):
+                domain = [
+                    (
+                        "restaurant_category_ids",
+                        "in",
+                        post.get("restaurant_category_ids"),
+                    )
+                ]
+            if post.get("merchant_id"):
+                domain += [("merchant_id", "=", post.get("merchant_id"))]
+            if not post.get("merchant_id"):
+                domain += [("merchant_id.is_restro", "=", True)]
+            products = (
+                request.env["product.template"]
+                .sudo()
+                .search_read(
+                    domain,
+                    [
+                        "name",
+                        "image_url",
+                        "list_price",
+                        "default_code",
+                        "point",
+                        "max_quantity",
+                        "barcode",
+                        "description",
+                        "description_sale",
+                        "is_in_offer",
+                        "offer_label",
+                        "merchant_id",
+                        "categ_id",
+                        "start_date",
+                        "end_date",
+                        "min_quantity",
+                        "discount",
+                    ],
+                )
+            )
+            datas = []
+            web_base_url = (
+                request.env["ir.config_parameter"]
+                .sudo()
+                .get_param("web.base.url", "https://www.golalita.com")
+            )
+            for product in products:
+                product["id_restro"] = product["id"]
+                product["ribbon"] = "15% Discount"
+                product["merchant_name"] = product["merchant_id"][1]
+                product["merchant_id"] = product["merchant_id"][0]
+                product["category_id"] = product["categ_id"][0]
+                product["category_name"] = product["categ_id"][1]
+                product["disc_ribbon"] = product["offer_label"]
+                product["point"] = product["point"]
+                product["merchant_logo"] = url_join(
+                    web_base_url,
+                    "/go/api/image/{}/{}/{}".format(
+                        product["merchant_id"], "image_1920", "res.partner"
+                    ),
+                )
+                datas.append(product)
+            return datas
+        except Exception as e:
+            return {"error": "Error occurred: {}".format(str(e))}

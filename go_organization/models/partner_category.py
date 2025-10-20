@@ -22,7 +22,7 @@ class PartnerCategory(models.Model):
     # complete_name = fields.Char(string="Complete Name", compute="_compute_complete_name", store=True, index=True)
 
     # Classification
-    is_restaurant = fields.Boolean(string="Restaurant Category?")
+    is_restro = fields.Boolean(string="Restaurant Category?")
     scope = fields.Selection(
         [
             ("local", "Local"),

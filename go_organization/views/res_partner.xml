@@ -94,7 +94,7 @@
                             <field name="merchant_type" widget="radio"/>
                             <field name="merchant_rating" widget="priority"/>
                             <field name="is_hotel_business"/>
-                            <field name="is_restaurant"/>
+                            <field name="is_restro"/>
                             <field name="online_store"/>
                         </group>
                         <group>
@@ -141,7 +141,7 @@
                 </page>
 
                 <!-- Restaurant/Delivery -->
-                <page string="Restaurant / Delivery" invisible="not is_restaurant">
+                <page string="Restaurant / Delivery" invisible="not is_restro">
                     <group>
                         <group>
                             <field name="accept_delivery"/>

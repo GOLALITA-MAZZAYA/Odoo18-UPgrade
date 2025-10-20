@@ -59,7 +59,7 @@ class ResPartner(models.Model):
     )
 
     is_hotel_business = fields.Boolean(string="Hotel Business", oldname="is_hotel_type")
-    is_restaurant = fields.Boolean(string="Restaurant", oldname="is_restro")
+    is_restro = fields.Boolean(string="Restaurant", oldname="is_restro")
 
     premium_client = fields.Boolean(string="Premium Client")
     client_type = fields.Selection(
@@ -440,7 +440,7 @@ class ResPartner(models.Model):
                 rec.merchant_type = False
                 rec.merchant_rating = False
                 rec.is_hotel_business = False
-                rec.is_restaurant = False
+                rec.is_restro = False
             if rec.entity_type != "organisation":
                 rec.vip_employee_limit = 0
                 rec.standard_employee_limit = 0

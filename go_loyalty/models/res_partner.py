@@ -184,7 +184,7 @@ class ResPartner(models.Model):
     email_verified = fields.Boolean(string="Email Verified")
     whatsapp_prefill_message = fields.Text(string="WhatsApp Prefill Message")
 
-    family_member_ids = fields.One2many('res.partner', 'family_head_member_id')
+    family_member_ids = fields.One2many("res.partner", "family_head_member_id")
     pdf_attached = fields.Boolean(string="PDF Attached", oldname="x_pdf_attached")
     is_hotel_type = fields.Boolean(string="Is Hotel Type")
     kts = fields.Char(string="KTS", oldname="x_kts", help="	If Hostel belongs to KTS?")
@@ -193,7 +193,7 @@ class ResPartner(models.Model):
 
     comment = fields.Text()
     is_published = fields.Boolean(string="Is Published", default=False)
-    is_restro = fields.Boolean(string="Is Restaurant")
+    is_restro = fields.Boolean(string="Is Restaurant", oldname="x_is_restro")
     merchant_type = fields.Selection(
         [("standard", "Standard"), ("premium", "Premium")],
         default="standard",
@@ -224,11 +224,15 @@ class ResPartner(models.Model):
         string="Is Premium Merchant", oldname="x_is_premium_merchant"
     )
 
-    cc_emails_management = fields.Char(string="CC To Management", oldname="x_cc_emails_outlet")
+    cc_emails_management = fields.Char(
+        string="CC To Management", oldname="x_cc_emails_outlet"
+    )
     location_id = fields.Many2one("custom.location", oldname="x_location_id")
     has_branches = fields.Boolean(string="Has Branches", oldname="x_have_branch")
     has_offers = fields.Boolean(string="Has Offers", oldname="x_have_offers")
-    time_for_order_prepration = fields.Char(string="Time Needed for Order Prepration", oldname="x_time_for_order_prepration")
+    time_for_order_prepration = fields.Char(
+        string="Time Needed for Order Prepration", oldname="x_time_for_order_prepration"
+    )
     delivery_cost = fields.Float(string="Delivery Cost", oldname="x_delivery_cost")
 
     not_linked_ids = fields.Many2many(
@@ -244,8 +248,14 @@ class ResPartner(models.Model):
 
     qid = fields.Char(string="QID", oldname="x_qid")
 
+    restaurant_category_ids = fields.Many2many(
+        "loyalty.restaurant.category", string="Restaurant Categories"
+    )
+    description_arabic = fields.Text(string="Description (Arabic)")
+    description = fields.Text(string="Description")
+
     def _is_code_exist(self, code):
-        return code in self.code_ids.mapped('code')
+        return code in self.code_ids.mapped("code")
 
     def _is_vip(self, code):
         record = self.code_ids.filtered(lambda rec: rec.code == code)

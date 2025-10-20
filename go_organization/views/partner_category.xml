@@ -45,7 +45,7 @@
                         </group>
 
                         <group string="Classification">
-                            <field name="is_restaurant"/>
+                            <field name="is_restro"/>
                             <field name="scope" required="1"/>
                             <field name="country_ids" widget="many2many_tags"/>
                         </group>
@@ -76,7 +76,7 @@
                 <field name="name"/>
                 <!--                <field name="complete_name"/>-->
                 <filter string="Active" name="active" domain="[('active','=',True)]" help="Show active categories"/>
-                <filter string="Restaurant" name="is_restaurant" domain="[('is_restaurant','=',True)]"/>
+                <filter string="Restaurant" name="is_restaurant" domain="[('is_restro','=',True)]"/>
                 <filter string="Local" name="scope_local" domain="[('scope','=','local')]"/>
                 <filter string="Global" name="scope_global" domain="[('scope','=','global')]"/>
                 <filter string="Both" name="scope_both" domain="[('scope','=','both')]"/>
