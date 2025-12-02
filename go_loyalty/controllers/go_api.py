@@ -7,7 +7,7 @@ from werkzeug.urls import url_join
 from odoo import http, fields, _
 import logging
 
-from odoo.odoo.exceptions import AccessError, AccessDenied
+from odoo.exceptions import AccessError, AccessDenied
 
 _logger = logging.getLogger(__name__)
 
