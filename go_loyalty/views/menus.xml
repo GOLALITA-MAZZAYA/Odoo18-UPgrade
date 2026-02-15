@@ -1,0 +1,304 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+
+    <menuitem
+            id="menu_go_loyalty_root"
+            name="Loyalty"
+            groups="base.group_system"
+            web_icon="go_loyalty,static/description/loyalty.png"
+            sequence="7"
+    />
+
+    <!--    customer -->
+
+    <menuitem
+            id="loyalty_customer_root"
+            name="Loyalty Customers"
+            groups="base.group_system"
+            parent="menu_go_loyalty_root"
+            sequence="1"
+    />
+
+    <menuitem
+            id="go_customer_menu"
+            action="action_go_customer"
+            parent="loyalty_customer_root"
+            groups="base.group_system"
+            name="Customer"
+            sequence="2"
+    />
+
+    <menuitem
+            id="go_organisation_menu"
+            action="action_go_organisation"
+            parent="loyalty_customer_root"
+            groups="base.group_system"
+            name="Organisation"
+            sequence="3"
+    />
+
+    <menuitem
+            id="loyalty_customer_root"
+            name="Loyalty Customers"
+            groups="base.group_system"
+            parent="menu_go_loyalty_root"
+            sequence="1"
+    />
+
+    <menuitem id="go_merchant_main"
+              action="action_go_merchant"
+              parent="loyalty_customer_root"
+              groups="base.group_system"
+              name="Merchant"
+              sequence="4"
+    />
+
+    <menuitem
+            id="go_merchant_main_from_website"
+            action="action_go_merchant_website"
+            parent="loyalty_customer_root"
+            groups="base.group_system"
+            name="Merchant From Website"
+            sequence="5"
+    />
+
+    <menuitem
+            id="menu_merchant_enquiry"
+            action="action_merchant_enquiry_loyalty"
+            parent="loyalty_customer_root"
+            name="Merchant Enquiry"
+            groups="base.group_system"
+            sequence="6"
+    />
+
+    <menuitem
+            id="menu_customer_address"
+            action="action_user_address"
+            parent="loyalty_customer_root"
+            name="Customer Address"
+            groups="base.group_system"
+            sequence="7"
+    />
+
+
+    <!--    Restaurant   -->
+
+    <menuitem
+            id="menu_loyalty_root"
+            name="Restaurant"
+            parent="menu_go_loyalty_root"
+            sequence="15"
+    />
+
+    <menuitem id="menu_loyalty_restaurant_order"
+              name="Restaurant Orders"
+              parent="menu_loyalty_root"
+              action="action_loyalty_restaurant_order"
+              sequence="10"
+    />
+
+    <menuitem id="menu_loyalty_restaurant_category"
+              name="Restaurant Categories"
+              parent="menu_loyalty_root"
+              action="action_loyalty_restaurant_category"
+              sequence="12"/>
+
+
+    <!--    Loyalty Management -->
+
+    <menuitem
+            id="menu_loyalty_point_generator_root"
+            name="Loyalty Management"
+            parent="menu_go_loyalty_root"
+            sequence="20"
+    />
+
+    <menuitem
+            id="menu_loyalty_point_generator"
+            name="Point Generators"
+            parent="menu_loyalty_point_generator_root"
+            action="action_loyalty_point_generator"
+            sequence="1"
+    />
+
+
+    <menuitem id="menu_loyalty_point_transfer"
+              name="Point Transfers"
+              parent="menu_loyalty_point_generator_root"
+              action="action_loyalty_point_transfer"
+              sequence="2"
+    />
+
+    <menuitem id="menu_loyalty_point_sent"
+              name="Points to Send"
+              parent="menu_loyalty_point_generator_root"
+              action="action_loyalty_point_transfer_sent"
+              sequence="3"/>
+
+    <menuitem id="menu_loyalty_point_received"
+              name="Points to Receive"
+              parent="menu_loyalty_point_generator_root"
+              action="action_loyalty_point_transfer_received"
+              sequence="4"/>
+
+    <menuitem
+            id="menu_point_transaction"
+            name="Points Transactions"
+            parent="menu_loyalty_point_generator_root"
+            action="action_loyalty_point_transfer_line"
+            sequence="5"
+    />
+
+
+    <menuitem
+            id="menu_loyalty_configuration"
+            name="Configuration"
+            parent="menu_go_loyalty_root"
+            sequence="25"
+    />
+
+    <menuitem
+        id="loyalty_config_settings_menu"
+        action="loyalty_config_settings_action"
+        parent="menu_loyalty_configuration"
+        name="Settings"
+        sequence="5"
+    />
+
+
+    <menuitem id="menu_loyalty_rule"
+              name="Loyalty Rules"
+              parent="menu_loyalty_configuration"
+              action="action_loyalty_rule"
+              sequence="7"
+    />
+
+
+    <menuitem
+            id="menu_loyalty_sale"
+            name="Loyalty Sales"
+            parent="menu_loyalty_configuration"
+            action="action_loyalty_sale"
+            sequence="10"
+    />
+
+
+    <menuitem id="menu_loyalty_notification"
+              name="Loyalty Notifications"
+              parent="menu_loyalty_configuration"
+              action="action_loyalty_notification"
+              sequence="12"/>
+
+
+    <menuitem id="menu_loyalty_notification_message_root"
+              name="Notification Messages"
+              parent="menu_loyalty_configuration"
+              action="action_loyalty_notification_message"
+              sequence="13"/>
+
+    <menuitem id="menu_loyalty_notifications"
+              name="Notifications List"
+              parent="menu_loyalty_configuration"
+              action="action_loyalty_notification_list"
+              sequence="14"/>
+
+    <menuitem id="menu_loyalty_contact_us_root"
+              name="Contact Us"
+              parent="menu_loyalty_configuration"
+              action="action_loyalty_contact_us"
+              sequence="15"/>
+
+    <menuitem
+            id="action_track_list"
+            name="Track List"
+            parent="menu_loyalty_configuration"
+            action="action_track_list_loyalty"
+            sequence="16"
+    />
+
+    <menuitem
+            id="menu_advertisement_tracking_root"
+            parent="menu_loyalty_configuration"
+            name="Advertisement Tracking"
+            action="action_advertisement_tracking"
+            sequence="17"
+    />
+
+    <menuitem id="menu_merchant_branch_main"
+              name="Merchant Branches"
+              parent="menu_loyalty_configuration"
+              action="action_merchant_branch_loyalty"
+              sequence="20"/>
+
+    <menuitem id="menu_contract_matrix"
+              name="Contract Matrices"
+              parent="menu_loyalty_configuration"
+              action="action_contract_matrix"
+              sequence="21"
+    />
+
+    <menuitem
+            id="menu_notin_app_root"
+            name="Not Linked Apps"
+            parent="menu_loyalty_configuration"
+            action="action_notin_app"
+            sequence="22"
+    />
+
+
+    <menuitem
+            id="menu_terms_matrix_root"
+            name="Terms Conditions Matrix"
+            parent="menu_loyalty_configuration"
+            action="action_terms_matrix"
+            sequence="23"
+    />
+
+    <menuitem
+            id="menu_partner_category"
+            name="Partner Categories"
+            parent="menu_loyalty_configuration"
+            action="action_partner_category"
+            sequence="25"
+    />
+
+    <menuitem
+            id="menu_org_registration_code"
+            name="Codes"
+            parent="menu_loyalty_configuration"
+            action="action_org_registration_code"
+            sequence="26"
+    />
+
+    <menuitem
+            id="menu_offer_usages_history"
+            name="Offer Usages History"
+            parent="menu_loyalty_configuration"
+            action="action_offer_usages_history"
+            sequence="30"/>
+
+    <menuitem
+            id="menu_merchant_matrix"
+            name="Merchant Matrix"
+            parent="menu_loyalty_configuration"
+            action="action_merchant_matrix"
+            sequence="32"
+    />
+
+    <menuitem id="menu_merchant_banner_main"
+              name="Merchant Banners"
+              parent="menu_loyalty_configuration"
+              action="action_merchant_banner"
+              sequence="33"/>
+
+    <menuitem id="menu_custom_location_main"
+              name="Locations"
+              parent="menu_loyalty_configuration"
+              action="action_custom_location"
+              sequence="34"/>
+
+
+
+
+
+</odoo>

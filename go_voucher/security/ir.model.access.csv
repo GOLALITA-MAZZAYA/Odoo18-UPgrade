@@ -1,0 +1,6 @@
+id,name,model_id:id,group_id:id,perm_read,perm_write,perm_create,perm_unlink
+access_discount_voucher,access.discount.voucher,model_discount_voucher,base.group_user,1,1,1,1
+access_voucher_saved_user,access.voucher.saved.user,model_voucher_saved_user,base.group_user,1,1,1,1
+access_voucher_redeemed_user,access.voucher.redeemed.user,model_voucher_redeemed_user,base.group_user,1,1,1,1
+access_voucher_purchased_user,access.voucher.purchased.user,model_voucher_purchased_user,base.group_user,1,1,1,1
+access_skipcash_transaction,access.skipcash.transaction,model_skipcash_transaction,base.group_user,1,1,1,1

@@ -1,0 +1,62 @@
+<odoo>
+
+
+    <record id="view_ugo2gift_language_form" model="ir.ui.view">
+        <field name="name">ugo2gift.language.form</field>
+        <field name="model">ugo2gift.language</field>
+        <field name="arch" type="xml">
+            <form string="Language">
+                <sheet>
+                    <group>
+                        <group>
+                            <field name="name"/>
+                            <field name="lang_code"/>
+                        </group>
+                        <group>
+                            <field name="country_id"/>
+                        </group>
+                    </group>
+                </sheet>
+            </form>
+        </field>
+    </record>
+
+    <record id="view_ugo2gift_language_tree" model="ir.ui.view">
+        <field name="name">ugo2gift.language.tree</field>
+        <field name="model">ugo2gift.language</field>
+        <field name="arch" type="xml">
+            <list string="Languages">
+                <field name="name"/>
+                <field name="lang_code"/>
+                <field name="country_id"/>
+            </list>
+        </field>
+    </record>
+
+    <record id="view_ugo2gift_language_search" model="ir.ui.view">
+        <field name="name">ugo2gift.language.search</field>
+        <field name="model">ugo2gift.language</field>
+        <field name="arch" type="xml">
+            <search string="Search Language">
+                <field name="name"/>
+                <field name="lang_code"/>
+                <field name="country_id"/>
+
+                <filter string="Group by Country"
+                        name="group_by_country"
+                        context="{'group_by': 'country_id'}"/>
+
+            </search>
+        </field>
+    </record>
+
+
+    <record id="action_ugo2gift_language" model="ir.actions.act_window">
+        <field name="name">Languages</field>
+        <field name="res_model">ugo2gift.language</field>
+        <field name="view_mode">list,form</field>
+        <field name="search_view_id" ref="view_ugo2gift_language_search"/>
+    </record>
+
+
+</odoo>

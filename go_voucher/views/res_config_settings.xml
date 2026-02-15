@@ -1,0 +1,46 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<odoo>
+
+    <record id="res_config_settings_view_form_inherit_skipcash_auth" model="ir.ui.view">
+        <field name="name">res.config.settings.giftcard.skipcash.auth</field>
+        <field name="model">res.config.settings</field>
+        <field name="inherit_id" ref="go_giftcard.res_config_settings_view_form_inherit_giftcard"/>
+        <field name="arch" type="xml">
+
+            <xpath expr="//div[@id='skipcash_merchant_password_setting']" position="after">
+                <div class="row mt16" id="skipcash_authorization_key_setting">
+                    <div class="col-12">
+                        <label for="skipcash_authorization_key" class="o_light_label"
+                               string="Authorization Key"/>
+                        <field name="skipcash_authorization_key"
+                               placeholder="Enter SkipCash Authorization Key"
+                               class="w-100" password="True"/>
+                    </div>
+                </div>
+            </xpath>
+
+
+            <xpath expr="//app[@name='go_giftcard']" position="inside">
+                <block title="Voucher Email Configuration" name="voucher_email_settings_container">
+                    <setting id="voucher_email_setting" string="Voucher Email Settings"
+                             help="Configure the sender email for voucher notifications.">
+
+                        <div class="row mt16">
+                            <div class="col-12">
+                                <label for="voucher_email_from" class="o_light_label"
+                                       string="Voucher Notification Email"/>
+                                <field name="voucher_email_from"
+                                       placeholder="e.g. vouchers@yourcompany.com"
+                                       class="w-100"/>
+                            </div>
+                        </div>
+                    </setting>
+                </block>
+            </xpath>
+
+
+
+        </field>
+    </record>
+
+</odoo>

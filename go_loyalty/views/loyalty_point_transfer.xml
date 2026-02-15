@@ -1,0 +1,191 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+
+    <record id="view_loyalty_point_transfer_form" model="ir.ui.view">
+        <field name="name">loyalty.point.transfer.form</field>
+        <field name="model">loyalty.point.transfer</field>
+        <field name="arch" type="xml">
+            <form string="Loyalty Point Transfer">
+                <header>
+                    <button name="action_send_approval_request"
+                            groups="base.group_system"
+                            type="object"
+                            string="Send Request"
+                            invisible="state != 'pending'"
+                            class="oe_highlight"/>
+
+                    <button name="action_transfer"
+                            groups="base.group_system"
+                            type="object"
+                            string="Transfer Points"
+                            invisible="state != 'pending'"
+                            class="oe_highlight"/>
+
+                    <button name="action_cancel"
+                            groups="base.group_system"
+                            type="object"
+                            string="Cancel"
+                            invisible="state != 'pending'"
+                            class="oe_highlight"/>
+
+                    <field name="state" widget="statusbar" statusbar_visible="pending,transfer,cancel"/>
+                </header>
+                <sheet>
+                    <div class="oe_title">
+                        <h1>
+                            <field name="name" readonly="1"/>
+                        </h1>
+                    </div>
+
+                    <group>
+                        <group string="Participants">
+                            <field name="from_id" readonly="state == 'transfer'"/>
+                            <field name="to_id" readonly="state == 'transfer'"/>
+                            <field name="date" readonly="state == 'transfer'"/>
+                            <field name="entity_type"/>
+                        </group>
+                        <group string="Points Info">
+                            <field name="points" readonly="state == 'transfer'"/>
+                            <field name="available_points_from"/>
+                            <field name="available_points_to"/>
+                            <!--                            <field name="rule_id" readonly="state == 'transfer'"/>-->
+                        </group>
+                    </group>
+
+                    <group>
+                        <group string="Transaction">
+                            <field name="transaction_type"/>
+                            <field name="go_transaction" readonly="state == 'transfer'"/>
+                        </group>
+                        <group string="Status">
+                            <field name="user_id"/>
+                        </group>
+                    </group>
+
+                    <notebook>
+                        <page string="Transactions">
+                            <field name="line_ids">
+                                <list editable="bottom">
+                                    <field name="name"/>
+                                    <field name="date"/>
+                                    <field name="credit"/>
+                                    <field name="debit"/>
+                                    <field name="balance"/>
+                                </list>
+                                <form string="Transfer Line Details">
+                                    <group>
+                                        <field name="name"/>
+                                        <field name="credit"/>
+                                        <field name="debit"/>
+                                        <field name="balance" readonly="1"/>
+                                        <field name="partner_id"/>
+                                        <field name="state"/>
+                                        <field name="date"/>
+                                    </group>
+                                </form>
+                            </field>
+                        </page>
+                        <page string="Note">
+                            <field name="note"/>
+                        </page>
+                    </notebook>
+                </sheet>
+                <chatter/>
+            </form>
+        </field>
+    </record>
+
+    <record id="view_loyalty_point_transfer_tree" model="ir.ui.view">
+        <field name="name">loyalty.point.transfer.tree</field>
+        <field name="model">loyalty.point.transfer</field>
+        <field name="arch" type="xml">
+            <list string="Loyalty Point Transfers">
+                <field name="name"/>
+                <field name="date"/>
+                <field name="from_id"/>
+                <field name="to_id"/>
+                <field name="points"/>
+                <field name="state"/>
+                <field name="state" widget="badge"
+                       decoration-info="state == 'pending'"
+                       decoration-success="state == 'transfer'"
+                       decoration-danger="state == 'cancel'"/>
+                <field name="approval_status" widget="badge"
+                       decoration-info="approval_status == 'sent'"
+                       decoration-success="approval_status == 'approved'"
+                       decoration-danger="approval_status == 'reject'"/>
+            </list>
+        </field>
+    </record>
+
+
+    <record id="view_loyalty_point_transfer_search" model="ir.ui.view">
+        <field name="name">loyalty.point.transfer.search</field>
+        <field name="model">loyalty.point.transfer</field>
+        <field name="arch" type="xml">
+            <search string="Loyalty Point Transfers">
+                <field name="name"/>
+                <field name="from_id"/>
+                <field name="to_id"/>
+                <field name="state"/>
+                <field name="approval_status"/>
+
+
+                <filter string="By Reference" name="filter_by_name" domain="[]" context="{'group_by':'name'}"/>
+                <filter string="By Sender" name="filter_by_from_id" domain="[]" context="{'group_by':'from_id'}"/>
+                <filter string="By Receiver" name="filter_by_to_id" domain="[]" context="{'group_by':'to_id'}"/>
+                <filter string="Pending" name="filter_pending" domain="[('state','=','pending')]"/>
+                <filter string="Transferred" name="filter_transferred" domain="[('state','=','transfer')]"/>
+                <filter string="Cancelled" name="filter_cancelled" domain="[('state','=','cancel')]"/>
+                <filter string="Sent for Approval" name="filter_sent" domain="[('approval_status','=','sent')]"/>
+                <filter string="Approved" name="filter_approved" domain="[('approval_status','=','approved')]"/>
+                <filter string="Rejected" name="filter_rejected" domain="[('approval_status','=','reject')]"/>
+            </search>
+        </field>
+    </record>
+
+
+    <record id="action_loyalty_point_transfer" model="ir.actions.act_window">
+        <field name="name">Loyalty Point Transfers</field>
+        <field name="res_model">loyalty.point.transfer</field>
+        <field name="view_mode">list,form</field>
+        <field name="search_view_id" ref="view_loyalty_point_transfer_search"/>
+        <field name="help" type="html">
+            <p class="o_view_nocontent_smiling_face">
+                Create and manage loyalty point transfers here.
+            </p>
+        </field>
+    </record>
+
+    <record id="action_loyalty_point_transfer_sent" model="ir.actions.act_window">
+        <field name="name">Loyalty Point Transfers - Sent</field>
+        <field name="res_model">loyalty.point.transfer</field>
+        <field name="view_mode">list,form</field>
+        <field name="context">{'default_transaction_type': 'sent'}</field>
+        <field name="search_view_id" ref="view_loyalty_point_transfer_search"/>
+        <field name="domain">[('transaction_type','=','sent')]</field>
+        <field name="help" type="html">
+            <p class="o_view_nocontent_smiling_face">
+                View all loyalty point transfers that have been sent.
+            </p>
+        </field>
+    </record>
+
+
+
+    <record id="action_loyalty_point_transfer_received" model="ir.actions.act_window">
+        <field name="name">Loyalty Point Transfers - Received</field>
+        <field name="res_model">loyalty.point.transfer</field>
+        <field name="view_mode">list,form</field>
+        <field name="search_view_id" ref="view_loyalty_point_transfer_search"/>
+        <field name="context">{'default_transaction_type': 'receive'}</field>
+        <field name="domain">[('transaction_type','=','receive')]</field>
+        <field name="help" type="html">
+            <p class="o_view_nocontent_smiling_face">
+                View all loyalty point transfers that have been received.
+            </p>
+        </field>
+    </record>
+
+
+</odoo>

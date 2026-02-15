@@ -1,0 +1,139 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+
+    <record id="view_loyalty_rule_form" model="ir.ui.view">
+        <field name="name">loyalty.rule.form</field>
+        <field name="model">loyalty.rule</field>
+        <field name="arch" type="xml">
+            <form string="Loyalty Rule">
+                <sheet>
+                    <div class="oe_title">
+                        <h1>
+                            <field name="name" readonly="1"/>
+                        </h1>
+                    </div>
+
+                    <group>
+                        <group>
+                            <field name="partner_id"/>
+                            <field name="entity"/>
+                            <field name="date"/>
+                        </group>
+                    </group>
+
+                    <group>
+                        <group string="Reward Configuration">
+                            <field name="reward_point"/>
+                            <field name="reward_amount"/>
+                            <field name="in_point_per_currency"/>
+                        </group>
+
+                        <group string="Redemption Configuration">
+                            <field name="redeem_point"/>
+                            <field name="redeem_amount"/>
+                            <field name="out_point_per_currency"/>
+                        </group>
+
+                    </group>
+
+                    <notebook>
+                        <page string="Merchant Rules">
+                            <field name="merchant_rule_ids" readonly="1">
+                                <list string="Merchant Rules">
+                                    <field name="merchant_id"/>
+                                    <field name="entity"/>
+                                    <field name="in_point_per_currency"/>
+                                    <field name="out_point_per_currency"/>
+                                </list>
+                                <form string="Merchant Rule">
+                                    <group>
+                                        <field name="merchant_id"/>
+                                        <field name="entity"/>
+                                        <field name="reward_point"/>
+                                        <field name="reward_amount"/>
+                                        <field name="redeem_point"/>
+                                        <field name="redeem_amount"/>
+                                        <field name="in_point_per_currency"/>
+                                        <field name="out_point_per_currency"/>
+                                    </group>
+                                </form>
+                            </field>
+                        </page>
+
+                        <page string="Extra Discount Lines">
+                            <field name="rule_line_ids">
+                                <list string="Discount Lines" editable="bottom">
+                                    <field name="merchant_id"/>
+                                    <field name="discount"/>
+                                </list>
+                                <form string="Discount Line">
+                                    <group>
+                                        <field name="merchant_id"/>
+                                        <field name="discount"/>
+                                    </group>
+                                </form>
+                            </field>
+                        </page>
+                    </notebook>
+                </sheet>
+                <chatter/>
+            </form>
+        </field>
+    </record>
+
+
+    <record id="view_loyalty_rule_tree" model="ir.ui.view">
+        <field name="name">loyalty.rule.tree</field>
+        <field name="model">loyalty.rule</field>
+        <field name="arch" type="xml">
+            <list string="Loyalty Rules">
+                <field name="name"/>
+                <field name="partner_id"/>
+                <field name="entity"/>
+                <field name="reward_point"/>
+                <field name="reward_amount"/>
+                <field name="redeem_point"/>
+                <field name="redeem_amount"/>
+            </list>
+        </field>
+    </record>
+
+    <record id="view_loyalty_rule_search" model="ir.ui.view">
+        <field name="name">loyalty.rule.search</field>
+        <field name="model">loyalty.rule</field>
+        <field name="arch" type="xml">
+            <search string="Loyalty Rules">
+
+                <field name="name" string="Rule Name"/>
+                <field name="partner_id" string="Associated Partner"/>
+                <field name="entity" string="Entity Type"/>
+
+
+                <filter name="merchant" string="Merchant" domain="[('entity','=','merchant')]"/>
+                <filter name="organisation" string="Organisation" domain="[('entity','=','organisation')]"/>
+                <filter name="employee_vip" string="VIP Employee" domain="[('entity','=','employee_vip')]"/>
+                <filter name="employee_standard" string="Standard Employee"
+                        domain="[('entity','=','employee_standard')]"/>
+
+
+                <group expand="0" string="Group By">
+                    <filter name="group_entity" string="Entity Type" domain="[]" context="{'group_by':'entity'}"/>
+                    <filter name="group_partner" string="Associated Partner" domain="[]"
+                            context="{'group_by':'partner_id'}"/>
+                    <filter name="group_date" string="Date" domain="[]" context="{'group_by':'date'}"/>
+                </group>
+            </search>
+        </field>
+    </record>
+
+
+    <record id="action_loyalty_rule" model="ir.actions.act_window">
+        <field name="name">Loyalty Rules</field>
+        <field name="res_model">loyalty.rule</field>
+        <field name="view_mode">list,form</field>
+        <field name="view_id" ref="view_loyalty_rule_tree"/>
+        <field name="search_view_id" ref="view_loyalty_rule_search"/>
+    </record>
+
+
+</odoo>

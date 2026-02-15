@@ -1,0 +1,28 @@
+# noinspection PyStatementEffect
+{
+    "name": "Go GiftCard",
+    "version": "18.0.0.0.0",
+    "category": "Tools",
+    "sequence": 500,
+    "summary": "End-to-end solution to sell and manage digital gift cards in Odoo",
+    "license": "OPL-1",
+    "author": "Dhiren Narola",
+    "depends": ["base", "mail", "product"],
+    "data": [
+        "security/ir.model.access.csv",
+        "data/gift_card_sequence.xml",
+        "views/gift_card.xml",
+        "views/ugo2gift_brand.xml",
+        "views/ugo2gift_category.xml",
+        "views/ugo2gift_denomination.xml",
+        "views/ugo2gift_image.xml",
+        "views/res_config_settings.xml",
+        "views/ugo2gift_country.xml",
+        "views/ugo2gift_language.xml",
+        "views/menuitems.xml",
+    ],
+    "python_dependencies": ["httpsig"],
+    "installable": True,
+    "auto_install": False,
+    "application": True,
+}

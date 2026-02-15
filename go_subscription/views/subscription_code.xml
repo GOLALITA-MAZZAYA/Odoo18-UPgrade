@@ -1,0 +1,83 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+
+    <record id="view_subscription_code_form" model="ir.ui.view">
+        <field name="name">subscription.code.form</field>
+        <field name="model">subscription.code</field>
+        <field name="arch" type="xml">
+            <form string="Subscription Code">
+                <sheet>
+                    <group string="General Information">
+                        <group>
+                            <field name="name"/>
+                            <field name="plan_id"/>
+                            <field name="merchant_id"/>
+                        </group>
+                        <group>
+                            <field name="expiry_date"/>
+                            <field name="is_redeemed"/>
+                        </group>
+                    </group>
+
+                    <group string="Redemption Details">
+                        <group>
+                            <field name="redeemed_by" />
+                            <field name="redeemed_on" />
+                        </group>
+                    </group>
+                </sheet>
+                <chatter/>
+            </form>
+        </field>
+    </record>
+
+
+    <record id="view_subscription_code_tree" model="ir.ui.view">
+        <field name="name">subscription.code.tree</field>
+        <field name="model">subscription.code</field>
+        <field name="arch" type="xml">
+            <list string="Subscription Codes" create="true" edit="true">
+                <field name="name"/>
+                <field name="plan_id"/>
+                <field name="merchant_id"/>
+                <field name="expiry_date"/>
+                <field name="is_redeemed"/>
+                <field name="redeemed_by"/>
+                <field name="redeemed_on"/>
+            </list>
+        </field>
+    </record>
+
+
+    <record id="view_subscription_code_search" model="ir.ui.view">
+        <field name="name">subscription.code.search</field>
+        <field name="model">subscription.code</field>
+        <field name="arch" type="xml">
+            <search string="Search Subscription Codes">
+                <field name="name"/>
+                <field name="plan_id"/>
+                <field name="merchant_id"/>
+                <field name="is_redeemed"/>
+
+                <filter name="redeemed" string="Redeemed Codes" domain="[('is_redeemed','=',True)]"/>
+                <filter name="not_redeemed" string="Available Codes" domain="[('is_redeemed','=',False)]"/>
+            </search>
+        </field>
+    </record>
+
+
+
+    <record id="action_subscription_code" model="ir.actions.act_window">
+        <field name="name">Subscription Codes</field>
+        <field name="res_model">subscription.code</field>
+        <field name="view_mode">list,form</field>
+        <field name="search_view_id" ref="view_subscription_code_search"/>
+        <field name="help" type="html">
+            <p class="o_view_nocontent_smiling_face">
+                Create your first Subscription Code
+            </p>
+        </field>
+    </record>
+
+
+</odoo>

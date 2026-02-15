@@ -1,0 +1,125 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+
+    <record id="view_partner_form_inherit_loyalty" model="ir.ui.view">
+        <field name="name">res.partner.form.inherit.partner.enhanced</field>
+        <field name="model">res.partner</field>
+        <field name="inherit_id" ref="base.view_partner_form"/>
+        <field name="arch" type="xml">
+
+            <xpath expr="//field[@name='vat']" position="after">
+                <field name="entity_type" widget="radio"/>
+                <field name="employee_type" widget="radio"/>
+                <field name="points"/>
+                <field name="from_website"/>
+                <field name="is_published"/>
+                <field name="merchant_type"/>
+                <field name="partner_category_id"/>
+                <field name="is_published"/>
+                <field name="contract_copy" filename="contract_filename"/>
+                <field name="contract_filename" invisible="1"/>
+                <field name="company_registartion" filename="company_registartion_filename"/>
+                <field name="company_registartion_filename" invisible="1"/>
+            </xpath>
+
+            <xpath expr="//page[@name='contact_addresses']" position="attributes">
+                <attribute name="groups">base.group_no_one</attribute>
+            </xpath>
+
+            <xpath expr="//page[@name='sales_purchases']" position="attributes">
+                <attribute name="groups">base.group_no_one</attribute>
+            </xpath>
+
+            <xpath expr="//page[@name='internal_notes']" position="attributes">
+                <attribute name="groups">base.group_no_one</attribute>
+            </xpath>
+
+        </field>
+    </record>
+
+
+    <record id="view_partner_form_inherit_loyalty_accounting" model="ir.ui.view">
+        <field name="name">res.partner.form.inherit.partner.enhanced.accounting</field>
+        <field name="model">res.partner</field>
+        <field name="inherit_id" ref="account.view_partner_property_form"/>
+        <field name="arch" type="xml">
+
+            <xpath expr="//page[@name='accounting']" position="attributes">
+                <attribute name="groups">base.group_no_one</attribute>
+            </xpath>
+
+        </field>
+    </record>
+
+
+    <record id="action_go_customer" model="ir.actions.act_window">
+        <field name="name">Customers</field>
+        <field name="type">ir.actions.act_window</field>
+        <field name="res_model">res.partner</field>
+        <field name="domain">[('entity_type', '=', False)]</field>
+        <field name="view_mode">kanban,list,form,activity</field>
+        <field name="search_view_id" ref="base.view_res_partner_filter"/>
+        <field name="context">{'default_is_company': True}</field>
+        <field name="help" type="html">
+            <p class="o_view_nocontent_smiling_face">
+                No customers yet
+            </p>
+            <p>
+                Add a new customer to keep your contacts organized.
+            </p>
+        </field>
+    </record>
+
+
+    <record id="action_go_organisation" model="ir.actions.act_window">
+        <field name="name">Organisation</field>
+        <field name="type">ir.actions.act_window</field>
+        <field name="res_model">res.partner</field>
+        <field name="view_mode">kanban,list,form,activity</field>
+        <field name="search_view_id" ref="base.view_res_partner_filter"/>
+        <field name="domain">[('entity_type', '=', 'organisation')]</field>
+        <field name="context">{'default_entity_type': 'organisation'}</field>
+        <field name="help" type="html">
+            <p class="o_view_nocontent_smiling_face">
+                Create a new organisation
+            </p>
+        </field>
+    </record>
+
+
+    <record id="action_go_merchant" model="ir.actions.act_window">
+        <field name="name">Merchant</field>
+        <field name="type">ir.actions.act_window</field>
+        <field name="res_model">res.partner</field>
+        <field name="view_mode">kanban,list,form,activity</field>
+        <field name="search_view_id" ref="base.view_res_partner_filter"/>
+        <field name="domain">[('entity_type', '=', 'merchant')]</field>
+        <field name="context">{'default_entity_type': 'merchant'}</field>
+        <field name="help" type="html">
+            <p class="o_view_nocontent_smiling_face">
+                Create a new merchant
+            </p>
+        </field>
+    </record>
+
+
+    <record id="action_go_merchant_website" model="ir.actions.act_window">
+        <field name="name">Merchants from Website</field>
+        <field name="type">ir.actions.act_window</field>
+        <field name="res_model">res.partner</field>
+        <field name="view_mode">kanban,list,form,activity</field>
+        <field name="search_view_id" ref="base.view_res_partner_filter"/>
+        <field name="domain">[('entity_type', '=', 'merchant'), ('from_website', '=', True)]</field>
+        <field name="context">{'default_entity_type': 'merchant','default_from_website': True}</field>
+        <field name="help" type="html">
+            <p class="o_view_nocontent_smiling_face">
+                No merchants from website yet
+            </p>
+            <p>
+                Add a merchant created through the website to keep them organized.
+            </p>
+        </field>
+    </record>
+
+
+</odoo>

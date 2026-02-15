@@ -1,0 +1,98 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+
+    <record id="view_track_list_form" model="ir.ui.view">
+        <field name="name">track.list.form</field>
+        <field name="model">track.list</field>
+        <field name="arch" type="xml">
+            <form string="Customer Track">
+                <sheet>
+                    <group>
+                        <group string="Customer Information">
+                            <field name="customer_id"/>
+                            <field name="customer_name"/>
+                            <field name="customer_phone"/>
+                            <field name="customer_email"/>
+                        </group>
+                        <group string="Tracking Information">
+                            <field name="track_type"/>
+                            <field name="track_value"/>
+                            <field name="track_date_time"/>
+                        </group>
+                    </group>
+
+                    <group>
+                        <group string="Product &amp; Merchant">
+                            <field name="product_id"/>
+                            <field name="merchant_id"/>
+                            <field name="company_id"/>
+                        </group>
+                    </group>
+
+                </sheet>
+            </form>
+        </field>
+    </record>
+
+    <record id="view_track_list_tree" model="ir.ui.view">
+        <field name="name">track.list.tree</field>
+        <field name="model">track.list</field>
+        <field name="arch" type="xml">
+            <list string="Customer Track List">
+                <field name="customer_id"/>
+                <field name="customer_name"/>
+                <field name="customer_phone"/>
+                <field name="customer_email"/>
+                <field name="track_type"/>
+                <field name="track_value"/>
+                <field name="track_date_time"/>
+                <field name="product_id"/>
+                <field name="merchant_id"/>
+                <field name="company_id"/>
+            </list>
+        </field>
+    </record>
+
+    <record id="view_track_list_search" model="ir.ui.view">
+        <field name="name">track.list.search</field>
+        <field name="model">track.list</field>
+        <field name="arch" type="xml">
+            <search string="Track List Search">
+
+                <field name="customer_name" string="Customer Name"/>
+                <field name="customer_phone" string="Phone"/>
+                <field name="customer_email" string="Email"/>
+                <field name="track_type" string="Track Type"/>
+                <field name="track_value" string="Track Value"/>
+                <field name="product_id" string="Product"/>
+                <field name="merchant_id" string="Merchant"/>
+                <field name="company_id" string="Company"/>
+
+                <filter name="filter_with_customer" string="With Customer" domain="[('customer_id','!=',False)]"/>
+                <filter name="filter_with_merchant" string="With Merchant" domain="[('merchant_id','!=',False)]"/>
+                <filter name="filter_with_product" string="With Product" domain="[('product_id','!=',False)]"/>
+
+                <group expand="1" string="Group By">
+                    <filter name="group_by_customer" string="Customer" context="{'group_by':'customer_id'}"/>
+                    <filter name="group_by_merchant" string="Merchant" context="{'group_by':'merchant_id'}"/>
+                    <filter name="group_by_product" string="Product" context="{'group_by':'product_id'}"/>
+                    <filter name="group_by_company" string="Company" context="{'group_by':'company_id'}"/>
+                </group>
+            </search>
+        </field>
+    </record>
+
+
+    <record id="action_track_list_loyalty" model="ir.actions.act_window">
+        <field name="name">Customer Track List</field>
+        <field name="res_model">track.list</field>
+        <field name="view_mode">list,form</field>
+        <field name="help" type="html">
+            <p class="o_view_nocontent_smiling_face">
+                Create your first tracking record
+            </p>
+        </field>
+    </record>
+
+
+</odoo>

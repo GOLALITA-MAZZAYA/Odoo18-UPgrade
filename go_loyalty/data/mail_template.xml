@@ -1,0 +1,61 @@
+<?xml version="1.0" encoding="utf-8"?>
+
+<odoo>
+
+    <data>
+        <record id="mail_template_golalita_promocode" model="mail.template">
+            <field name="name">Golalita - Promocode</field>
+            <field name="model_id" ref="model_track_list"/>
+            <field name="subject">Golalita !! Your Promocode - ${object.track_value}!</field>
+            <field name="email_from">Golalita APP &lt;support@golalita.com&gt;</field>
+            <field name="email_to">{{object.customer_email}}"</field>
+            <field name="lang">{{object.lang or 'en_US'}}</field>
+            <field name="body_html">
+                <![CDATA[
+<table style="border-collapse:collapse;padding-top:16px;background-color: #F1F1F1; font-family:Verdana, Arial,sans-serif; color: #454748; width: 100%;" cellspacing="0" cellpadding="0" border="0">
+<tbody>
+<tr><td align="center">
+<table style="border-collapse:collapse;padding:16px;background-color: white; width: 590px;" cellspacing="0" cellpadding="0" border="0">
+<tbody>
+<tr>
+    <td align="center">
+        <h2 style="font-size:20px;font-weight:bold;">{{object.customer_name}}</h2>
+        <hr style="border-top:1px solid #ccc; margin:16px 0;" width="100%">
+        <h3 style="color:#464646;">Dear Customer,</h3>
+        <p style="font-size:18px;color:#797979;text-align:justify;">
+            Congratulations !! You have a discounted promo code.
+        </p>
+        <p style="font-size:18px;color:#797979;text-align:justify;">
+            Kindly use the below code to avail the discount:
+        </p>
+        <p style="text-align:center;">
+            <button type="button" style="border:1px solid #28a745;background-color:#28a745;color:#fff;padding:6px 10px;font-size:13px;">
+                Promo Code: {{object.track_value}}
+            </button>
+        </p>
+        <p style="font-size:18px;">Enjoy Shopping !!</p>
+        <p style="font-size:9px; color:#939292; text-align:center;">&copy; 2025 All Rights Reserved</p>
+        <p style="text-align:center;">
+            <a href="{{object.company_id.social_facebook}}" style="text-decoration:none;margin:0 5px;">
+                <img src="/web_editor/font_to_img/61594/rgb(100,89,116)/13" alt="Facebook" width="16" height="16" style="vertical-align:middle;">
+            </a>
+            <a href="{{object.company_id.social_linkedin}}" style="text-decoration:none;margin:0 5px;">
+                <img src="/web_editor/font_to_img/61665/rgb(100,89,116)/13" alt="LinkedIn" width="16" height="16" style="vertical-align:middle;">
+            </a>
+            <a href="{{object.company_id.social_twitter}}" style="text-decoration:none;margin:0 5px;">
+                <img src="/web_editor/font_to_img/61593/rgb(100,89,116)/13" alt="Twitter" width="16" height="16" style="vertical-align:middle;">
+            </a>
+        </p>
+    </td>
+</tr>
+</tbody>
+</table>
+</td></tr>
+</tbody>
+</table>
+            ]]>
+            </field>
+        </record>
+
+    </data>
+</odoo>

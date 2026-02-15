@@ -4,7 +4,6 @@ from . import merchant_branch
 from . import notin_app
 from . import partner_category
 from . import res_country
-from . import user_address
-
-
+from . import advertisement_banner
+from . import res_company
 

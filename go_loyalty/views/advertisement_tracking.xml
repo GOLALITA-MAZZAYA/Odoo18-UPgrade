@@ -1,0 +1,73 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+
+    <record id="view_advertisement_tracking_form" model="ir.ui.view">
+        <field name="name">advertisement.tracking.form</field>
+        <field name="model">advertisement.tracking</field>
+        <field name="arch" type="xml">
+            <form string="Advertisement Tracking">
+                <sheet>
+                    <group>
+                        <group string="Customer Information">
+                            <field name="partner_id"/>
+                            <field name="customer_name"/>
+                            <field name="email"/>
+                            <field name="phone"/>
+                        </group>
+                        <group string="Tracking Details">
+                            <field name="tracking_code"/>
+                            <field name="date"/>
+                        </group>
+                    </group>
+                </sheet>
+            </form>
+        </field>
+    </record>
+
+
+    <record id="view_advertisement_tracking_tree" model="ir.ui.view">
+        <field name="name">advertisement.tracking.tree</field>
+        <field name="model">advertisement.tracking</field>
+        <field name="arch" type="xml">
+            <list string="Advertisement Tracking List">
+                <field name="tracking_code"/>
+                <field name="partner_id"/>
+                <field name="customer_name"/>
+                <field name="email"/>
+                <field name="phone"/>
+                <field name="date"/>
+            </list>
+        </field>
+    </record>
+
+    <record id="view_advertisement_tracking_search" model="ir.ui.view">
+        <field name="name">advertisement.tracking.search</field>
+        <field name="model">advertisement.tracking</field>
+        <field name="arch" type="xml">
+            <search string="Search Advertisement Tracking">
+                <field name="tracking_code" string="Tracking Code"/>
+                <field name="partner_id" string="Customer"/>
+                <field name="email" string="Email"/>
+                <field name="phone" string="Phone"/>
+
+                <group expand="1" string="Group By">
+                    <filter name="group_by_customer" string="Customer" context="{'group_by':'partner_id'}"/>
+                </group>
+            </search>
+        </field>
+    </record>
+
+
+    <record id="action_advertisement_tracking" model="ir.actions.act_window">
+        <field name="name">Advertisement Tracking</field>
+        <field name="res_model">advertisement.tracking</field>
+        <field name="view_mode">list,form</field>
+        <field name="help" type="html">
+            <p class="o_view_nocontent_smiling_face">
+                Create your first Advertisement Tracking Record
+            </p>
+        </field>
+    </record>
+
+
+</odoo>

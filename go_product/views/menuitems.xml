@@ -1,0 +1,31 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+
+    <!--    sale app-->
+
+    <menuitem
+            id="menu_product_offer_sale"
+            action="go_product.product_template_action_sales"
+            parent="sale.product_menu_catalog"
+            name="Offers"
+            sequence="31"
+    />
+
+
+    <menuitem
+            id="menu_product_sticker_sale"
+            action="go_product.action_product_sticker"
+            parent="sale.product_menu_catalog"
+            name="Product Sticker"
+            sequence="32"
+    />
+
+    <menuitem
+            id="menu_product_label_sale"
+            action="go_product.action_product_label"
+            parent="sale.product_menu_catalog"
+            name="Product Label"
+            sequence="33"
+    />
+
+</odoo>

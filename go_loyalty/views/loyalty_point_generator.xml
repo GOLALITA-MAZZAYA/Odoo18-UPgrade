@@ -1,0 +1,128 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+
+    <record id="view_loyalty_point_generator_form" model="ir.ui.view">
+        <field name="name">loyalty.point.generator.form</field>
+        <field name="model">loyalty.point.generator</field>
+        <field name="arch" type="xml">
+            <form string="Loyalty Point Generator">
+                <header>
+                    <button string="Approve" type="object" name="action_approve"
+                            class="btn-primary"
+                            invisible="state != 'pending'"
+                    />
+                    <button string="Reject" type="object" name="action_reject"
+                            class="btn-warning"
+                            invisible="state != 'pending'"
+                    />
+                    <field name="state" widget="statusbar" statusbar_visible="pending,approved,rejected"/>
+                </header>
+                <sheet>
+                    <div class="oe_title">
+                        <h1>
+                            <field name="name"
+                                   placeholder="Enter reference for this transaction"
+                            />
+                        </h1>
+                    </div>
+                    <group>
+                        <group string="Basic Information">
+                            <field name="date"/>
+                            <field name="points"/>
+                        </group>
+                        <group string="Responsible &amp; Platform">
+                            <field name="platform_id"/>
+                            <field name="user_id"/>
+                        </group>
+                    </group>
+
+                    <notebook>
+                        <page string="Transactions">
+                            <field name="line_ids">
+                                <list editable="bottom">
+                                    <field name="name"/>
+                                    <field name="date"/>
+                                    <field name="credit"/>
+                                    <field name="debit"/>
+                                    <field name="balance"/>
+                                </list>
+                                <form string="Transfer Line Details">
+                                    <group>
+                                        <field name="name"/>
+                                        <field name="credit"/>
+                                        <field name="debit"/>
+                                        <field name="balance" readonly="1"/>
+                                        <field name="partner_id"/>
+                                        <field name="state"/>
+                                        <field name="date"/>
+                                    </group>
+                                </form>
+                            </field>
+                        </page>
+                        <page string="Note">
+                            <field name="note"/>
+                        </page>
+                    </notebook>
+                </sheet>
+                <chatter/>
+            </form>
+        </field>
+    </record>
+
+
+    <record id="view_loyalty_point_generator_tree" model="ir.ui.view">
+        <field name="name">loyalty.point.generator.tree</field>
+        <field name="model">loyalty.point.generator</field>
+        <field name="arch" type="xml">
+            <list string="Loyalty Point Generators">
+                <field name="name"/>
+                <field name="date"/>
+                <field name="points"/>
+                <field name="platform_id"/>
+                <field name="user_id"/>
+                <field name="state"/>
+            </list>
+        </field>
+    </record>
+
+
+    <record id="view_loyalty_point_generator_search" model="ir.ui.view">
+        <field name="name">loyalty.point.generator.search</field>
+        <field name="model">loyalty.point.generator</field>
+        <field name="arch" type="xml">
+            <search string="Loyalty Point Generator">
+                <field name="name"/>
+                <field name="platform_id"/>
+                <field name="user_id"/>
+                <field name="state"/>
+                <field name="date"/>
+
+                <filter name="filter_pending" string="Pending" domain="[('state','=','pending')]"/>
+                <filter name="filter_approved" string="Approved" domain="[('state','=','approved')]"/>
+                <filter name="filter_rejected" string="Rejected" domain="[('state','=','rejected')]"/>
+
+                <group expand="0" string="Group By">
+                    <filter name="group_by_state" string="By Status" context="{'group_by':'state'}"/>
+                    <filter name="group_by_platform" string="By Platform" context="{'group_by':'platform_id'}"/>
+                    <filter name="group_by_user" string="By Responsible User" context="{'group_by':'user_id'}"/>
+                    <filter name="group_by_date" string="By Date" context="{'group_by':'date'}"/>
+                </group>
+
+            </search>
+        </field>
+    </record>
+
+
+    <record id="action_loyalty_point_generator" model="ir.actions.act_window">
+        <field name="name">Loyalty Point Generators</field>
+        <field name="res_model">loyalty.point.generator</field>
+        <field name="view_mode">list,form</field>
+        <field name="help" type="html">
+            <p class="o_view_nocontent_smiling_face">
+                Create your first loyalty point generation record.
+            </p>
+        </field>
+    </record>
+
+
+</odoo>

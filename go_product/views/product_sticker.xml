@@ -1,0 +1,104 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+
+    <record id="view_product_sticker_tree" model="ir.ui.view">
+        <field name="name">product.sticker.tree</field>
+        <field name="model">product.sticker</field>
+        <field name="arch" type="xml">
+            <list string="Product Stickers">
+                <field name="sequence"/>
+                <field name="name"/>
+                <field name="sticker_type"/>
+                <field name="position"/>
+            </list>
+        </field>
+    </record>
+
+    <!-- Form (modern direct props, no legacy attrs) -->
+    <record id="view_product_sticker_form" model="ir.ui.view">
+        <field name="name">product.sticker.form</field>
+        <field name="model">product.sticker</field>
+        <field name="arch" type="xml">
+            <form string="Product Sticker">
+                <sheet>
+                    <group string="Create Product Sticker">
+                        <group>
+                            <field name="sticker_type" required="1"/>
+                            <field name="name" required="1"/>
+                            <field name="position" required="1"/>
+                            <!-- Text/HTML fields -->
+                            <field name="sticker_text"
+                                   invisible="sticker_type == 'image'"
+                                   required="sticker_type == 'html'"/>
+                            <field name="font_size"
+                                   invisible="sticker_type == 'image'"
+                                   required="sticker_type == 'html'"/>
+                            <field name="bg_color" widget="color"
+                                   invisible="sticker_type == 'image'"
+                                   required="sticker_type == 'html'"/>
+                            <field name="text_color" widget="color"
+                                   invisible="sticker_type == 'image'"
+                                   required="sticker_type == 'html'"/>
+                            <field name="shape"
+                                   invisible="sticker_type == 'image'"
+                                   required="sticker_type == 'html'"/>
+                            <field name="rotate" invisible="sticker_type == 'image'"/>
+                            <field name="cut_corner" invisible="sticker_type == 'image'"/>
+                        </group>
+
+                        <group>
+                            <!-- Image mode -->
+                            <field name="image" widget="image" class="oe_avatar"
+                                   options="{'preview_image': 'image_512'}"
+                                   invisible="sticker_type == 'html'"
+                                   required="sticker_type == 'image'"/>
+                            <!-- Common geometry -->
+                            <field name="height"/>
+                            <field name="width"/>
+                            <field name="top"/>
+                            <field name="bottom"/>
+                            <field name="left"/>
+                            <field name="right"/>
+                        </group>
+                    </group>
+
+                    <group>
+                        <group>
+                            <field name="sequence"/>
+                            <field name="active" invisible="1"/>
+                            <field name="company_id" readonly="1"/>
+                        </group>
+                    </group>
+                </sheet>
+            </form>
+        </field>
+    </record>
+
+    <!-- Search -->
+    <record id="view_product_sticker_search" model="ir.ui.view">
+        <field name="name">product.sticker.search</field>
+        <field name="model">product.sticker</field>
+        <field name="arch" type="xml">
+            <search string="Search Stickers">
+                <field name="name"/>
+                <field name="sticker_type"/>
+                <field name="position"/>
+                <filter string="Active" name="active" domain="[('active','=',True)]"/>
+            </search>
+        </field>
+    </record>
+
+
+    <record id="action_product_sticker" model="ir.actions.act_window">
+        <field name="name">Product Stickers</field>
+        <field name="res_model">product.sticker</field>
+        <field name="view_mode">list,form</field>
+        <field name="help" type="html">
+            <p class="o_view_nocontent_smiling_face">
+                Create your first product sticker!
+            </p>
+        </field>
+    </record>
+
+
+</odoo>

@@ -1,0 +1,187 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+
+    <record id="view_gift_card_form" model="ir.ui.view">
+        <field name="name">gift.card.form</field>
+        <field name="model">gift.card</field>
+        <field name="arch" type="xml">
+            <form string="Gift Card">
+                <header>
+                    <field name="state" widget="statusbar"
+                           statusbar_visible="pending_payment,paid,confirmed,delivered"
+                           string="Status"/>
+
+<!--                    <button-->
+<!--                            string="Create Order"-->
+<!--                            class="oe_highlight"-->
+<!--                            type="object"-->
+<!--                            name="create_order"-->
+<!--                            data-hotkey="q"-->
+<!--                    />-->
+
+<!--                    <button-->
+<!--                            string="Cardmoola Create Order"-->
+<!--                            class="oe_highlight"-->
+<!--                            type="object"-->
+<!--                            name="create_cardmoola_order"-->
+<!--                            data-hotkey="q"-->
+<!--                    />-->
+
+
+                    <button
+                            string="skipcash"
+                            class="oe_highlight"
+                            type="object"
+                            name="get_skipcash_url"
+                            data-hotkey="q"
+                    />
+                </header>
+                <sheet>
+                    <div class="oe_title">
+                        <h1>
+                            <field name="name"/>
+                        </h1>
+                    </div>
+
+                    <!-- Key Information -->
+                    <group>
+                        <group string="Gift Card Overview">
+                            <field name="brand_code" required="1"/>
+                            <field name="amount" widget="monetary" required="1"/>
+                            <field name="currency_id" required="1"/>
+                            <field name="expiry_date"/>
+                            <field name="country_id"/>
+                        </group>
+
+                        <group string="Receiver Details">
+                            <field name="customer_id"/>
+                            <field name="receiver_name"/>
+                            <field name="receiver_email" widget="email"/>
+                            <field name="receiver_phone" widget="phone"/>
+                        </group>
+                    </group>
+
+                    <!-- Tabs -->
+                    <notebook>
+                        <page string="General Information">
+                            <group>
+                                <group>
+                                    <field name="is_cardmoola"/>
+                                    <field name="cardmoola_product_id" invisible="not is_cardmoola"/>
+                                    <field name="amount_org"/>
+                                    <field name="currency_org_id"/>
+                                    <field name="barcode"/>
+                                    <field name="notify"/>
+                                </group>
+                                <group>
+                                    <field name="egift_card_url" widget="url"/>
+                                    <field name="gift_verification_pin"/>
+                                    <field name="vis_id"/>
+                                    <field name="delivery_language_id"/>
+                                </group>
+                            </group>
+
+                            <group string="Redemption Instructions">
+                                <field name="redemption_instructions" nolabel="1"/>
+                            </group>
+
+                            <group string="Message">
+                                <field name="message" placeholder="Personalized message..." nolabel="1"/>
+                            </group>
+
+                        </page>
+
+                        <page string="Payment Info">
+                            <group>
+                                <group>
+                                    <field name="order_id"/>
+                                    <field name="payment_id"/>
+                                    <field name="payment_web_link" widget="url"/>
+                                </group>
+                            </group>
+                        </page>
+
+                        <page string="System Info">
+                            <group>
+                                <group>
+                                    <field name="reference_id"/>
+                                    <field name="date_added"/>
+                                </group>
+                                <group>
+                                    <field name="return_url" widget="url"/>
+                                </group>
+                            </group>
+                        </page>
+                    </notebook>
+                </sheet>
+                <chatter/>
+            </form>
+        </field>
+    </record>
+
+
+    <record id="view_gift_card_tree" model="ir.ui.view">
+        <field name="name">gift.card.tree</field>
+        <field name="model">gift.card</field>
+        <field name="arch" type="xml">
+            <list string="Gift Cards">
+                <field name="name"/>
+                <field name="reference_id"/>
+                <field name="order_id"/>
+                <field name="cardmoola_product_id"/>
+                <field name="brand_code"/>
+                <field name="customer_id"/>
+                <field name="receiver_name"/>
+                <field name="receiver_email" widget="email"/>
+                <field name="amount" widget="monetary"/>
+                <field name="currency_id" column_invisible="True" />
+                <field name="amount_org" widget="monetary"/>
+                <field name="currency_org_id" column_invisible="True" />
+                <field name="expiry_date"/>
+                <field name="state" widget="badge" decoration-success="state == 'paid'"/>
+            </list>
+        </field>
+    </record>
+
+
+    <record id="view_gift_card_search" model="ir.ui.view">
+        <field name="name">gift.card.search</field>
+        <field name="model">gift.card</field>
+        <field name="arch" type="xml">
+            <search>
+                <field name="name" string="Reference"/>
+                <field name="order_id" string="Order"/>
+                <field name="receiver_name"/>
+                <field name="receiver_email"/>
+                <field name="customer_id"/>
+                <filter string="Expired" name="expired"
+                        domain="[('expiry_date','&lt;', context_today().strftime('%Y-%m-%d'))]"/>
+                <filter string="Active" name="active" domain="[('active', '=', True)]"/>
+                <filter string="In Active" name="inactive" domain="[('active', '=', False)]"/>
+                <separator/>
+
+                <group expand="0" string="Group By">
+                    <filter string="Customer" name="customer" domain="[]" context="{'group_by': 'customer_id'}"/>
+                    <filter string="State" name="state" domain="[]" context="{'group_by': 'state'}"/>
+                </group>
+            </search>
+        </field>
+    </record>
+
+
+    <record id="action_gift_card" model="ir.actions.act_window">
+        <field name="name">Gift Cards</field>
+        <field name="res_model">gift.card</field>
+        <field name="view_mode">list,form</field>
+        <field name="search_view_id" ref="go_giftcard.view_gift_card_search"/>
+        <field name="help" type="html">
+            <p class="o_view_nocontent_smiling_face">
+                Create your first Gift Card
+            </p>
+            <p>
+                Manage your gift cards, track their lifecycle, and notify recipients.
+            </p>
+        </field>
+    </record>
+
+</odoo>

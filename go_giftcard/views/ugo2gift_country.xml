@@ -1,0 +1,85 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+
+    <record id="view_ugo2gift_country_form" model="ir.ui.view">
+        <field name="name">ugo2gift.country.form</field>
+        <field name="model">ugo2gift.country</field>
+        <field name="arch" type="xml">
+            <form string="Country">
+                <sheet>
+                    <group>
+                        <group string="Basic Information">
+                            <field name="name"/>
+                            <field name="code"/>
+                            <field name="currency_id"/>
+                            <field name="timezone"/>
+                            <field name="detail_url" widget="url"/>
+                        </group>
+
+                        <group string="Mobile Information">
+                            <field name="mobile_number_formats"/>
+                            <field name="mobile_number_regex"/>
+                        </group>
+
+                    </group>
+
+                    <notebook>
+                        <page string="Languages">
+                            <field name="languages">
+                                <list editable="bottom">
+                                    <field name="name"/>
+                                    <field name="lang_code"/>
+                                </list>
+                            </field>
+                        </page>
+                    </notebook>
+                </sheet>
+            </form>
+        </field>
+    </record>
+
+
+     <record id="view_ugo2gift_country_list" model="ir.ui.view">
+        <field name="name">ugo2gift.country.list</field>
+        <field name="model">ugo2gift.country</field>
+        <field name="arch" type="xml">
+            <list string="Countries">
+                <field name="name"/>
+                <field name="code"/>
+                <field name="currency_id"/>
+                <field name="timezone"/>
+            </list>
+        </field>
+    </record>
+
+    <record id="view_ugo2gift_country_search" model="ir.ui.view">
+    <field name="name">ugo2gift.country.search</field>
+    <field name="model">ugo2gift.country</field>
+    <field name="arch" type="xml">
+        <search string="Search Countries">
+
+            <field name="name"/>
+            <field name="code"/>
+            <field name="currency_id"/>
+
+            <group expand="0" string="Group By">
+                <filter string="Currency" name="group_by_currency" domain="[]" context="{'group_by':'currency_id'}"/>
+                <filter string="Timezone" name="group_by_tz" domain="[]" context="{'group_by':'timezone'}"/>
+            </group>
+        </search>
+    </field>
+</record>
+
+
+    <record id="action_ugo2gift_country" model="ir.actions.act_window">
+        <field name="name">Countries</field>
+        <field name="res_model">ugo2gift.country</field>
+        <field name="view_mode">list,form</field>
+        <field name="help" type="html">
+            <p class="oe_view_nocontent_create">
+                Click to create a new Country.
+            </p>
+        </field>
+    </record>
+
+</odoo>

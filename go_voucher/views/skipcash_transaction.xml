@@ -1,0 +1,80 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<odoo>
+
+    <record id="view_skipcash_transaction_form" model="ir.ui.view">
+        <field name="name">skipcash.transaction.form</field>
+        <field name="model">skipcash.transaction</field>
+        <field name="arch" type="xml">
+            <form string="Skipcash Transaction" create="0" edit="0">
+                <sheet>
+                    <group string="Transaction Details" colspan="2">
+                        <group>
+                            <field name="payment_id"/>
+                            <field name="amount"/>
+                            <field name="payment_status"/>
+                        </group>
+                        <group>
+                            <field name="voucher_purchase_id" readonly="1"/>
+                            <field name="vis_id"/>
+                            <field name="payment_url" widget="url"/>
+                        </group>
+                    </group>
+                </sheet>
+            </form>
+        </field>
+    </record>
+
+
+    <record id="view_skipcash_transaction_tree" model="ir.ui.view">
+        <field name="name">skipcash.transaction.tree</field>
+        <field name="model">skipcash.transaction</field>
+        <field name="arch" type="xml">
+            <list string="Skipcash Transactions" create="0" edit="0">
+                <field name="payment_id"/>
+                <field name="amount"/>
+                <field name="payment_status"/>
+                <field name="voucher_purchase_id"/>
+                <field name="vis_id"/>
+                <field name="payment_url" widget="url"/>
+            </list>
+        </field>
+    </record>
+
+
+
+    <record id="view_skipcash_transaction_search" model="ir.ui.view">
+        <field name="name">skipcash.transaction.search</field>
+        <field name="model">skipcash.transaction</field>
+        <field name="arch" type="xml">
+            <search string="Skipcash Transactions">
+
+                <field name="payment_id" string="Payment ID"/>
+                <field name="payment_status" string="Payment Status"/>
+                <field name="vis_id" string="Visa ID"/>
+                <field name="voucher_purchase_id" string="Voucher Purchase"/>
+
+
+                <filter name="filter_pending" string="Pending" domain="[('payment_status','=','pending')]"/>
+                <filter name="filter_successful" string="Successful" domain="[('payment_status','=','successful')]"/>
+                <filter name="filter_failed" string="Failed" domain="[('payment_status','=','failed')]"/>
+
+
+                <group expand="0" string="Group By">
+                    <filter name="group_by_status" string="Payment Status" context="{'group_by':'payment_status'}"/>
+                    <filter name="group_by_voucher" string="Voucher Purchase" context="{'group_by':'voucher_purchase_id'}"/>
+                </group>
+            </search>
+        </field>
+    </record>
+
+
+
+    <record id="action_skipcash_transaction" model="ir.actions.act_window">
+        <field name="name">Skipcash Transactions</field>
+        <field name="res_model">skipcash.transaction</field>
+        <field name="view_mode">list,form</field>
+    </record>
+
+
+
+</odoo>

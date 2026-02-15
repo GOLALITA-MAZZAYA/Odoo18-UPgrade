@@ -1,0 +1,70 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<odoo>
+
+    <record id="view_voucher_redeemed_user_form" model="ir.ui.view">
+        <field name="name">voucher.redeemed.user.form</field>
+        <field name="model">voucher.redeemed.user</field>
+        <field name="arch" type="xml">
+            <form string="Redeemed Voucher" create="0" edit="0">
+                <sheet>
+                    <group>
+                        <group string="Redemption Details">
+                            <field name="user_id"/>
+                            <field name="discount_voucher_id"/>
+                            <field name="redeemed_date"/>
+                        </group>
+                    </group>
+
+                </sheet>
+            </form>
+        </field>
+    </record>
+
+    <record id="view_voucher_redeemed_user_tree" model="ir.ui.view">
+        <field name="name">voucher.redeemed.user.tree</field>
+        <field name="model">voucher.redeemed.user</field>
+        <field name="arch" type="xml">
+            <list string="Redeemed Vouchers" create="0" edit="0">
+                <field name="user_id"/>
+                <field name="discount_voucher_id"/>
+                <field name="redeemed_date"/>
+            </list>
+        </field>
+    </record>
+
+
+    <record id="view_voucher_redeemed_user_search" model="ir.ui.view">
+        <field name="name">voucher.redeemed.user.search</field>
+        <field name="model">voucher.redeemed.user</field>
+        <field name="arch" type="xml">
+            <search string="Search Redeemed Vouchers">
+                <field name="user_id" string="User"/>
+                <field name="discount_voucher_id" string="Voucher"/>
+                <field name="redeemed_date" string="Redeemed Date"/>
+
+                <group expand="0" string="Group By">
+                    <filter string="User" name="group_user" context="{'group_by':'user_id'}"/>
+                    <filter string="Voucher" name="group_voucher" context="{'group_by':'discount_voucher_id'}"/>
+                    <filter string="Redeemed Date" name="group_redeemed_date" context="{'group_by':'redeemed_date'}"/>
+                </group>
+            </search>
+        </field>
+    </record>
+
+
+    <record id="action_voucher_redeemed_user" model="ir.actions.act_window">
+        <field name="name">Redeemed Vouchers</field>
+        <field name="res_model">voucher.redeemed.user</field>
+        <field name="view_mode">list,form</field>
+        <field name="search_view_id" ref="view_voucher_redeemed_user_search"/>
+        <field name="help" type="html">
+            <p class="o_view_nocontent_smiling_face">
+                No vouchers redeemed yet.
+            </p>
+            <p>
+                Track which vouchers were redeemed by which users, along with the redemption date.
+            </p>
+        </field>
+    </record>
+
+</odoo>

@@ -1,0 +1,114 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+
+    <record model="ir.ui.view" id="merchant_enquiry_form_view_loyalty">
+        <field name="name">Merchant Enquiry</field>
+        <field name="model">merchant.enquiry</field>
+        <field name="arch" type="xml">
+            <form string="Merchant Enquiry">
+                <sheet>
+                    <group>
+                        <group string="Basic Information">
+                            <field name="name"/>
+                            <field name="phone"/>
+                            <field name="email"/>
+                        </group>
+
+                        <group string="Travel Details">
+                            <field name="city"/>
+                            <field name="country"/>
+                            <field name="departure_date"/>
+                            <field name="return_date"/>
+                            <field name="hotel_name"/>
+                            <field name="no_adult"/>
+                            <field name="no_children"/>
+                        </group>
+                    </group>
+
+                    <group string="Additional Information">
+                        <field name="note"/>
+                    </group>
+
+                </sheet>
+            </form>
+        </field>
+    </record>
+
+    <record model="ir.ui.view" id="merchant_enquiry_list_view_loyalty">
+        <field name="name">Merchant Enquiry</field>
+        <field name="model">merchant.enquiry</field>
+        <field name="arch" type="xml">
+            <list string="Merchant Enquiry">
+                <field name="partner_id"/>
+                <field name="name"/>
+                <field name="phone"/>
+                <field name="email"/>
+                <field name="city"/>
+                <field name="country"/>
+                <field name="departure_date"/>
+                <field name="return_date"/>
+                <field name="product_id"/>
+                <field name="product_name"/>
+                <field name="product_price"/>
+            </list>
+        </field>
+    </record>
+
+
+    <record id="view_merchant_enquiry_search_loyalty" model="ir.ui.view">
+        <field name="name">Merchant Enquiry</field>
+        <field name="model">merchant.enquiry</field>
+        <field name="arch" type="xml">
+            <search string="Merchant Enquiries">
+
+                <!-- Quick search fields -->
+                <field name="name"/>
+                <field name="phone"/>
+                <field name="email"/>
+                <field name="city"/>
+                <field name="partner_id"/>
+                <field name="product_name"/>
+
+                <!-- Status Filters -->
+                <filter string="Draft" name="filter_draft" domain="[('state','=','draft')]"/>
+                <filter string="Sent" name="filter_sent" domain="[('state','=','sent')]"/>
+
+                <!-- Other Filters -->
+                <filter string="Has Children" name="filter_children" domain="[('no_children','>',0)]"/>
+                <filter string="Past Departure" name="filter_past_departure"
+                        domain="[('departure_date','&lt;', context_today().strftime('%Y-%m-%d'))]"
+                        help="Show all enquiries with a departure date before today"/>
+
+                <filter string="Today Departure" name="filter_today_departure"
+                        domain="[('departure_date','=', context_today().strftime('%Y-%m-%d'))]"
+                        help="Show all enquiries with a departure date today"/>
+
+                <filter string="Upcoming Departure" name="filter_departure"
+                        domain="[('departure_date','&gt;', context_today().strftime('%Y-%m-%d'))]"
+                        help="Show all enquiries with a departure date after today"/>
+
+
+                <!-- Group By Options -->
+                <group expand="1" string="Group By...">
+                    <filter string="State" name="group_state" context="{'group_by':'state'}"/>
+                    <filter string="Country" name="group_country" context="{'group_by':'country'}"/>
+                    <filter string="City" name="group_city" context="{'group_by':'city'}"/>
+                    <filter string="Partner" name="group_partner" context="{'group_by':'partner_id'}"/>
+                    <filter string="Product" name="group_product" context="{'group_by':'product_id'}"/>
+                    <filter string="Departure Date" name="group_departure" context="{'group_by':'departure_date'}"/>
+                    <filter string="Return Date" name="group_return" context="{'group_by':'return_date'}"/>
+                </group>
+            </search>
+        </field>
+    </record>
+
+
+    <record id="action_merchant_enquiry_loyalty" model="ir.actions.act_window">
+        <field name="name">Merchant Enquiry</field>
+        <field name="res_model">merchant.enquiry</field>
+        <field name="view_mode">list,form</field>
+        <field name="search_view_id" ref="view_merchant_enquiry_search_loyalty"/>
+    </record>
+
+
+</odoo>

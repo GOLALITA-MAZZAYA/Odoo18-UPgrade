@@ -1,0 +1,72 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<odoo>
+
+    <record id="view_voucher_saved_user_form" model="ir.ui.view">
+        <field name="name">voucher.saved.user.form</field>
+        <field name="model">voucher.saved.user</field>
+        <field name="arch" type="xml">
+            <form string="Saved Voucher" create="0" edit="0">
+                <sheet>
+                    <group>
+                        <group string="Saved Voucher Details">
+                            <field name="user_id"/>
+                            <field name="discount_voucher_id"/>
+                            <field name="saved_date"/>
+                        </group>
+                    </group>
+
+                </sheet>
+            </form>
+        </field>
+    </record>
+
+
+    <record id="view_voucher_saved_user_tree" model="ir.ui.view">
+        <field name="name">voucher.saved.user.tree</field>
+        <field name="model">voucher.saved.user</field>
+        <field name="arch" type="xml">
+            <list string="Saved Vouchers" create="0" edit="0">
+                <field name="user_id"/>
+                <field name="discount_voucher_id"/>
+                <field name="saved_date"/>
+            </list>
+        </field>
+    </record>
+
+
+    <record id="view_voucher_saved_user_search" model="ir.ui.view">
+        <field name="name">voucher.saved.user.search</field>
+        <field name="model">voucher.saved.user</field>
+        <field name="arch" type="xml">
+            <search string="Search Saved Vouchers">
+                <field name="user_id" string="User"/>
+                <field name="discount_voucher_id" string="Voucher"/>
+                <field name="saved_date" string="Saved Date"/>
+                <group expand="0" string="Group By">
+                    <filter string="User" name="group_user" context="{'group_by':'user_id'}"/>
+                    <filter string="Voucher" name="group_voucher" context="{'group_by':'discount_voucher_id'}"/>
+                    <filter string="Saved Date" name="group_saved_date" context="{'group_by':'saved_date'}"/>
+                </group>
+            </search>
+        </field>
+    </record>
+
+
+    <record id="action_voucher_saved_user" model="ir.actions.act_window">
+        <field name="name">Saved Vouchers</field>
+        <field name="res_model">voucher.saved.user</field>
+        <field name="view_mode">list,form</field>
+        <field name="search_view_id" ref="view_voucher_saved_user_search"/>
+        <field name="help" type="html">
+            <p class="o_view_nocontent_smiling_face">
+                No vouchers saved yet.
+            </p>
+            <p>
+                Track which vouchers were saved by which users, along with the saved date.
+            </p>
+        </field>
+    </record>
+
+
+
+</odoo>

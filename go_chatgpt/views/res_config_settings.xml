@@ -1,0 +1,24 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<odoo>
+    <record id="view_res_config_settings_inherit_openapi" model="ir.ui.view">
+        <field name="name">res.config.settings.openai.key</field>
+        <field name="model">res.config.settings</field>
+        <field name="inherit_id" ref="base_setup.res_config_settings_view_form"/>
+        <field name="arch" type="xml">
+            <xpath expr="//div[@id='invite_users']" position="before">
+                <div id="openapi_api_key_container">
+                    <block title="ChatGPT Integration" name="openapi_api_key_block">
+                        <setting name="openapi_api_key" help="Enter your OpenAI API key to enable ChatGPT integration.">
+                            <field name="openapi_api_key" placeholder="Enter your OpenAI API Key"/>
+                        </setting>
+
+                        <setting name="openai_model"
+                                 help="Enter the OpenAI model to use (e.g., gpt-4o-mini, gpt-3.5-turbo).">
+                            <field name="openai_model"/>
+                        </setting>
+                    </block>
+                </div>
+            </xpath>
+        </field>
+    </record>
+</odoo>

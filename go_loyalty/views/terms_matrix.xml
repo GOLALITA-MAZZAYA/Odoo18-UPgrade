@@ -1,0 +1,80 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+
+    <record id="view_terms_matrix_form" model="ir.ui.view">
+        <field name="name">terms.matrix.form</field>
+        <field name="model">terms.matrix</field>
+        <field name="arch" type="xml">
+            <form string="Terms Matrix">
+                <sheet>
+                    <group>
+                        <group string="Merchant Info">
+                            <field name="res_partner_id" context="{'default_entity_type': 'merchant'}"/>
+                            <field name="organisation_id" widget="many2many_tags" context="{'default_entity_type': 'organisation'}"/>
+                        </group>
+
+                        <group string="Metadata">
+                            <field name="create_date"/>
+                            <field name="create_uid"/>
+                        </group>
+
+                    </group>
+
+                    <notebook>
+                        <page string="Terms &amp; Conditions (English)">
+                            <field name="terms_condition" widget="html"/>
+                        </page>
+                        <page string="Terms &amp; Conditions (Arabic)">
+                            <field name="terms_condition_ar" widget="html"/>
+                        </page>
+                    </notebook>
+
+                </sheet>
+            </form>
+        </field>
+    </record>
+
+
+    <record id="view_terms_matrix_tree" model="ir.ui.view">
+        <field name="name">terms.matrix.tree</field>
+        <field name="model">terms.matrix</field>
+        <field name="arch" type="xml">
+            <list string="Terms Matrix List">
+                <field name="res_partner_id" string="Merchant"/>
+                <field name="organisation_id" string="Organisations" widget="many2many_tags"/>
+                <field name="create_date" string="Creation Date"/>
+            </list>
+        </field>
+    </record>
+
+
+    <record id="view_terms_matrix_search" model="ir.ui.view">
+        <field name="name">terms.matrix.search</field>
+        <field name="model">terms.matrix</field>
+        <field name="arch" type="xml">
+            <search string="Terms Matrix Search">
+                <field name="res_partner_id" string="Merchant"/>
+
+                <filter name="has_organisation" string="With Organisation" domain="[('organisation_id','!=',False)]"/>
+
+                <group expand="1" string="Group By">
+                    <filter name="group_by_merchant" string="Merchant" context="{'group_by':'res_partner_id'}"/>
+                </group>
+            </search>
+        </field>
+    </record>
+
+
+    <record id="action_terms_matrix" model="ir.actions.act_window">
+        <field name="name">Terms Matrix</field>
+        <field name="res_model">terms.matrix</field>
+        <field name="view_mode">list,form</field>
+        <field name="help" type="html">
+            <p class="o_view_nocontent_smiling_face">
+                Create your first Terms Matrix record.
+            </p>
+        </field>
+    </record>
+
+
+</odoo>

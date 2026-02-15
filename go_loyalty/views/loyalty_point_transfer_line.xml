@@ -1,0 +1,100 @@
+<?xml version="1.0" encoding="utf-8"?>
+
+<odoo>
+
+    <record id="view_loyalty_point_transfer_line_form" model="ir.ui.view">
+        <field name="name">loyalty.point.transfer.line.form</field>
+        <field name="model">loyalty.point.transfer.line</field>
+        <field name="arch" type="xml">
+            <form string="Loyalty Point Transfer Line" create="0" edit="0">
+                <header>
+                    <field name="state" widget="statusbar" statusbar_visible="draft,post,cancel"/>
+                </header>
+                <sheet>
+                    <group>
+                        <group string="Reference Info">
+                            <field name="transfer_id"/>
+                            <field name="name"/>
+                            <field name="partner_id"/>
+                            <field name="sale_id"/>
+                        </group>
+
+                        <group string="Points Info">
+                            <field name="credit"/>
+                            <field name="debit"/>
+                            <field name="balance" readonly="1"/>
+                            <field name="generator_id"/>
+                        </group>
+
+                    </group>
+
+                    <group>
+                        <group string="Other Info">
+                            <field name="date"/>
+                            <field name="state"/>
+                        </group>
+                    </group>
+
+                </sheet>
+            </form>
+        </field>
+    </record>
+
+    <record id="view_loyalty_point_transfer_line_tree" model="ir.ui.view">
+        <field name="name">loyalty.point.transfer.line.tree</field>
+        <field name="model">loyalty.point.transfer.line</field>
+        <field name="arch" type="xml">
+            <list string="Loyalty Point Transfer Lines" create="0" edit="0">
+                <field name="transfer_id" string="Transfer"/>
+                <field name="partner_id" string="Customer"/>
+                <field name="date" string="Transaction Date"/>
+                <field name="credit" string="Credit Points"/>
+                <field name="debit" string="Debit Points"/>
+                <field name="balance" string="Balance"/>
+                <field name="state" string="Status"/>
+                <field name="generator_id" string="Generated From"/>
+                <field name="sale_id" string="Related Sale"/>
+            </list>
+        </field>
+    </record>
+
+
+    <record id="view_loyalty_point_transfer_line_search" model="ir.ui.view">
+        <field name="name">loyalty.point.transfer.line.search</field>
+        <field name="model">loyalty.point.transfer.line</field>
+        <field name="arch" type="xml">
+            <search string="Loyalty Point Transfer Lines Search">
+                <field name="transfer_id" string="Transfer"/>
+                <field name="partner_id" string="Customer"/>
+                <field name="generator_id" string="Generated From"/>
+                <field name="sale_id" string="Related Sale"/>
+                <field name="state" string="Status"/>
+
+
+                <filter name="filter_posted" string="Posted" domain="[('state','=','post')]"/>
+                <filter name="filter_draft" string="Draft" domain="[('state','=','draft')]"/>
+                <filter name="filter_cancel" string="Cancelled" domain="[('state','=','cancel')]"/>
+
+                <group expand="1" string="Group By">
+                    <filter name="group_by_customer" string="Customer" context="{'group_by':'partner_id'}"/>
+                    <filter name="group_by_transfer" string="Transfer" context="{'group_by':'transfer_id'}"/>
+                    <filter name="group_by_state" string="Status" context="{'group_by':'state'}"/>
+                </group>
+            </search>
+        </field>
+    </record>
+
+
+    <record id="action_loyalty_point_transfer_line" model="ir.actions.act_window">
+        <field name="name">Loyalty Point Transfer Lines</field>
+        <field name="res_model">loyalty.point.transfer.line</field>
+        <field name="view_mode">list,form</field>
+        <field name="help" type="html">
+            <p class="o_view_nocontent_smiling_face">
+                Create your first Loyalty Point Transfer Line.
+            </p>
+        </field>
+    </record>
+
+
+</odoo>

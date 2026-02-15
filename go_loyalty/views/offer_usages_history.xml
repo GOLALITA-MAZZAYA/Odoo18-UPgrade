@@ -1,0 +1,89 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<odoo>
+
+    <record id="view_offer_usages_history_form" model="ir.ui.view">
+        <field name="name">offer.usages.history.form</field>
+        <field name="model">offer.usages.history</field>
+        <field name="arch" type="xml">
+            <form string="Offer Usage History">
+                <sheet>
+                    <group>
+                        <group>
+                            <field name="name"/>
+                            <field name="partner_id"/>
+                            <field name="organisation_id"/>
+                        </group>
+                        <group>
+                            <field name="product_id"/>
+                            <field name="usage_count"/>
+                            <field name="used_on"/>
+                        </group>
+
+                    </group>
+                </sheet>
+            </form>
+        </field>
+    </record>
+
+    <record id="view_offer_usages_history_tree" model="ir.ui.view">
+        <field name="name">offer.usages.history.tree</field>
+        <field name="model">offer.usages.history</field>
+        <field name="arch" type="xml">
+            <list string="Offer Usages History">
+                <field name="name"/>
+                <field name="partner_id"/>
+                <field name="organisation_id"/>
+                <field name="product_id"/>
+                <field name="usage_count"/>
+                <field name="used_on"/>
+            </list>
+        </field>
+    </record>
+
+    <record id="view_offer_usages_history_search" model="ir.ui.view">
+        <field name="name">offer.usages.history.search</field>
+        <field name="model">offer.usages.history</field>
+        <field name="arch" type="xml">
+            <search string="Offer Usages History">
+                <field name="name"/>
+                <field name="partner_id"/>
+                <field name="organisation_id"/>
+                <field name="product_id"/>
+            </search>
+        </field>
+    </record>
+
+    <record id="view_offer_usages_history_search" model="ir.ui.view">
+        <field name="name">offer.usages.history.search</field>
+        <field name="model">offer.usages.history</field>
+        <field name="arch" type="xml">
+            <search string="Offer Usages History">
+                <field name="name"/>
+                <field name="partner_id"/>
+                <field name="organisation_id"/>
+                <field name="product_id"/>
+
+                <group expand="0" string="Group By">
+                    <filter string="Partner" name="group_by_partner" context="{'group_by':'partner_id'}"/>
+                    <filter string="Organisation" name="group_by_organisation"
+                            context="{'group_by':'organisation_id'}"/>
+                    <filter string="Product" name="group_by_product" context="{'group_by':'product_id'}"/>
+                </group>
+            </search>
+        </field>
+    </record>
+
+
+    <record id="action_offer_usages_history" model="ir.actions.act_window">
+        <field name="name">Offer Usages History</field>
+        <field name="res_model">offer.usages.history</field>
+        <field name="view_mode">list,form</field>
+        <field name="help" type="html">
+            <p class="o_view_nocontent_smiling_face">
+                Manage Offer Usages History here.
+            </p>
+        </field>
+    </record>
+
+
+</odoo>

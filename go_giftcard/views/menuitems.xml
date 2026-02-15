@@ -1,0 +1,83 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+
+    <menuitem id="menu_giftcard_root"
+              name="Gift Card"
+              sequence="10"
+              web_icon="go_giftcard,static/description/gift_card_logo.png"
+    />
+
+    <menuitem id="menu_giftcard_main"
+              name="Gift Cards"
+              parent="go_giftcard.menu_giftcard_root"
+              action="go_giftcard.action_gift_card"
+              sequence="1"
+    />
+
+    <menuitem id="menu_ugo2gift_brand"
+              name="Brands"
+              parent="go_giftcard.menu_giftcard_root"
+              action="go_giftcard.action_ugo2gift_brand"
+              sequence="5"
+    />
+
+    <menuitem
+            id="menu_ugo2gift_configuration"
+            parent="go_giftcard.menu_giftcard_root"
+            name="Configuration"
+            action="go_giftcard.action_giftcard_settings"
+            sequence="100"/>
+
+
+    <menuitem
+            id="menu_ugo2gift_settings"
+            parent="go_giftcard.menu_ugo2gift_configuration"
+            name="Settings"
+            action="go_giftcard.action_giftcard_settings"
+            sequence="5"/>
+
+
+    <menuitem id="menu_ugo2gift_root"
+              name="UGO2Gift"
+              parent="go_giftcard.menu_ugo2gift_configuration"
+              sequence="10"
+    />
+
+    <menuitem
+            id="menu_ugo2gift_categories"
+            parent="go_giftcard.menu_ugo2gift_root"
+            name="Categories"
+            action="go_giftcard.action_ugo2gift_category"
+            sequence="5"
+    />
+
+
+    <menuitem id="menu_ugo2gift_denomination"
+              name="Denominations"
+              parent="go_giftcard.menu_ugo2gift_root"
+              action="go_giftcard.action_ugo2gift_denomination"
+              sequence="10"/>
+
+
+    <menuitem id="menu_ugo2gift_image"
+              name="Images Gallery"
+              parent="go_giftcard.menu_ugo2gift_root"
+              action="go_giftcard.action_ugo2gift_image"
+              sequence="15"/>
+
+
+     <menuitem id="menu_ugo2gift_country"
+              name="Countries"
+              parent="go_giftcard.menu_ugo2gift_root"
+              action="go_giftcard.action_ugo2gift_country"
+              sequence="15"
+     />
+
+    <menuitem id="menu_ugo2gift_language"
+              name="Languages"
+              parent="go_giftcard.menu_ugo2gift_root"
+              action="go_giftcard.action_ugo2gift_language"
+              sequence="16"
+     />
+
+</odoo>

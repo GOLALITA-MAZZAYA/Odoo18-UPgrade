@@ -1,8 +1,9 @@
 # -*- coding: utf-8 -*-
-from odoo import api, fields, models, _
-from odoo.exceptions import ValidationError
-from werkzeug.urls import url_join
 from datetime import date
+
+from odoo.exceptions import ValidationError
+
+from odoo import api, fields, models, _
 
 
 class ResPartner(models.Model):
@@ -22,6 +23,7 @@ class ResPartner(models.Model):
         string="Entity Type",
         oldname="go_entity",
         index=True,
+        required=True,
         help="Functional role of the contact in your program.",
     )
 
@@ -57,7 +59,7 @@ class ResPartner(models.Model):
     )
 
     is_hotel_business = fields.Boolean(string="Hotel Business", oldname="is_hotel_type")
-    is_restaurant = fields.Boolean(string="Restaurant", oldname="is_restro")
+    is_restro = fields.Boolean(string="Restaurant", oldname="is_restro")
 
     premium_client = fields.Boolean(string="Premium Client")
     client_type = fields.Selection(
@@ -156,20 +158,16 @@ class ResPartner(models.Model):
         oldname="x_is_token_permanent",
         help="Only set if confirmed.",
     )
+    mobile_version = fields.Char("Mobile Version")
 
     barcode = fields.Char(
         string="Customer Barcode or Merchant PIN",
         help="Use a barcode to identify this contact.",
     )
-    user_expiry = fields.Char(
-        string="User Expiry", oldname="x_user_expiry"
-    )  # legacy (kept for history)
     user_expiry_date = fields.Date(
         string="User Expiry", help="Use this Date field; legacy text is migrated here."
     )
-    merchant_pin_new = fields.Char(
-        string="Merchant PIN (New)", oldname="x_merchant_pin_new"
-    )
+    merchant_pin = fields.Char(string="Merchant PIN", oldname="x_merchant_pin_new")
 
     # ───────────────────────────────────────────────────────────────────────────
     # Merchant operational settings (restaurant/delivery)
@@ -198,14 +196,17 @@ class ResPartner(models.Model):
     )
     pdf_attached = fields.Boolean(string="PDF Attached", oldname="x_pdf_attached")
 
-    company_registration = fields.Char(
-        string="Company Registration", oldname="x_company_registartion"
+    company_registration = fields.Char()
+    company_registration_id = fields.Binary(
+        string="Company Registration File",
+        help="Company Registration and related files for this partner.",
     )
+
     company_registration_date = fields.Date(
         string="Company Registration Date", oldname="x_company_registartion_date"
     )
     company_expiry_date = fields.Date(
-        string="Company Expiry Date", oldname="x_company_expiry_date"
+        string="Company Registration Expiry Date", oldname="x_company_expiry_date"
     )
 
     contract_expiry = fields.Date(string="Contract Expiry", oldname="x_contract_expiry")
@@ -228,23 +229,11 @@ class ResPartner(models.Model):
     # ───────────────────────────────────────────────────────────────────────────
     # Misc & metrics
     # ───────────────────────────────────────────────────────────────────────────
-    organisation_linked = fields.Selection(
-        [
-            ("sjc", "SJC"),
-            ("gulfexchange", "Gulf Exchange"),
-            ("daam", "DAAM"),
-            ("qatarinsurance", "Qatar Insurance"),
-            ("golalita", "Golalita"),
-            ("masrif", "Masrif"),
-            ("barwa", "Barwa Bank"),
-            ("alzamanexchange", "Alzaman Exchange"),
-            ("moi", "MOI"),
-            ("qatar_post", "Qatar Post"),
-            ("hayyakam", "Hayyakam"),
-            ("qlm", "QLM"),
-        ],
+    organisation_linked_id = fields.Many2one(
+        "res.partner",
         string="Organisation Linked With",
         oldname="x_org_linked",
+        domain=[("entity_type", "=", "organisation")],  # Only show organisations
     )
 
     merchant_mobile_visit_count = fields.Integer(
@@ -346,12 +335,10 @@ class ResPartner(models.Model):
         readonly=True,
     )
 
-    merchant_mobile_count = fields.Integer(string="Mobile App Merchant Visits")
-
     # Public image URL for convenience (read-only)
-    image_url = fields.Char(
-        string="Public Image URL", compute="_compute_url", readonly=True
-    )
+    # image_url = fields.Char(
+    #     string="Public Image URL", compute="_compute_url", readonly=True
+    # )
 
     # Org codes / registration windows
     registration_from = fields.Date(string="Registration From")
@@ -360,6 +347,17 @@ class ResPartner(models.Model):
     # code_ids = fields.One2many("org.registration.code", "partner_id", string="Registration Codes")
     is_expired = fields.Boolean(
         string="Registration Expired", compute="_compute_is_expired", store=True
+    )
+
+    owner_name = fields.Char(
+        string="Owner Name",
+        help="Enter the full name of the business owner or primary contact person for this partner.",
+    )
+
+    type = fields.Selection(
+        selection_add=[
+            ("branch", "Branch"),
+        ],
     )
 
     # ───────────────────────────────────────────────────────────────────────────
@@ -392,15 +390,15 @@ class ResPartner(models.Model):
         for rec in self:
             rec.is_expired = bool(rec.registration_to and rec.registration_to < today)
 
-    @api.depends("image_1920")
-    def _compute_url(self):
-        base = self.env["ir.config_parameter"].sudo().get_param("web.base.url")
-        for rec in self:
-            rec.image_url = (
-                url_join(base, f"/go/api/image/{rec.id}/image_512/res.partner")
-                if rec.id
-                else False
-            )
+    # @api.depends("image_1920")
+    # def _compute_url(self):
+    #     base = self.env["ir.config_parameter"].sudo().get_param("web.base.url")
+    #     for rec in self:
+    #         rec.image_url = (
+    #             url_join(base, f"/go/api/image/{rec.id}/image_512/res.partner")
+    #             if rec.id
+    #             else False
+    #         )
 
     # ───────────────────────────────────────────────────────────────────────────
     # CONSTRAINTS & ONCHANGES
@@ -442,7 +440,7 @@ class ResPartner(models.Model):
                 rec.merchant_type = False
                 rec.merchant_rating = False
                 rec.is_hotel_business = False
-                rec.is_restaurant = False
+                rec.is_restro = False
             if rec.entity_type != "organisation":
                 rec.vip_employee_limit = 0
                 rec.standard_employee_limit = 0

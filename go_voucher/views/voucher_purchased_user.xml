@@ -1,0 +1,98 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<odoo>
+
+    <record id="view_voucher_purchased_user_form" model="ir.ui.view">
+        <field name="name">voucher.purchased.user.form</field>
+        <field name="model">voucher.purchased.user</field>
+        <field name="arch" type="xml">
+            <form string="Purchased Voucher" create="0" edit="0">
+                <sheet>
+                    <group>
+
+                        <group string="Purchase Details">
+                            <field name="user_id"/>
+                            <field name="discount_voucher_id"/>
+                            <field name="quantity"/>
+                            <field name="voucher_price"/>
+                            <field name="total_price" readonly="1"/>
+                            <field name="purchase_date"/>
+                        </group>
+
+                        <group string="Payment Information">
+                            <field name="payment_url" widget="url"/>
+                            <field name="payment_status"/>
+                            <field name="payment_id"/>
+                            <field name="vis_id"/>
+                        </group>
+
+                    </group>
+
+                    <group string="Additional Notes" colspan="2">
+                        <field name="remark"/>
+                    </group>
+                </sheet>
+                <chatter/>
+            </form>
+        </field>
+    </record>
+
+
+    <record id="view_voucher_purchased_user_tree" model="ir.ui.view">
+        <field name="name">voucher.purchased.user.tree</field>
+        <field name="model">voucher.purchased.user</field>
+        <field name="arch" type="xml">
+            <list string="Purchased Vouchers" create="0" edit="0">
+                <field name="purchase_date"/>
+                <field name="user_id"/>
+                <field name="discount_voucher_id"/>
+                <field name="quantity"/>
+                <field name="voucher_price"/>
+                <field name="total_price"/>
+                <field name="payment_status"/>
+            </list>
+        </field>
+    </record>
+
+
+    <record id="view_voucher_purchased_user_search" model="ir.ui.view">
+        <field name="name">voucher.purchased.user.search</field>
+        <field name="model">voucher.purchased.user</field>
+        <field name="arch" type="xml">
+            <search string="Search Purchased Vouchers">
+                <field name="user_id" string="User"/>
+                <field name="discount_voucher_id" string="Voucher"/>
+                <field name="payment_status" string="Payment Status"/>
+
+                <filter name="paid_filter" string="Paid" domain="[('payment_status','=','Paid')]"/>
+                <filter name="unpaid_filter" string="Not Paid" domain="[('payment_status','=','Not Paid')]"/>
+                <group expand="0" string="Group By">
+                    <filter name="group_name" string="User" context="{'group_by':'user_id'}"/>
+                    <filter name="group_discount_voucher" string="Voucher"
+                            context="{'group_by':'discount_voucher_id'}"/>
+                    <filter name="group_purchase_date" string="Purchase Date" context="{'group_by':'purchase_date'}"/>
+                </group>
+            </search>
+        </field>
+    </record>
+
+
+    <record id="action_voucher_purchased_user" model="ir.actions.act_window">
+        <field name="name">Purchased Vouchers</field>
+        <field name="res_model">voucher.purchased.user</field>
+        <field name="view_mode">list,form</field>
+        <field name="search_view_id" ref="view_voucher_purchased_user_search"/>
+        <field name="context">{}</field>
+        <field name="help" type="html">
+            <p class="o_view_nocontent_smiling_face">
+                Record your customers' voucher purchases here.
+            </p>
+            <p>
+                Track purchased vouchers, their quantities, prices, and payment status easily.
+            </p>
+        </field>
+    </record>
+
+
+</odoo>
+
+

@@ -1,0 +1,300 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+
+    <record id="view_product_template_form_inherit_hide_variants" model="ir.ui.view">
+        <field name="name">product.template.form.inherit.hide.variants</field>
+        <field name="model">product.template</field>
+        <field name="inherit_id" ref="product.product_template_only_form_view"/>
+        <field name="arch" type="xml">
+
+
+            <xpath expr="//button[@name='open_pricelist_rules']" position="attributes">
+                <attribute name="invisible">is_in_offer</attribute>
+            </xpath>
+
+            <xpath expr="//button[@name='%(product.product_variant_action)d']" position="attributes">
+                <attribute name="invisible">1</attribute>
+            </xpath>
+
+
+            <xpath expr="//sheet/*[1]" position="before">
+                <widget name="web_ribbon" title="Expired" bg_color="bg-danger"
+                        invisible="not expired_offer"/>
+            </xpath>
+
+            <xpath expr="//field[@name='categ_id']" position="after">
+                <field
+                        name="product_tags_ids"
+                        widget="many2many_tags"
+                />
+                <field
+                        name="employee_type"
+                />
+
+            </xpath>
+
+            <xpath expr="//page[@name='variants']" position="attributes">
+                <attribute name="invisible">1</attribute>
+            </xpath>
+
+            <xpath expr="//div[@class='oe_title']" position="replace">
+                <div class="oe_title">
+                    <label for="name"
+                           string="Product"
+                           invisible="is_in_offer"/>
+
+                    <label for="name"
+                           string="Offer"
+                           invisible="not is_in_offer"
+                    />
+
+                    <h1>
+                        <div class="d-flex">
+
+                            <field name="is_favorite"
+                                   widget="boolean_favorite"
+                                   class="me-3"
+                                   nolabel="1"
+                            />
+
+                            <field name="name"
+                                   class="text-break"
+                                   widget="text"
+                                   options="{'line_breaks': False}"
+                                   placeholder="e.g. Cheese Burger"
+                                   invisible="is_in_offer"
+                            />
+
+                            <field name="name"
+                                   class="text-break"
+                                   widget="text"
+                                   options="{'line_breaks': False}"
+                                   placeholder="e.g. Special Offer Burger"
+                                   invisible="not is_in_offer"/>
+                        </div>
+                    </h1>
+                </div>
+            </xpath>
+
+
+            <xpath expr="//div[@name='options']/span[field[@name='sale_ok']]" position="before">
+                <span class="d-inline-flex">
+                    <field name="is_in_offer"
+                           invisible="sale_ok or context.get('from_normal_product', False)"
+                           readonly="context.get('default_is_in_offer', False)"
+                    />
+                    <label for="is_in_offer"
+                           invisible="sale_ok or context.get('from_normal_product', False)"
+                    />
+                </span>
+            </xpath>
+
+            <xpath expr="//field[@name='type']" position="attributes">
+                <attribute name="invisible">context.get('default_type', False)</attribute>
+            </xpath>
+
+            <xpath expr="//field[@name='sale_ok']" position="attributes">
+                <attribute name="invisible">is_in_offer</attribute>
+            </xpath>
+
+            <xpath expr="//label[@for='sale_ok']" position="attributes">
+                <attribute name="invisible">is_in_offer</attribute>
+            </xpath>
+
+            <xpath expr="//page[@name='sales']" position="attributes">
+                <attribute name="invisible">is_in_offer or not sale_ok</attribute>
+            </xpath>
+
+            <xpath expr="//sheet/notebook" position="inside">
+                <page string="General Information"
+                      invisible="not is_in_offer"
+                      name="general_information_offers"
+                >
+
+                    <group string="Product Identifiers">
+                        <group>
+                            <field name="default_code"/>
+                            <field name="barcode"/>
+                        </group>
+                    </group>
+                    <group>
+                        <group string="Offer Details">
+                            <field name="offer_label" required="is_in_offer"/>
+                            <field name="offer_type"
+                                   widget="radio"
+                                   required="is_in_offer"
+                            />
+                        </group>
+                        <group string="Offer Validity &amp; Usage">
+                            <field name="start_date" required="is_in_offer"/>
+                            <field name="end_date" required="is_in_offer"/>
+                            <field name="expired_offer"/>
+                            <field name="usage_limit"/>
+                            <field name="offer_on_homepage"/>
+                        </group>
+                    </group>
+
+                    <group>
+                        <group string="Discount Settings" invisible="offer_type != 'discount'">
+                            <field name="discount_flat"/>
+                            <field name="discount_percent"/>
+                        </group>
+                        <group string="Promocode Settings" invisible="offer_type != 'promocode'">
+                            <field name="promo_code"/>
+                        </group>
+                    </group>
+
+                    <group>
+                        <group string="Quantity Rules" invisible="offer_type not in ('b1g1','giftcard')">
+                            <field name="min_purchase_qty"/>
+                            <field name="max_purchase_qty"/>
+                        </group>
+                    </group>
+
+
+                    <group string="Additional Description">
+                        <field name="ar_description"
+                               placeholder="Enter additional description..."
+                               colspan="2"
+                               nolabel="1"
+                        />
+                    </group>
+
+
+                    <group name="internal_notes_offers" string="Internal Notes">
+                        <field colspan="2" name="description" nolabel="1"
+                               placeholder="This note is only for internal purposes."/>
+                    </group>
+
+
+                </page>
+                <page string="Advanced Offers" invisible="not is_in_offer">
+
+                    <!-- Offer Restrictions -->
+                    <group string="Offer Configurations">
+                        <field name="offer_limit_ids">
+                            <list editable="bottom">
+                                <field name="partner_id"/>
+                                <field name="frequency"/>
+                                <field name="number_of_usages"/>
+                            </list>
+                            <form>
+                                <group>
+                                    <field name="partner_id"/>
+                                    <field name="frequency"/>
+                                    <field name="number_of_usages"/>
+                                </group>
+                            </form>
+                        </field>
+                    </group>
+
+                    <!--                     Additional Offers -->
+                    <group string="Additional Offers">
+                        <field name="multi_offer_ids">
+                            <list editable="bottom">
+                                <field
+                                        name="partner_id"
+                                        domain="[('entity_type', '=', 'organisation')]"
+                                />
+                                <field name="offer_type"/>
+                                <field name="discount"/>
+                                <field name="promocode"/>
+                            </list>
+                            <form>
+                                <group>
+                                    <field name="partner_id"
+                                           domain="[('entity_type', '=', 'organisation')]"
+                                    />
+                                    <field name="offer_type" widget="radio"/>
+                                    <field name="discount"/>
+                                    <field name="promocode"/>
+                                </group>
+                            </form>
+                        </field>
+                    </group>
+                </page>
+                <page string="Product Stickers" name="product_stickers">
+                    <field name="product_sticker_ids" widget="many2many" mode="tree,form"/>
+                </page>
+            </xpath>
+
+            <xpath expr="//page[@name='general_information']" position="attributes">
+                <attribute name="invisible">is_in_offer</attribute>
+            </xpath>
+
+        </field>
+    </record>
+
+    <record id="view_product_template_main_form_view" model="ir.ui.view">
+        <field name="name">product.template.form.inherit.hide.variants</field>
+        <field name="model">product.template</field>
+        <field name="inherit_id" ref="product.product_template_form_view"/>
+        <field name="arch" type="xml">
+
+            <xpath expr="//group[@name='internal_notes']" position="before">
+                <group string="Additional Description">
+                    <field name="ar_description"
+                           placeholder="Enter additional description..."
+                           colspan="2"
+                           nolabel="1"
+                    />
+                </group>
+            </xpath>
+
+        </field>
+    </record>
+
+
+    <record id="product_template_form_view_sale_order_smart_button" model="ir.ui.view">
+        <field name="name">product.template.sale.order.button</field>
+        <field name="model">product.template</field>
+        <field name="inherit_id" ref="sale.product_template_form_view_sale_order_button"/>
+        <field name="arch" type="xml">
+            <xpath expr="//button[@name='action_view_sales']" position="attributes">
+                <attribute name="invisible">is_in_offer</attribute>
+            </xpath>
+        </field>
+    </record>
+
+    <!--    These below actions are for the sales app-->
+
+    <record id="product_template_action_sales" model="ir.actions.act_window">
+        <field name="name">Offers</field>
+        <field name="res_model">product.template</field>
+        <field name="view_mode">kanban,list,form,activity</field>
+        <field name="view_id" ref="product.product_template_kanban_view"/>
+        <field name="search_view_id" ref="product.product_template_search_view"/>
+        <field name="context">{
+            "search_default_filter_to_sell":1,
+            "sale_multi_pricelist_product_template":1,
+            'from_product_offer_menu':1,
+            'default_is_in_offer' : True,
+            'default_type':'service',
+            }
+        </field>
+        <field name="domain">[('is_in_offer', '=', True)]</field>
+        <field name="help" type="html">
+            <p class="o_view_nocontent_smiling_face">
+                Create a new product
+            </p>
+            <p>
+                You must define a product for everything you sell or purchase,
+                whether it's a storable product, a consumable or a service.
+            </p>
+        </field>
+    </record>
+
+
+    <record id="sale.product_template_action" model="ir.actions.act_window">
+        <field name="domain">[('is_in_offer', '=', False)]</field>
+        <field name="context">{
+            "search_default_filter_to_sell":1,
+            "sale_multi_pricelist_product_template": 1,
+            'from_normal_product':1,
+            'default_is_in_offer' : False,
+            }
+        </field>
+    </record>
+
+
+</odoo>

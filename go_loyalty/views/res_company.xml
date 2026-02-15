@@ -1,0 +1,104 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+
+    <record id="view_company_form_inherit_loyalty" model="ir.ui.view">
+        <field name="name">res.company.form.loyalty</field>
+        <field name="model">res.company</field>
+        <field name="inherit_id" ref="base.view_company_form"/>
+        <field name="arch" type="xml">
+            <xpath expr="//page[@name='branches']" position="after">
+
+                <page string="Advertisement 1 Banners" name="loyalty_settings">
+                    <field name="ad_1_ids" readonly="1">
+                        <list>
+                            <field name="name"/>
+                            <field name="banner_url"/>
+                            <field name="advertisement"/>
+                        </list>
+                        <form>
+                            <group>
+                                <group>
+                                    <field name="name"/>
+                                    <field name="banner_url"/>
+                                    <field name="advertisement"/>
+                                    <field name="android"/>
+                                    <field name="ios"/>
+                                </group>
+                                <group>
+                                    <field name="internal"/>
+                                    <field name="merchant_id"/>
+                                    <field name="org_type"/>
+                                    <field name="seq"/>
+                                    <field name="sjc"/>
+                                    <field name="tracking_code"/>
+                                </group>
+                            </group>
+                        </form>
+                    </field>
+                </page>
+
+                <page string="Advertisement 2 Banners" name="loyalty_settings_2">
+                    <field name="ad_2_ids" readonly="1">
+                        <list>
+                            <field name="name"/>
+                            <field name="banner_url"/>
+                            <field name="advertisement"/>
+                        </list>
+                        <form>
+                            <group>
+                                <group>
+                                    <field name="name"/>
+                                    <field name="banner_url"/>
+                                    <field name="advertisement"/>
+                                    <field name="android"/>
+                                    <field name="ios"/>
+                                </group>
+                                <group>
+                                    <field name="internal"/>
+                                    <field name="merchant_id"/>
+                                    <field name="org_type"/>
+                                    <field name="seq"/>
+                                    <field name="sjc"/>
+                                    <field name="tracking_code"/>
+                                </group>
+                            </group>
+                        </form>
+                    </field>
+                </page>
+
+                <page string="Advertisement 3 Banners" name="loyalty_settings_3">
+                    <field name="ad_3_ids" readonly="1">
+                        <list>
+                            <field name="name"/>
+                            <field name="banner_url"/>
+                            <field name="advertisement"/>
+                        </list>
+                        <form>
+                            <group>
+                                <group>
+                                    <field name="name"/>
+                                    <field name="banner_url"/>
+                                    <field name="advertisement"/>
+                                    <field name="android"/>
+                                    <field name="ios"/>
+                                </group>
+                                <group>
+                                    <field name="internal"/>
+                                    <field name="merchant_id"/>
+                                    <field name="org_type"/>
+                                    <field name="seq"/>
+                                    <field name="sjc"/>
+                                    <field name="tracking_code"/>
+                                </group>
+
+
+                            </group>
+                        </form>
+                    </field>
+                </page>
+
+            </xpath>
+        </field>
+    </record>
+
+</odoo>

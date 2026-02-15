@@ -1,0 +1,105 @@
+<?xml version="1.0" encoding="utf-8"?>
+
+<odoo>
+
+    <record id="view_loyalty_notification_list_form" model="ir.ui.view">
+        <field name="name">loyalty.notification.list.form</field>
+        <field name="model">loyalty.notification.list</field>
+        <field name="arch" type="xml">
+            <form string="Notification">
+                <header>
+                    <field name="state" widget="statusbar" string="Status"/>
+                </header>
+                <sheet>
+                    <group>
+                        <group>
+                            <field name="partner_id"/>
+                            <field name="merchant_id"/>
+                            <field name="product_id"/>
+                        </group>
+                        <group>
+                            <field name="notification_type"/>
+                            <field name="date" readonly="1"/>
+                        </group>
+                    </group>
+                    <notebook>
+                        <page string="Descriptions">
+                            <group>
+                                <field name="description" nolabel="1" placeholder="Enter description here..."/>
+                            </group>
+                        </page>
+                        <page string="Descriptions Arabic">
+                            <group>
+                                <field name="description_ar" nolabel="1" placeholder="Enter description here..."/>
+                            </group>
+                        </page>
+                        <page string="Offer &amp; Image">
+                            <group>
+                                <field name="url" widget="url"/>
+                            </group>
+                            <group>
+                                <field name="offer_image" widget="image" class="oe_image" options="{'size': [800, 600]}"
+                                       string="Offer Image"/>
+                            </group>
+
+                        </page>
+                    </notebook>
+                </sheet>
+                <chatter/>
+            </form>
+        </field>
+    </record>
+
+
+    <record id="view_loyalty_notification_list_tree" model="ir.ui.view">
+        <field name="name">loyalty.notification.list.tree</field>
+        <field name="model">loyalty.notification.list</field>
+        <field name="arch" type="xml">
+            <list string="Notifications">
+                <field name="partner_id"/>
+                <field name="merchant_id"/>
+                <field name="description"/>
+                <field name="notification_type"/>
+                <field name="state" widget="badge"
+                       decoration-danger="state=='unread'"
+                       decoration-success="state=='read'"/>
+                <field name="date"/>
+            </list>
+        </field>
+    </record>
+
+
+        <record id="view_loyalty_notification_list_search" model="ir.ui.view">
+            <field name="name">loyalty.notification.list.search</field>
+            <field name="model">loyalty.notification.list</field>
+            <field name="arch" type="xml">
+                <search string="Notifications">
+                    <field name="partner_id" string="Customer"/>
+                    <field name="merchant_id" string="Merchant"/>
+                    <field name="notification_type" string="Type"/>
+
+                    <filter string="Unread" name="filter_unread" domain="[('state','=','unread')]"/>
+                    <filter string="Read" name="filter_read" domain="[('state','=','read')]"/>
+
+                    <group expand="0" string="Group By">
+                        <filter string="Customer" name="group_by_partner" context="{'group_by':'partner_id'}"/>
+                        <filter string="Merchant" name="group_by_merchant" context="{'group_by':'merchant_id'}"/>
+                        <filter string="Status" name="group_by_state" context="{'group_by':'state'}"/>
+                        <filter string="Notification Type" name="group_by_type" context="{'group_by':'notification_type'}"/>
+                    </group>
+                </search>
+            </field>
+        </record>
+
+
+    <record id="action_loyalty_notification_list" model="ir.actions.act_window">
+        <field name="name">Notifications</field>
+        <field name="res_model">loyalty.notification.list</field>
+        <field name="view_mode">list,form</field>
+        <field name="help" type="html">
+            <p>Manage all customer notifications here.</p>
+        </field>
+    </record>
+
+
+</odoo>
